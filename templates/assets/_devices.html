@@ -1,0 +1,7 @@
+<section id="results" aria-live="polite" aria-label="Resultados de dispositivos">
+<p class="small text-secondary">{{ page_obj.paginator.count }} dispositivo{{ page_obj.paginator.count|pluralize:'s' }}</p>
+{% if page_obj %}<div class="table-responsive card"><table class="table align-middle mb-0"><caption class="visually-hidden">Dispositivos registrados</caption><thead><tr><th scope="col">Código y nombre</th><th scope="col">Categoría</th><th scope="col">Ubicación</th><th scope="col">Estado operativo</th>{% if perms.assets.view_device %}<th scope="col">Registro</th>{% endif %}</tr></thead><tbody>
+{% for device in page_obj %}<tr><td><a class="fw-semibold font-monospace" href="{% url 'assets:detail' device.public_id %}">{{ device.code }}</a><div>{{ device.name }}</div></td><td>{{ device.category.name }}</td><td>{{ device.location.name }}</td><td>{{ device.get_status_display }}</td>{% if perms.assets.view_device %}<td>{{ device.is_active|yesno:'Activo,Inactivo' }}</td>{% endif %}</tr>{% endfor %}
+</tbody></table></div>{% include 'components/pagination.html' %}
+{% else %}<div class="card card-body py-5 text-center"><h2 class="h5">No se encontraron dispositivos</h2><p class="text-secondary mb-0">Revisa el nombre, el código o los filtros seleccionados.</p></div>{% endif %}
+</section>

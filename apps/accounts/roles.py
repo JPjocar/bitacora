@@ -14,9 +14,25 @@ ROLE_PERMISSIONS = {
         "locations.view_location",
         "locations.add_location",
         "locations.change_location",
+        "assets.view_category",
+        "assets.add_category",
+        "assets.change_category",
+        "assets.view_device",
+        "assets.add_device",
+        "assets.change_device",
+        "assets.update_device_operation",
+        "assets.view_movement",
+        "assets.add_movement",
     },
-    TECHNICIAN: {"locations.view_location"},
-    TEACHER: set(),
+    TECHNICIAN: {
+        "locations.view_location",
+        "assets.view_device",
+        "assets.view_category",
+        "assets.update_device_operation",
+        "assets.view_movement",
+        "assets.add_movement",
+    },
+    TEACHER: {"assets.view_device_limited"},
 }
 
 

@@ -44,3 +44,12 @@ Las herramientas de consola y SQL son acceso de confianza: no usar `QuerySet.upd
 ediciones directas de grupos o `save()` aislados para operaciones de negocio. Invocar
 los servicios para preservar reglas/auditoría. La recuperación técnica de superusuarios
 mediante comandos internos no genera eventos de negocio y debe registrarse operativamente.
+
+En dispositivos el UUID/código no autoriza acceso. La consulta docente restringe objetos
+tanto en listados como por URL directa, y omite datos técnicos/internos. El formulario
+operativo del técnico no acepta cambio de ficha o ubicación. El origen de un movimiento,
+su autor y su fecha registrada se obtienen en servidor. Las confirmaciones de advertencia
+se vuelven a comprobar bajo bloqueo del equipo. El historial usa FKs PROTECT.
+
+No hay integraciones ni datos de mantenimiento/incidencias en esta entrega. No se afirma
+haber probado un traslado durante mantenimiento real: ese módulo aún no existe.

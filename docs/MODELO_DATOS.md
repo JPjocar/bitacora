@@ -8,6 +8,15 @@ erDiagram
     User ||--o{ UserEvent : actor
     User ||--o{ LocationEvent : actor
     Location ||--o{ LocationEvent : historial
+    Category ||--o{ Device : clasifica
+    Category ||--o{ CategoryEvent : historial
+    Location ||--o{ Device : ubicacion_actual
+    User ||--o{ Device : registra
+    Device ||--o{ DeviceEvent : historial
+    Device ||--o{ Movement : traslados
+    Location ||--o{ Movement : origen
+    Location ||--o{ Movement : destino
+    User ||--o{ Movement : actor
 ```
 
 `User` extiende AbstractUser desde la primera migración, evitando una sustitución futura
@@ -43,4 +52,30 @@ Migraciones:
 
 No se borraron migraciones aplicadas. Los grupos se aprovisionan después de `migrate`
 con `sync_roles`, porque los permisos de Django se crean durante `post_migrate`.
-No se implementó todavía la relación Location–Device; cuando exista debe usar PROTECT.
+La relación Location–Device ya está implementada con PROTECT.
+
+`Category`: nombre único sin distinción de caja, tipo de referencia, descripción,
+activo y versión. La migración inicial de datos aporta seis categorías genéricas;
+no contiene información institucional ni usuario ficticio como actor de configuración.
+
+`Device`: PK entero; UUID público único para URL estable autenticada; código público
+único de 11 caracteres; nombre, categoría y ubicación actual; marca/modelo y serie
+opcionales; estado, observaciones, detalles técnicos libres, adquisición/puesta en
+servicio opcionales, activo, versión, timestamps y creador protegido.
+
+`Movement`: equipo, origen/destino con PROTECT, motivo, observaciones, fecha efectiva,
+fecha registrada, actor y versión resultante del equipo. UNIQUE(equipo, versión)
+impide duplicar un resultado de traslado; CHECK exige origen distinto de destino y
+motivo no vacío. La versión también cambia por ediciones de ficha: no es un contador
+de traslados. No se espera una secuencia sin huecos en Movement.device_version.
+
+`CategoryEvent` y `DeviceEvent` reutilizan la base abstracta AuditEvent. Se añaden para
+conservar auditoría con claves foráneas reales; no hay infraestructura genérica adicional.
+Auditoría y eventos tienen actor/fecha y referencias protegidas. Los movimientos son
+inmutables en la interfaz y en las operaciones ORM públicas provistas.
+
+Migraciones del segundo incremento, sin alterar las previas:
+
+- `assets/0001_initial`: cinco modelos, FKs PROTECT, índices únicos y CHECKs.
+- `assets/0002_initial_categories`: seis categorías; reversión de datos no destructiva (noop).
+- `assets/0003_text_length_validation`: validadores de longitud en textos también para servicios.

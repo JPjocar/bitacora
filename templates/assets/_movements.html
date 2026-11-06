@@ -1,0 +1,7 @@
+<section id="results" aria-live="polite" aria-label="Resultados de movimientos">
+{% if form.errors %}<div class="alert alert-danger" role="alert">{% for field in form %}{% for error in field.errors %}<p class="mb-1">{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}{{ form.non_field_errors }}</div>{% endif %}
+<p class="small text-secondary">{{ page_obj.paginator.count }} movimiento{{ page_obj.paginator.count|pluralize:'s' }}</p>
+{% if page_obj %}<div class="table-responsive card"><table class="table align-middle mb-0"><caption class="visually-hidden">Traslados registrados</caption><thead><tr><th scope="col">Dispositivo</th><th scope="col">Origen</th><th scope="col">Destino</th><th scope="col">Fecha efectiva (Lima)</th><th scope="col">Registrado por</th></tr></thead><tbody>
+{% for movement in page_obj %}<tr><td><a class="fw-semibold font-monospace" href="{% url 'assets:movement_detail' movement.pk %}">{{ movement.device.code }}</a><div>{{ movement.device.name }}</div></td><td>{{ movement.origin.name }}</td><td>{{ movement.destination.name }}</td><td>{{ movement.effective_at|date:'d/m/Y H:i' }}</td><td>{{ movement.actor.username }}</td></tr>{% endfor %}
+</tbody></table></div>{% include 'components/pagination.html' %}{% else %}<div class="card card-body text-center py-5"><h2 class="h5">No hay movimientos para estos filtros</h2><p class="text-secondary mb-0">Los traslados registrados aparecerán aquí.</p></div>{% endif %}
+</section>

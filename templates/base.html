@@ -14,7 +14,7 @@
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 <a href="#main" class="visually-hidden-focusable skip-link">Saltar al contenido</a>
-<nav class="navbar navbar-expand-md bg-white border-bottom" aria-label="Navegación principal">
+<nav class="navbar navbar-expand-xl bg-white border-bottom" aria-label="Navegación principal">
   <div class="container">
     <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}">Bitacora<span class="brand-dot" aria-hidden="true">.</span></a>
     {% if user.is_authenticated %}
@@ -22,6 +22,8 @@
     <div class="collapse navbar-collapse" id="navigation">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Inicio</a></li>
+        {% if perms.assets.view_device or perms.assets.view_device_limited %}<li class="nav-item"><a class="nav-link" href="{% url 'assets:list' %}">Dispositivos</a></li>{% endif %}
+        {% if perms.assets.view_movement %}<li class="nav-item"><a class="nav-link" href="{% url 'assets:movements' %}">Movimientos</a></li>{% endif %}
         {% if perms.locations.view_location %}<li class="nav-item"><a class="nav-link" href="{% url 'locations:list' %}">Ubicaciones</a></li>{% endif %}
         {% if perms.accounts.view_user %}<li class="nav-item"><a class="nav-link" href="{% url 'accounts:list' %}">Usuarios</a></li>{% endif %}
         {% if perms.auth.view_group %}<li class="nav-item"><a class="nav-link" href="{% url 'accounts:roles' %}">Roles</a></li>{% endif %}

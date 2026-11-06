@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Movimientos · Bitacora{% endblock %}
+{% block content %}
+<p class="eyebrow">TRASLADOS FÍSICOS</p><h1>Movimientos</h1><p class="text-secondary">Historial de ubicaciones. Para registrar un traslado, abre la ficha del dispositivo.</p>
+<form method="get" action="{% url 'assets:movements' %}" class="card card-body mb-4" hx-get="{% url 'assets:movements' %}" hx-target="#results" hx-swap="outerHTML" hx-push-url="true" hx-indicator="#loading" hx-sync="this:replace">
+<div class="row g-3">{% for field in form %}<div class="col-md-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}</div>
+<div class="d-flex gap-3 align-items-center mt-3"><button class="btn btn-outline-primary" type="submit">Filtrar</button><a href="{% url 'assets:movements' %}">Limpiar filtros</a><span id="loading" class="htmx-indicator" role="status">Buscando…</span></div>
+</form>{% include 'assets/_movements.html' %}
+{% endblock %}

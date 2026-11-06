@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Movimiento {{ movement.pk }} · Bitacora{% endblock %}
+{% block content %}
+<a class="d-inline-block mb-3" href="{% url 'assets:movements' %}?q={{ movement.device.code|urlencode }}">← Volver a movimientos del equipo</a>
+<h1 class="h2">Traslado registrado</h1><p><a class="font-monospace fw-semibold" href="{% url 'assets:detail' movement.device.public_id %}">{{ movement.device.code }}</a> · {{ movement.device.name }}</p>
+<div class="card card-body"><dl class="row mb-0">
+<dt class="col-sm-4">Origen</dt><dd class="col-sm-8">{{ movement.origin.name }}</dd>
+<dt class="col-sm-4">Destino</dt><dd class="col-sm-8">{{ movement.destination.name }}</dd>
+<dt class="col-sm-4">Motivo</dt><dd class="col-sm-8 preserve-lines">{{ movement.reason }}</dd>
+<dt class="col-sm-4">Observaciones</dt><dd class="col-sm-8 preserve-lines">{{ movement.notes|default:'Sin observaciones' }}</dd>
+<dt class="col-sm-4">Fecha efectiva</dt><dd class="col-sm-8">{{ movement.effective_at|date:'d/m/Y H:i' }} · Lima</dd>
+<dt class="col-sm-4">Fecha registrada</dt><dd class="col-sm-8">{{ movement.recorded_at|date:'d/m/Y H:i' }} · Lima</dd>
+<dt class="col-sm-4">Registrado por</dt><dd class="col-sm-8">{{ movement.actor.username }}</dd>
+</dl></div><p class="text-secondary small mt-3">Este registro histórico no se modifica ni elimina. La ubicación actual puede diferir si hubo traslados posteriores.</p>
+{% endblock %}

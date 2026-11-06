@@ -1,4 +1,53 @@
-# Verificación realizada
+# Verificación del segundo incremento: dispositivos y movimientos
+
+**6 de noviembre de 2026, America/Lima.** Mismas versiones y PostgreSQL 18.4 real.
+Antes de modificar código se ejecutaron las 62 pruebas existentes: OK en 35,185 s.
+La suite completa final pasó con **116 pruebas, 53,140 s**, incluyendo ocho casos
+TransactionTestCase con conexiones PostgreSQL independientes.
+
+| Verificación | Resultado |
+| --- | --- |
+| Migraciones `assets/0001`, `0002`, `0003` | Aplicadas; ninguna migración anterior eliminada |
+| Suite completa `test --noinput -v 2` | 116 OK (62 anteriores + 54 nuevas) |
+| `check`, `makemigrations --check --dry-run` | 0 problemas; sin cambios pendientes |
+| HTTP real en `127.0.0.1:8001`, `smoke_http.py --assets` | Login, roles, listas, fichas, categorías, formularios, movimientos, fragmentos y assets correctos |
+| Ruff lint y formato | Sin errores; 82 archivos Python formateados |
+| `pip check` | Sin dependencias incompatibles |
+| `collectstatic --noinput` | 3 copiados, 171 sin cambios |
+| `check --deploy --fail-level WARNING`, DEBUG=False | 0 problemas |
+
+Salida local: `.local/tests-assets-full.txt`. La demo adicional se creó mediante
+`seed_assets_demo --confirm-demo`, usando las cuentas demo existentes y sin cambiar
+contraseñas. La verificación HTTP no equivale a ejecutar JavaScript en un navegador.
+
+Pruebas nuevas:
+
+- `test_assets.py`: 19 casos de categorías, datos opcionales por tipo, fechas, permisos,
+  identificadores inmutables, colisiones de códigos, límites, integridad, archivo y rollback.
+- `test_movements.py`: 13 casos de origen/actor reales, destino activo y diferente, motivo,
+  fechas, reenvíos, advertencias, movimientos de inactivos, atomicidad y conservación.
+- `test_asset_views.py`: 18 casos de formularios, matriz de roles, privacidad docente por
+  URL directa, CSRF, XSS, búsquedas/paginación, errores y respuestas HTMX.
+- `test_asset_concurrency.py`: 4 casos con conexiones distintas: traslados incompatibles
+  del mismo dispositivo; traslado contra edición; intercambio de ubicaciones de dos
+  equipos sin bloqueo circular; desactivación del destino concurrente con traslado.
+
+Defectos/incidentes encontrados y corregidos:
+
+- Una prueba detectó que `TextField.max_length` no validaba por sí solo llamadas directas
+  al servicio: se añadieron MaxLengthValidator y una nueva migración, sin alterar las aplicadas.
+- Se usó NO KEY UPDATE en destinos para permitir las comprobaciones de FK de traslados
+  cruzados; una prueba fuerza ambos destinos bloqueados antes de guardar los movimientos.
+- El clúster local se detuvo durante el trabajo; se comprobó su estado y se volvió a
+  iniciar conservando los datos. Las pruebas finales se ejecutaron después del reinicio.
+
+Pendiente: revisión visual escritorio/móvil y ejecución JS. El intento de conectar un
+navegador devolvió «No browser is available». Revisar manualmente búsqueda HTMX, fichas
+por rol, creación con errores y confirmación de traslado en móvil/escritorio. No hay
+capturas simuladas. Tampoco se probó mantenimiento/incidencias/QR, porque no existen aún.
+Permanece pendiente CI remoto, HTTPS/proxy real y restauración de backups.
+
+## Registro histórico de la primera entrega (usuarios, roles y ubicaciones)
 
 Fecha de la entrega: **5 de noviembre de 2026, America/Lima**.
 Entorno local Windows, Python 3.12.13, PostgreSQL **18.4** real en 127.0.0.1:55432,

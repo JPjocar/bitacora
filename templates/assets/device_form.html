@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}{% if device %}Editar dispositivo{% else %}Nuevo dispositivo{% endif %} · Bitacora{% endblock %}
+{% block content %}
+<a class="d-inline-block mb-3" href="{% if device %}{% url 'assets:detail' device.public_id %}{% else %}{% url 'assets:list' %}{% endif %}">← Volver</a>
+<h1 class="h2">{% if operation %}Actualizar estado{% elif device %}Editar ficha{% else %}Nuevo dispositivo{% endif %}</h1>
+{% if device %}<p class="font-monospace fw-semibold">{{ device.code }} · {{ device.name }}</p><p class="text-secondary">Ubicación actual: {{ device.location.name }}. Para cambiarla, utiliza Registrar traslado.</p>{% else %}<p class="text-secondary">El código se generará al guardar. La serie y los detalles técnicos son opcionales.</p>{% endif %}
+<form method="post" class="card card-body p-4 form-panel" novalidate>{% csrf_token %}{% include 'components/form_fields.html' %}<div class="d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">Guardar dispositivo</button><a class="btn btn-outline-secondary" href="{% url 'assets:list' %}">Cancelar</a></div></form>
+{% endblock %}

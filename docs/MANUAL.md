@@ -20,9 +20,31 @@ solicita nombre y tipo; código y descripción son opcionales. Abra el nombre pa
 detalle. En **Editar ubicación**, desmarque Activo para desactivar o márquelo para reactivar.
 Los cambios aparecen en el historial con actor y hora de Lima.
 
-**Técnico:** consulta listado/detalle de ubicaciones y su perfil. No administra cuentas,
-roles ni ubicaciones. **Docente:** en esta fase solo dispone de su perfil; los equipos e
-incidencias serán módulos posteriores.
+**Dispositivos (administrador):** entre a Dispositivos → Nuevo dispositivo. Seleccione
+nombre, categoría y ubicación inicial activa. Complete opcionalmente marca/modelo,
+serie, detalles y fechas. El código se genera al guardar y no se puede editar.
+En la ficha, Editar permite modificar datos y desactivar/reactivar el registro. Para
+cambiar el estado operativo indique un motivo. Para cambiar ubicación use Registrar traslado.
+En Categorías puede crear, editar o desactivar categorías conservando equipos existentes.
+
+**Técnico:** consulta ubicaciones y fichas de dispositivos. En Actualizar estado puede
+cambiar estado/observaciones, con motivo si cambia el estado. No puede editar datos de
+identificación ni archivar equipos. Tanto técnico como administrador pueden registrar
+traslados y consultar movimientos.
+
+**Registrar traslado:** abra la ficha del equipo, compruebe el origen mostrado, seleccione
+destino, motivo y fecha/hora efectiva en Lima. Registre solo traslados físicos ya realizados.
+Si aparece una advertencia por equipo fuera de servicio, retirado o inactivo, léala y
+confirme. El traslado no repara el equipo. Al guardar verá el evento histórico y la ficha
+tendrá nueva ubicación. No hay solicitudes, aprobaciones ni recepciones pendientes.
+
+**Movimientos:** filtre por nombre/código del equipo, origen/destino o rango de fechas
+efectivas. Abra un resultado para ver motivo, autor, fechas y observaciones. Un historial
+no es editable; si detecta un error, comuníquelo al responsable, sin inventar traslados.
+
+**Docente:** consulta su perfil y fichas limitadas de equipos activos no retirados. Puede
+buscar por código o nombre y filtrar categoría, ubicación o estado. No accede a números
+de serie, detalles técnicos, notas internas ni movimientos. Incidencias es una fase posterior.
 
 Si aparece «otra persona modificó…», recargue, revise los datos actuales y vuelva a
 realizar la edición. No basta con reenviar el formulario anterior. Un error de validación

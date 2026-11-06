@@ -7,6 +7,7 @@ urlpatterns = [
     path("", home, name="home"),
     path("cuentas/", include("apps.accounts.urls")),
     path("ubicaciones/", include("apps.locations.urls")),
+    path("dispositivos/", include("apps.assets.urls")),
     path("admin/", admin.site.urls),
 ]
 handler403 = "apps.core.views.forbidden"

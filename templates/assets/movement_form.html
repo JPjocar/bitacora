@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Registrar traslado · {{ device.code }} · Bitacora{% endblock %}
+{% block content %}
+<a href="{% url 'assets:detail' device.public_id %}" class="d-inline-block mb-3">← Volver al dispositivo</a><h1 class="h2">Registrar traslado</h1>
+<p class="font-monospace fw-semibold">{{ device.code }} · {{ device.name }}</p>
+<p>Origen actual: <strong>{{ device.location.name }}</strong></p>
+<p class="text-secondary">Registra un traslado físico ya realizado. Guardarlo actualizará la ubicación del equipo; no modifica su estado ni registra mantenimiento.</p>
+{% if device.movement_warning %}<div class="alert alert-warning" role="alert">{{ device.movement_warning }}</div>{% endif %}
+<form method="post" class="card card-body p-4 form-panel" novalidate>{% csrf_token %}{% include 'components/form_fields.html' %}<div class="d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">Registrar traslado realizado</button><a class="btn btn-outline-secondary" href="{% url 'assets:detail' device.public_id %}">Cancelar</a></div></form>
+{% endblock %}

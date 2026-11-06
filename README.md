@@ -1,7 +1,7 @@
 # Bitacora
 
 Monolito modular para gestión de equipos y mantenimiento de laboratorios. Esta entrega
-implementa **únicamente usuarios, roles y ubicaciones**, más la infraestructura que necesitan.
+implementa **usuarios, roles, ubicaciones, dispositivos y movimientos**, más su infraestructura.
 Piloto académico con datos sintéticos; no representa un despliegue institucional autorizado.
 
 ## Estado inicial y alcance
@@ -16,6 +16,15 @@ servicios, permisos ni dependencias. El prompt permanece sin modificaciones.
 - Ubicaciones: listado, detalle, filtros, paginación, alta, edición y desactivación/reactivación.
 - Historial protegido, servicios transaccionales, control de versiones y permisos en servidor.
 - Bootstrap local, formularios accesibles y filtros HTMX con alternativa HTML convencional.
+- Categorías, ficha de dispositivos con serie opcional, código único generado e inmutable,
+  búsqueda manual, fechas y detalles técnicos opcionales, desactivación/reactivación.
+- Consulta limitada para docentes; estado y observaciones operativas para técnicos.
+- Traslados físicos con origen obtenido en servidor, destino activo, motivo, fecha efectiva,
+  historial protegido y actualización atómica de ubicación. No equivalen a reparación.
+
+El segundo incremento reutiliza la base existente y añade `apps/assets`, sin nuevas
+dependencias. Las pruebas anteriores se ejecutaron antes de modificarla: 62 OK. La suite
+ampliada tiene **116 pruebas aprobadas** en PostgreSQL; detalles en `docs/PRUEBAS.md`.
 
 ## Entorno verificado
 
@@ -84,6 +93,25 @@ sus credenciales. No crea superusuarios.
 En esta entrega se ejecutó para la verificación HTTP; las credenciales temporales
 quedaron en `.local/demo-credentials.txt`, ignorado por Git. No publique ese archivo.
 
+Para agregar dos dispositivos y un traslado ficticios a esa demo:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/manage_local.py seed_assets_demo --confirm-demo
+```
+
+Requiere la demo base y `sync_roles`. No restablece contraseñas ni modifica equipos
+ya existentes con esos nombres. Las seis categorías iniciales se crean con migraciones.
+
+## Actualizar desde la primera entrega
+
+```powershell
+.\.venv\Scripts\python.exe scripts/manage_local.py migrate
+.\.venv\Scripts\python.exe scripts/manage_local.py sync_roles
+```
+
+Reinicie el servidor para cargar `apps/assets` y sus rutas. Los roles existentes reciben
+los nuevos permisos; no se recrean las cuentas. No hay migraciones destructivas.
+
 ## Comprobaciones
 
 ```powershell
@@ -108,6 +136,8 @@ Con el servidor y los datos demo disponibles:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/smoke_http.py --credentials-file .local/demo-credentials.txt
+# Con seed_assets_demo también ejecutado:
+.\.venv\Scripts\python.exe scripts/smoke_http.py --assets
 ```
 
 Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislado:
@@ -124,5 +154,7 @@ Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislad
 
 Pendientes: inspección visual real en escritorio/móvil, despliegue HTTPS, limitación
 de intentos de login en el proxy y prueba de restauración de backups. No se implementaron
-dispositivos, movimientos, QR, mantenimientos, incidencias, notificaciones ni reportes.
-El siguiente incremento sugerido es dispositivos, únicamente cuando se solicite.
+QR, mantenimientos, incidencias, notificaciones ni reportes. Los traslados no dependen
+de esos módulos. Advertencias de mantenimiento pendiente se integrarán cuando exista
+ese módulo, sin inventar estados o resultados ahora.
+El siguiente incremento sugerido es QR, únicamente cuando se solicite.

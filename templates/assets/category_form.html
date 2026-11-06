@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Categoría · Bitacora{% endblock %}
+{% block content %}
+<a class="d-inline-block mb-3" href="{% url 'assets:categories' %}">← Volver a categorías</a><h1 class="h2">{% if category %}Editar categoría{% else %}Nueva categoría{% endif %}</h1>
+<p class="text-secondary">Desactivar evita nuevas asignaciones. Los dispositivos ya registrados conservan su categoría.</p>
+<form method="post" class="card card-body p-4 form-panel" novalidate>{% csrf_token %}{% include 'components/form_fields.html' %}<div><button class="btn btn-primary" type="submit">Guardar categoría</button></div></form>
+{% endblock %}

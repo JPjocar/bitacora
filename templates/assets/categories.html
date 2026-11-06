@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Categorías · Bitacora{% endblock %}
+{% block content %}
+<a class="d-inline-block mb-3" href="{% url 'assets:list' %}">← Volver a dispositivos</a>
+<div class="d-flex flex-wrap justify-content-between gap-3 mb-4"><h1>Categorías</h1>{% if perms.assets.add_category %}<a class="btn btn-primary align-self-start" href="{% url 'assets:category_create' %}">Nueva categoría</a>{% endif %}</div>
+<form method="get" class="d-flex gap-2 mb-3"><label for="q" class="visually-hidden">Buscar categoría</label><input class="form-control" id="q" name="q" value="{{ q }}" type="search" maxlength="80" placeholder="Nombre de categoría"><button class="btn btn-outline-primary">Buscar</button></form>
+<div class="table-responsive card"><table class="table mb-0"><caption class="visually-hidden">Categorías de dispositivos</caption><thead><tr><th scope="col">Nombre</th><th scope="col">Tipo</th><th scope="col">Estado</th></tr></thead><tbody>{% for category in page_obj %}<tr><td><a href="{% url 'assets:category_detail' category.pk %}">{{ category.name }}</a></td><td>{{ category.get_kind_display }}</td><td>{{ category.is_active|yesno:'Activa,Inactiva' }}</td></tr>{% empty %}<tr><td colspan="3">No se encontraron categorías.</td></tr>{% endfor %}</tbody></table></div>{% include 'components/pagination.html' %}
+{% endblock %}

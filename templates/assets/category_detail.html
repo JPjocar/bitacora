@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }} · Categorías · Bitacora{% endblock %}
+{% block content %}
+<a class="d-inline-block mb-3" href="{% url 'assets:categories' %}">← Volver a categorías</a>
+<div class="d-flex flex-wrap justify-content-between gap-3 mb-3"><h1>{{ category.name }}</h1>{% if perms.assets.change_category %}<a class="btn btn-primary align-self-start" href="{% url 'assets:category_edit' category.pk %}">Editar categoría</a>{% endif %}</div>
+<div class="card card-body"><dl><dt>Tipo</dt><dd>{{ category.get_kind_display }}</dd><dt>Estado</dt><dd>{{ category.is_active|yesno:'Activa,Inactiva' }}</dd><dt>Descripción</dt><dd class="preserve-lines">{{ category.description|default:'Sin descripción' }}</dd></dl><p class="mb-0">{{ category.technical_help }}</p></div>
+<p class="mt-3"><a href="{% url 'assets:list' %}?category={{ category.pk }}">Ver dispositivos de esta categoría</a></p>
+{% if events is not None %}{% include 'components/events.html' %}{% endif %}
+{% endblock %}

@@ -9,6 +9,7 @@ No hay SPA, API REST, colas, microservicios ni capa Repository.
 | `config` | Entorno, rutas, middleware, WSGI/ASGI y seguridad |
 | `apps.accounts` | Usuario extendido, autenticación, roles, servicios y eventos de cuentas |
 | `apps.locations` | Ambientes, validación, servicios y eventos de ubicaciones |
+| `apps.assets` | Categorías, identidad y ficha de dispositivos, consulta limitada, movimientos y auditoría |
 | `apps.core` | Clases abstractas de conservación/auditoría, permisos y presentación compartida |
 | `templates`, `static` | Interfaz en español, componentes Bootstrap y filtros HTMX |
 | `tests` | Pruebas funcionales, de seguridad y transacciones concurrentes |
@@ -32,3 +33,13 @@ de solo lectura y no registra Group para evitar escrituras que salteen los servi
 El operador con acceso a shell/SQL tiene una frontera de confianza mayor; véase seguridad.
 
 Las dependencias QR, gráficos y otros módulos se incorporarán cuando se soliciten.
+
+`assets` agrupa dispositivos y movimientos porque la ubicación actual y su evento de
+traslado deben cambiar en una sola transacción. Consume Location mediante FK PROTECT;
+no cambia nombres, tipos ni estado de ubicaciones. `selectors.visible_devices` aplica
+el alcance docente tanto a la lista como al acceso directo a una ficha.
+
+Una edición/traslado bloquea el dispositivo y comprueba su versión. La selección de
+destino usa `select_for_update(no_key=True)`: serializa desactivaciones y permite las
+comprobaciones FK de otros traslados, evitando bloqueos circulares al intercambiar dos
+equipos entre ambientes. No hay dependencia ni cambios en módulos de mantenimiento.

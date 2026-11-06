@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}{% if subject %}Editar usuario{% else %}Nuevo usuario{% endif %} · Bitacora{% endblock %}
+{% block content %}
+<a href="{% url 'accounts:list' %}" class="d-inline-block mb-3">← Volver a usuarios</a>
+<h1 class="h2">{% if subject %}Editar usuario: {{ subject.username }}{% else %}Nuevo usuario{% endif %}</h1>
+<p class="text-secondary">Asigna un rol y conserva las cuentas anteriores mediante la desactivación.</p>
+<form method="post" class="card card-body p-4 form-panel" novalidate>{% csrf_token %}{% include 'components/form_fields.html' %}<div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Guardar usuario</button><a class="btn btn-outline-secondary" href="{% url 'accounts:list' %}">Cancelar</a></div></form>
+{% endblock %}

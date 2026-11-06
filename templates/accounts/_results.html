@@ -1,0 +1,9 @@
+<section id="results" aria-live="polite" aria-label="Resultados de usuarios">
+<p class="small text-secondary">{{ page_obj.paginator.count }} usuario{{ page_obj.paginator.count|pluralize:'s' }}</p>
+{% if page_obj %}
+<div class="table-responsive card"><table class="table align-middle mb-0"><caption class="visually-hidden">Usuarios registrados</caption><thead><tr><th scope="col">Usuario</th><th scope="col">Nombre</th><th scope="col">Rol</th><th scope="col">Estado</th></tr></thead><tbody>
+{% for subject in page_obj %}<tr><td><a class="fw-semibold" href="{% url 'accounts:detail' subject.pk %}">{{ subject.username }}</a></td><td>{{ subject.get_full_name|default:'—' }}</td><td>{% if subject.is_superuser %}Superusuario técnico{% else %}{{ subject.business_role|default:'Sin rol' }}{% endif %}</td><td>{% if subject.is_active %}<span class="badge text-bg-success">Activo</span>{% else %}<span class="badge text-bg-secondary">Inactivo</span>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+{% include 'components/pagination.html' %}
+{% else %}<div class="card card-body py-5 text-center"><h2 class="h5">No se encontraron usuarios</h2><p class="text-secondary mb-0">Prueba otros filtros o registra una cuenta si tienes permiso.</p></div>{% endif %}
+</section>

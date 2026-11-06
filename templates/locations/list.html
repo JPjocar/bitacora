@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Ubicaciones · Bitacora{% endblock %}
+{% block content %}
+<p class="eyebrow">AMBIENTES</p>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><h1>Ubicaciones</h1><p class="text-secondary mb-0">Laboratorios, almacenes y ambientes de mantenimiento.</p></div>{% if perms.locations.add_location %}<a class="btn btn-primary" href="{% url 'locations:create' %}">Nueva ubicación</a>{% endif %}</div>
+<form method="get" class="card card-body mb-4" action="{% url 'locations:list' %}" hx-get="{% url 'locations:list' %}" hx-target="#results" hx-swap="outerHTML" hx-push-url="true" hx-indicator="#loading" hx-sync="this:replace">
+<div class="row g-3 align-items-end">
+  <div class="col-md-4"><label for="q" class="form-label">Buscar por nombre o código</label><input class="form-control" type="search" id="q" name="q" value="{{ q }}" maxlength="120"></div>
+  <div class="col-md-4"><label class="form-label" for="kind">Tipo de ambiente</label><select class="form-select" name="kind" id="kind"><option value="">Todos los tipos</option>{% for value,label in kinds %}<option value="{{ value }}" {% if kind == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  <div class="col-md-2">{% include 'components/active_filter.html' %}</div>
+  <div class="col-md-2"><button class="btn btn-outline-primary w-100" type="submit">Filtrar</button></div>
+</div>
+<div class="mt-2 small"><a href="{% url 'locations:list' %}">Limpiar filtros</a><span id="loading" class="htmx-indicator ms-3" role="status">Buscando…</span></div>
+</form>
+{% include 'locations/_results.html' %}
+{% endblock %}

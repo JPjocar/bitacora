@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Ingresar · Bitacora{% endblock %}
+{% block content %}
+<div class="auth-panel mx-auto">
+  <p class="eyebrow">ACCESO A BITACORA</p>
+  <h1 class="h2">Inicia sesión</h1>
+  <p class="text-secondary">Ingresa con la cuenta asignada por tu administrador.</p>
+  <form method="post" class="card card-body p-4" novalidate>
+    {% csrf_token %}{% include 'components/form_fields.html' %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+  </form>
+  <p class="small text-secondary mt-3">Si no recuerdas tu contraseña, contacta al administrador.</p>
+</div>
+{% endblock %}

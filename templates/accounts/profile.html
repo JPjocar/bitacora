@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Mi perfil · Bitacora{% endblock %}
+{% block content %}
+<p class="eyebrow">MI CUENTA</p><h1>Mi perfil</h1>
+<div class="card card-body form-panel mt-3">
+  <dl><dt>Usuario</dt><dd>{{ user.username }}</dd><dt>Nombre</dt><dd>{{ user.get_full_name|default:'No registrado' }}</dd><dt>Correo</dt><dd>{{ user.email|default:'No registrado' }}</dd><dt>Rol</dt><dd>{% if user.is_superuser %}Superusuario técnico{% else %}{{ user.business_role|default:'Sin rol asignado' }}{% endif %}</dd></dl>
+  <div><a href="{% url 'accounts:password_change' %}" class="btn btn-primary">Cambiar mi contraseña</a></div>
+</div>
+{% endblock %}

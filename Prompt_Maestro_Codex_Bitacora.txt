@@ -1,0 +1,1145 @@
+PROMPT MAESTRO DE CONTEXTO Y DESARROLLO — BITACORA
+Sistema web de gestión de equipos informáticos, incidencias y mantenimiento preventivo
+Instituto de Educación Superior Tecnológico Público Pedro P. Díaz — Arequipa, Perú
+Versión de requisitos: 1.0 | Fecha de consolidación: noviembre de 2026
+
+======================================================================
+0. CÓMO DEBES USAR ESTE DOCUMENTO (INSTRUCCIÓN PARA CODEX)
+======================================================================
+
+Este archivo es la especificación maestra de contexto para desarrollar «Bitacora».
+Léelo por completo antes de modificar el repositorio. Sus reglas funcionales,
+restricciones y decisiones arquitectónicas son la fuente de verdad inicial.
+No es una instrucción para generar toda la aplicación en una sola respuesta o
+un solo commit. El usuario puede encargarte 1, 2, 3 o varios módulos por vez.
+
+INSTRUCCIÓN DE LA ITERACIÓN (la escribirá el usuario junto a este archivo):
+«Lee Prompt_Maestro_Codex_Bitacora.txt y ejecuta [MÓDULOS/TAREAS]
+completamente, siguiendo sus dependencias, pruebas y criterios de aceptación.
+Revisa el repositorio antes de modificar archivos. No implementes módulos
+posteriores que no se hayan solicitado, salvo infraestructura compartida mínima
+imprescindible y debidamente explicada».
+
+Si el usuario pide «desarrollar toda Bitacora», procede por fases pequeñas,
+verificables y ordenadas, conservando compatibilidad entre ellas; no des por
+finalizado algo que no está implementado y probado. Si no delimita tareas,
+revisa el estado del repositorio, propone el siguiente incremento lógico y
+comienza por la infraestructura mínima y sus pruebas, sin hacer cambios
+irreversibles ni decidir requisitos fundamentales en silencio.
+
+Orden de autoridad:
+1) Instrucción específica y más reciente del usuario.
+2) Este documento maestro (salvo corrección explícita posterior).
+3) Decisiones técnicas justificadas, compatibles con los puntos anteriores.
+4) Buenas prácticas oficiales de las herramientas efectivamente instaladas.
+
+Si identificas una contradicción, declárala con precisión y propón la opción
+más simple y verificable. No inventes acuerdos, datos institucionales,
+certificaciones, pruebas aprobadas ni accesos a equipos reales.
+No prometas software «sin errores»: identifica riesgos, escribe pruebas,
+ejecútalas y comunica los defectos o limitaciones que queden.
+
+Cada entrega debe incluir:
+- Qué estaba implementado antes y qué cambió.
+- Archivos y migraciones modificados.
+- Reglas de negocio implementadas y decisiones tomadas.
+- Pruebas ejecutadas, resultados reales, y pruebas no ejecutadas con motivo.
+- Pasos reproducibles para ejecutar, migrar y probar.
+- Riesgos, deuda técnica y siguiente incremento recomendado.
+No marques tareas como completadas si no se ejecutaron satisfactoriamente.
+
+======================================================================
+1. CONTEXTO INSTITUCIONAL, ALCANCE Y FILOSOFÍA
+======================================================================
+
+Nombre comercial de la aplicación: Bitacora (respetar esta escritura en la
+interfaz; no cambiarla por un nombre inventado). Descripción opcional en
+interfaz: «Gestión de equipos y mantenimiento de laboratorios».
+
+Contexto: proyecto académico de Desarrollo de Sistemas de Información para el
+Instituto de Educación Superior Tecnológico Público Pedro P. Díaz, Arequipa.
+Se pretende demostrar una solución técnico-operativa al registro de equipos,
+ubicaciones, movimientos, mantenimiento preventivo e incidencias.
+
+Equipo ejecutor: dos desarrolladores. Plazo objetivo: aproximadamente 30 días.
+Alcance: aplicación web de nivel intermedio, con buena ingeniería, seguridad,
+trazabilidad, UX/UI, documentación y pruebas, pero sin sobreingeniería.
+
+No afirmar que existe autorización institucional para una puesta en producción
+real. La entrega será inicialmente un piloto demostrable, con datos sintéticos,
+usuarios ficticios, instalaciones reproducibles y manuales.
+
+No es un sistema de administración patrimonial pública: no efectuar altas/bajas
+patrimoniales oficiales, depreciación, valorización, conciliación contable,
+compras públicas ni aprobaciones legales. Tampoco hacer inventario automático
+por agentes instalados, acceso remoto, diagnosis con IA o predicción de fallas.
+
+Principios no negociables:
+- Las acciones humanas deben ser pocas y claras; no obligar a cronometrar cada
+  intervención ni a escribir una nota después de cada clic.
+- Cada registro tiene estado y responsabilidad semánticamente coherentes.
+- Evitar duplicación o pérdida de historial por liberaciones, traslados o
+  ciclos periódicos.
+- Un traslado no implica reparación ni mantenimiento completado.
+- Una incidencia resuelta no cuenta por sí misma como preventivo realizado.
+- Una fecha de vencimiento es un cálculo; no significa que el trabajo comenzó.
+- Cada equipo de un mantenimiento grupal tiene su propio resultado y fecha.
+- Formularios, textos, errores y ayudas en español claro, adecuado a Perú.
+
+======================================================================
+2. TECNOLOGÍAS OBLIGATORIAS Y JUSTIFICACIÓN
+======================================================================
+
+Arquitectura: MONOLITO MODULAR, una sola aplicación Django desplegable y una
+base de datos PostgreSQL. Módulos Django alineados al negocio; APIs/servicios
+internos explícitos; no microservicios ni frontend SPA.
+
+- Python 3.12: versión objetivo para estabilidad y compatibilidad. Usar venv.
+- Django 5.2 LTS: backend, ORM, migraciones, formularios, autenticación,
+  sesiones, permisos, protección CSRF, panel administrativo y pruebas.
+  Fijar la rama 5.2 y usar el último parche compatible que se pueda instalar
+  y verificar en el entorno; registrar las versiones reales en dependencias.
+- PostgreSQL: datos relacionales, integridad, índices, transacciones y
+  exclusión de operaciones concurrentes incompatibles.
+- psycopg (3): controlador PostgreSQL compatible con la versión de Django.
+- Django Templates: renderizado HTML en servidor, sin React/Next.js.
+- Bootstrap 5.3.x: estilo responsive, estructura visual accesible, formularios,
+  tablas, navegación, modal, alertas y diseño coherente y sobrio.
+- HTMX 2.x + django-htmx compatible: actualizar porciones HTML de la página
+  sin crear API REST innecesaria. Usar PRG/redirect normal donde sea más claro.
+- JavaScript nativo, solo para QR/cámara, eventos del navegador y necesidades
+  concretas; no introducir un framework JS pesado.
+- qrcode + Pillow: generar códigos QR en el backend y etiquetas imprimibles.
+- html5-qrcode o alternativa ligera, estable y verificada: escanear desde
+  cámara y archivo dentro de la página. Requiere permisos y contexto seguro.
+- Chart.js: gráficos simples, solo cuando sean útiles; priorizar información
+  textual y tablas con filtros.
+- Django TestCase y TransactionTestCase: pruebas unitarias e integración,
+  incluyendo concurrencia real bajo PostgreSQL donde aplique.
+- Ruff (desarrollo): lint y formato, si se configura de forma consistente.
+- Git y GitHub: commits pequeños, ramas o PR por funcionalidad, sin incluir
+  secretos, archivos locales ni datos reales.
+
+Para un piloto, se permiten paquetes adicionales solo cuando resuelvan un
+problema real y se justifique su costo de dependencia y mantenimiento.
+Usar herramientas de Django y Python estándar antes que paquetes redundantes.
+
+No incorporar por defecto: React, Vue, Next.js, Django REST Framework,
+GraphQL, microservicios, Redis, Celery, RabbitMQ, WebSockets, un constructor
+visual, una capa genérica Repository/UnitOfWork ni CQRS/Event Sourcing.
+No desinstalar o reescribir dependencias existentes sin inspeccionarlas.
+
+Las librerías y sus versiones reales deben comprobarse contra documentación
+oficial al instalarlas. No asumir interfaces ni APIs no verificadas.
+
+Fuentes técnicas de referencia para consultas durante la implementación:
+- https://docs.djangoproject.com/en/5.2/
+- https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+- https://django-htmx.readthedocs.io/
+- https://htmx.org/docs/
+- https://getbootstrap.com/docs/5.3/
+- https://www.postgresql.org/docs/
+- https://scanapp.org/html5-qrcode-docs/
+- https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+No sustituir la verificación del entorno actual por copiar instrucciones
+obsoletas o código de ejemplos sin análisis.
+
+======================================================================
+3. ORGANIZACIÓN DEL MONOLITO MODULAR
+======================================================================
+
+Estructura propuesta (adaptar si el repositorio ya tiene convenciones válidas):
+
+bitacora/
+  manage.py
+  config/                  # settings, URLs, WSGI/ASGI y configuración
+  apps/
+    core/                  # helpers compartidos, auditoría, constantes comunes
+    accounts/              # login, usuarios, grupos y permisos
+    locations/             # ambientes físicos
+    assets/                # dispositivos, categorías, movimientos, códigos QR
+    maintenance/           # definiciones preventivas, ejecuciones, tareas
+    notifications/         # avisos internos y estado de lectura
+    dashboard/             # consultas, indicadores y reportes
+    incidents/             # POSTERIOR: incidencias/correctivos
+  templates/
+    base.html
+    components/
+    ...
+  static/
+    css/
+    js/
+    vendor/                # dependencias frontend controladas, si se alojan localmente
+  media/                   # no versionar archivos subidos
+  docs/
+  tests/                   # si conviene centralizar pruebas integrales
+  requirements.in / requirements.txt (o pyproject y lock reproducible)
+  .env.example
+  .gitignore
+  README.md
+
+Cada app es responsable de sus datos y operaciones. Emplear `models.py`,
+`forms.py`, `views.py`, `urls.py`, `admin.py`, `services.py`, `selectors.py`
+(opcional), `tests/` y plantillas de la propia app cuando correspondan.
+No fragmentar archivos por moda. Si una vista sencilla puede ser clara, no
+forzar diez capas artificiales.
+
+Reglas de integración:
+- Un módulo no debe cambiar directamente estados de otro desde templates,
+  JavaScript o vistas dispersas. Usar una función de servicio validada.
+- No depender de señales de Django para operaciones críticas encadenadas;
+  preferir llamadas explícitas y `transaction.atomic`.
+- Reservar locking y restricciones de base de datos para invariantes que
+  podrían romperse con peticiones simultáneas.
+- `core` no debe convertirse en un vertedero de lógica de todos los módulos.
+- Mantener modelos pequeños y relaciones comprensibles, pero usar los modelos
+  necesarios para preservar historia y recurrencia.
+- Los nombres de modelos, métodos y rutas pueden ajustarse si mejora el diseño,
+  documentando la equivalencia con la especificación.
+
+======================================================================
+4. ROLES, AUTENTICACIÓN Y AUTORIZACIÓN
+======================================================================
+
+Roles de negocio:
+A) Administrador: gestiona configuración, usuarios, ubicaciones, dispositivos,
+   supervisión y acciones excepcionales autorizadas.
+B) Técnico: consulta y actualiza datos operativos permitidos, registra
+   movimientos, toma/libera/ejecuta mantenimientos, y luego incidencias.
+C) Docente: consulta ficha limitada de equipos, reporta y sigue sus incidencias.
+
+Usar Django Auth + Groups + Permissions, con comprobación en servidor y por
+objeto cuando corresponda. El usuario que no tiene permisos debe recibir
+403 o redirección adecuada, nunca una acción ejecutada a escondidas.
+
+No crear automáticamente superusuarios con credenciales fijas.
+Proveer comando o fixture de demostración explícito, no ejecutado en
+producción, con credenciales temporales documentadas para que el responsable
+las cambie. El personal del instituto y sus datos NO se presuponen.
+
+En el módulo de incidencias posterior, el docente solo puede ver sus propios
+reportes y la información de activos autorizada. Los enlaces QR no sustituyen
+la autenticación. La administración Django no debe ser el único frontend
+para los técnicos y docentes; puede servir de administración interna.
+
+======================================================================
+5. UBICACIONES, CATEGORÍAS, DISPOSITIVOS E IDENTIFICADORES
+======================================================================
+
+Ubicaciones: laboratorios, almacenes y ambientes de mantenimiento.
+Campos mínimos: nombre, código opcional, tipo, descripción, activo.
+No destruir ubicaciones que tengan equipos o historia; usar desactivación
+cuando corresponda y relaciones protectoras.
+
+Dispositivo: identidad estable y ficha técnica. Campos mínimos:
+- ID técnico PK (preferiblemente entero o UUID, decisión consistente).
+- Código público alfanumérico único e inmutable, fácil de transcribir.
+- Tipo/categoría (PC, laptop, router, impresora, monitor, otros).
+- Marca/modelo; número de serie opcional y no obligatorio universal.
+- Ubicación actual, estado operativo, observaciones.
+- Fecha adquisición y puesta en servicio opcionales, distintas entre sí.
+- Detalles técnicos por categoría sin obligar a routers a tener RAM o CPU
+  de escritorio; elegir campos comunes más detalles opcionales claros.
+- Fechas de creación/actualización y actor cuando proceda.
+
+Estados operativos sugeridos: OPERATIVO, CON_OBSERVACIONES,
+FUERA_DE_SERVICIO, RETIRADO_DEL_CONTROL_OPERATIVO.
+No incluir «En mantenimiento» como estado físico universal; se deriva de
+las ejecuciones en curso y no debe bloquear ni forzar traslados.
+
+CÓDIGO ALFANUMÉRICO:
+- Aproximadamente 8 a 12 caracteres útiles, incluido prefijo razonable;
+  ejemplo demostrativo: EQ-7K4M2P8. No fijar un algoritmo inseguro.
+- Generar con aleatoriedad criptográficamente segura y verificar unicidad;
+  reintentar en colisión y mantener UNIQUE en PostgreSQL.
+- Evitar caracteres confundibles como O/0 o I/1.
+- Búsqueda manual tolerante a minúsculas/mayúsculas y espacios periféricos.
+- Mostrarlo claramente en ficha e impresión, sin depender del número de serie.
+- Evitar secuencias triviales previsibles como único identificador expuesto.
+
+QR:
+- QR contiene URL estable de ficha de equipo con identificador opaco
+  (p. ej. UUID público), no datos sensibles, contraseñas ni autorizaciones.
+- Generación individual y en lote, pero «lote de impresión» es solo un conjunto
+  de etiquetas, NO un tipo de mantenimiento.
+- Etiqueta: QR + código alfanumérico + categoría/nombre breve; tamaño
+  imprimible legible, sin cortar códigos ni duplicarlos.
+- Desde cámara normal del móvil se abre la ficha; dentro de Bitacora hay
+  «Escanear QR» que solicita acceso a cámara y reconoce un QR válido de
+  Bitacora, con búsqueda manual como alternativa.
+- Gestionar permiso denegado, cámara inexistente, dispositivo sin HTTPS,
+  QR inválido/no existente, cámara ocupada y cierre de cámara al salir del modal.
+- No redirigir ciegamente a URLs externas leídas de un QR.
+- Para usar la cámara en móvil en red, planear HTTPS. `localhost` puede
+  considerarse seguro en desarrollo; una IP por HTTP normalmente no.
+- Si el usuario no está autenticado, redirigir al login y después a la ficha;
+  proteger el contenido conforme a su rol.
+
+======================================================================
+6. MOVIMIENTOS DE DISPOSITIVOS
+======================================================================
+
+Un movimiento representa un traslado físico ya efectuado, no una orden o
+solicitud. No crear estados Solicitado/Aprobado/En tránsito/Recibido.
+
+Campos: dispositivo, ubicación origen, destino, motivo, observaciones
+opcionales, fecha efectiva, fecha registrada, autor. El origen se obtiene
+SIEMPRE de la ubicación actual al momento de confirmar.
+
+Al registrar traslado:
+1) Verificar permisos y que dispositivo y destino existan y sean válidos.
+2) No permitir destino igual a origen salvo excepción justificada y aprobada.
+3) En `transaction.atomic`, bloquear dispositivo cuando sea necesario,
+   confirmar origen vigente, guardar evento y actualizar ubicación actual.
+4) Registrar auditoría. No alterar movimientos anteriores.
+
+Los movimientos se permiten independientemente de que un dispositivo tenga
+incidencia o mantenimiento pendiente/en ejecución/completado. Si está fuera
+de servicio o tiene tareas preventivas pendientes, presentar una advertencia
+antes de completar el traslado, pero no inventar restricciones generales.
+Trasladar NO completa ni omite automáticamente un mantenimiento.
+
+======================================================================
+7. CONCEPTO CENTRAL DEL MÓDULO DE MANTENIMIENTO PREVENTIVO
+======================================================================
+
+DECISIÓN CERRADA: no existen pantallas «Jornadas» ni órdenes preventivas
+separadas para el usuario. La interfaz ofrece UN concepto «Mantenimiento».
+Puede dirigirse a UN dispositivo o MUCHOS (PC, routers, etc.). La diferencia
+no es una entidad de negocio diferente; es la cantidad de participantes.
+
+Un mantenimiento puede ser:
+A) ÚNICO: una sola ejecución, sin recurrencia posterior.
+B) PERIÓDICO: se define un intervalo para generar siguientes vencimientos.
+
+Ambos permiten una o muchas máquinas, tareas y notas. En mantenimiento
+individual, las tareas por equipo parecen «globales» en la interfaz porque
+solo hay un participante; internamente siguen siendo del dispositivo.
+
+Para evitar sobrescribir historia, distinguir internamente:
+- Definición del mantenimiento: nombre, descripción, periodicidad opcional,
+  dispositivos inscritos y plantillas de tareas.
+- Ejecución o ciclo: trabajo concreto con estado, técnico asignado,
+  fecha de inicio real, toma/liberación y fecha de cierre.
+- Participación del dispositivo en esa ejecución: tareas, observaciones,
+  resultado individual y fecha real de ejecución completa.
+
+NO mostrar al técnico innecesariamente «definición», «ciclo» y «participación»
+como tres módulos distintos. Él verá un mantenimiento y sus dispositivos,
+con un historial de ejecuciones cuando sea periódico.
+
+Nomenclatura orientativa para modelos:
+Maintenance (definición/configuración)
+MaintenanceTarget (inscripción vigente de equipo a definición)
+MaintenanceTaskTemplate (tarea definida por mantenimiento / categoría /
+                         ámbito grupal, cuando proceda)
+MaintenanceRun (ejecución/ciclo con estado general)
+MaintenanceRunDevice (dispositivo concreto en ese ciclo)
+MaintenanceTaskResult (tarea individual o grupal verificada en ese ciclo)
+MaintenanceEvent (tomas, liberaciones, cancelaciones, notas, cambios)
+
+Nombres ajustables; los invariantes de las relaciones no lo son.
+Evitar una tabla diferente para mantenimientos individuales y grupales.
+No mezclar órdenes correctivas en el módulo preventivo.
+
+======================================================================
+8. MANTENIMIENTO ÚNICO Y PERIÓDICO: FECHAS Y REGLAS
+======================================================================
+
+MANTENIMIENTO PERIÓDICO:
+- `is_recurring = True`.
+- `base_date` (fecha_base) por defecto = hoy según zona horaria Lima,
+  editable. NO significa que ya se hizo mantenimiento.
+- `interval_value` entero positivo, `interval_unit` = DÍAS o MESES.
+- El primer vencimiento por dispositivo = fecha_base + intervalo.
+- Los siguientes vencimientos de ese dispositivo = fecha REAL de su
+  última ejecución preventiva COMPLETADA + intervalo.
+- La periodicidad sigue siendo la misma si el técnico adelanta o retrasa
+  la ejecución. Una ejecución omitida, cancelada o pendiente NO reinicia
+  ni altera su vencimiento.
+- Meses son meses calendario reales: usar `dateutil.relativedelta`
+  o algoritmo equivalente probado; tratar fin de mes y febrero con pruebas.
+- Al modificarse la periodicidad/base para ciclos FUTUROS, registrar
+  auditoría; no reescribir vencimientos e historial de ejecuciones cerradas.
+
+MANTENIMIENTO ÚNICO:
+- `is_recurring = False`.
+- Pedir `planned_date` / fecha prevista para realizarlo, por defecto hoy
+  si resulta conveniente; NO pedir fecha_base ni periodicidad.
+- Puede ejecutarse anticipado/tarde; no genera nuevos ciclos automáticamente.
+
+En ambos casos:
+- No implementar reprogramaciones ni agenda de atención separada.
+- El vencimiento/fecha prevista sirve para ordenar y alertar, NUNCA para
+  inferir que se empezó o completó el trabajo.
+- Alertas de «próximo», «hoy» o «vencido» son etiquetas derivadas de fecha
+  y situación de ejecución; no nuevos estados persistidos de la ejecución.
+- Al iniciar trabajos, un técnico presiona explícitamente «Iniciar»;
+  esta decisión ES deliberada: un mantenimiento puede durar varios días.
+
+FECHAS EN DISTINTOS NIVELES:
+- `created_at`: mantenimiento o ejecución creada (timestamp automático).
+- `base_date`: definición periódica, fecha civil.
+- `next_due_date`/`due_date`: por dispositivo, cálculo de vencimiento.
+  Elegir si persistir como snapshot verificable o derivar; documentar y
+  probar la consistencia, no usar un único vencimiento para todo el grupo.
+- `planned_date`: solo en mantenimiento de ejecución única, fecha objetivo.
+- `taken_at`: evento al tomar por un técnico; puede ocurrir varias veces.
+- `started_at` / `fecha_inicio_real`: se fija AL PRESIONAR «Iniciar» por
+  primera vez en el ciclo; NO al asignar ni al marcar primera tarea.
+- `released_at`: por EVENTO de liberación, nunca un único campo que
+  sobrescriba el historial.
+- `device_executed_on` / `fecha_ejecucion_real`: fecha real de finalización
+  preventiva POR DISPOSITIVO. Por defecto hoy, con corrección autorizada
+  y auditada si se registra extemporáneamente.
+- `completed_at` / `fecha_completado`: timestamp de cierre GENERAL del ciclo.
+- `cancelled_at`: si se cancela, con motivo y actor.
+
+Almacenar timestamps aware con `USE_TZ = True`; representar fechas locales
+según `TIME_ZONE = 'America/Lima'`. Distinguir `DateField` de `DateTimeField`.
+No utilizar `datetime.now()` naive para fechas relevantes.
+
+CASO DE PRUEBA:
+Fecha base 01/10/2026, intervalo 2 meses => primer vencimiento
+01/12/2026. PC-01 completada el 25/11/2026 => próximo 25/01/2027.
+PC-02 completada el 28/11/2026 => próximo 28/01/2027.
+PC-03 omitida => conserva su vencimiento 01/12/2026.
+
+RECURRENCIA Y GRUPOS (CASO QUE EXIGE DISEÑO CUIDADOSO):
+Cada dispositivo de un mantenimiento periódico mantiene su propio vencimiento.
+Un mantenimiento que agrupa 15 PCs no debe imponer una única próxima fecha
+si se ejecutaron en días distintos.
+
+Para el MVP, NO generar una nueva ejecución grupal automáticamente solo porque
+un vencimiento se alcanzó. Las alertas salen de los vencimientos por equipo.
+Después de cerrar una ejecución, debe existir una acción clara «Crear siguiente
+ejecución» para un mantenimiento recurrente. La interfaz propone los equipos
+vencidos/próximos (y permite seleccionar otros autorizadamente), mostrando
+el vencimiento individual. Por defecto no duplicar un mismo dispositivo en
+una segunda ejecución abierta del mismo mantenimiento.
+
+La primera ejecución se crea junto a la definición del mantenimiento para
+que el flujo sea simple. Las siguientes se crean en el momento en que se
+requiere intervenir, desde la misma pantalla, sin crear un módulo «Jornada».
+No permitir crear una nueva ejecución para un mantenimiento único ya cerrado.
+Si después se solicita automatizar la apertura de ejecuciones, presentarlo
+como mejora posterior y no introducirlo sin acuerdo.
+
+Un dispositivo omitido puede volver a seleccionarse en la siguiente ejecución
+si continúa perteneciendo a la definición. El vencimiento omitido no cambia,
+y deberá mostrarse como vencido cuando corresponda.
+
+======================================================================
+9. TAREAS, NOTAS Y RESULTADO POR DISPOSITIVO
+======================================================================
+
+Al crear el mantenimiento, el responsable configura tareas verificables.
+Combinar una lista estructurada de tareas (checklist) con notas técnicas.
+No depender SOLO de notas: no permitirían comprobar requisitos terminados.
+No exigir una nota para cada tarea marcada: produciría rechazo operativo.
+
+El mantenimiento puede contener:
+A) Tareas INDIVIDUALES por equipo (habituales y necesarias para verificar
+   mantenimiento; una tarea de PC-01 no se completa para PC-02).
+B) Tareas GENERALES de la ejecución (ej. preparación de área/materiales),
+   que se verifican una sola vez para el grupo; no sirven para dar por
+   mantenidos automáticamente todos los dispositivos.
+C) Tareas opcionales por categoría, p. ej. router vs computadora.
+
+En un mantenimiento de un equipo, la UI puede mostrar checklist + notas sin
+secciones innecesarias. En uno grupal, pestañas/filas por equipo con tareas,
+observaciones y progreso, además de tareas generales si existen.
+
+Cada tarea debe tener al menos: nombre, orden, obligatoria/opcional,
+ámbito (GRUPAL o DISPOSITIVO) y categoría aplicable si procede.
+Tomar SNAPSHOT de las tareas al iniciar/crear un ciclo para que editar la
+plantilla futura no reescriba el pasado.
+
+Guardar en cada resultado: tarea, completada/no, actor, fecha, observación
+opcional; historial de cambios si se reabre/rectifica una tarea crítica.
+No permitir que un simple GET altere resultados: operaciones mutantes por
+POST/servicios con CSRF y validación de permisos.
+
+RESULTADO DE CADA DISPOSITIVO EN UN CICLO:
+- SIN_FINALIZAR: aún no se confirmó mantenimiento completo. Puede tener
+  0 o varias tareas hechas, sin otro estado «en proceso» propio.
+- COMPLETADO: tareas obligatorias por dispositivo terminadas, verificación
+  final aceptada y fecha de ejecución real registrada.
+- OMITIDO: se excluyó DE ESA EJECUCIÓN por motivo obligatorio. No se
+  considera mantenido, no actualiza vencimiento y permanece en historia.
+
+Acciones por dispositivo: «Registrar avance», «Completar equipo»,
+«Omitir de esta ejecución» (con motivo).
+Estas acciones de ejecución solo se habilitan cuando el ciclo general está
+EN_EJECUCION y el operador es el técnico responsable (o cuenta con permiso
+administrativo explícito). El servidor debe validar esas precondiciones incluso
+si una solicitud se envía manualmente. No registrar avances mientras el ciclo
+está PENDIENTE_ATENCION, ASIGNADO sin iniciar, o cerrado/cancelado.
+No crear acción «Liberar computadora»; «Liberar mantenimiento» afecta al
+responsable del ciclo completo, no a un equipo específico.
+
+Si el equipo debe regresar al laboratorio antes de completar sus tareas:
+- Se puede trasladar; su mantenimiento permanece SIN_FINALIZAR si luego se
+  atenderá en el mismo ciclo.
+- Si ya no será revisado en ese ciclo, usar «Omitir de esta ejecución».
+- No borrar la fila del dispositivo ni marcarlo falsamente completado.
+
+Se puede volver a abrir una tarea incorrectamente marcada, con justificación
+y registro auditable. No permitir deshacer un COMPLETADO individual que ya
+recalculó vencimientos sin un flujo correctivo autorizado y transaccional;
+como mínimo implementar reversión administrativa segura o impedirlo con
+mensaje y registrar la limitación del MVP.
+
+Para `COMPLETADO`: validar tareas obligatorias y guardar fecha real,
+responsable final, notas finales opcionales o breve resumen (definir campo
+exigido para evidencia, sin obligar a texto extenso).
+No inferir «realizado» solo porque alguien trasladó o escaneó el equipo.
+
+======================================================================
+10. ESTADOS Y FLUJO DE LA EJECUCIÓN GENERAL
+======================================================================
+
+Los estados se aplican a CADA EJECUCIÓN/CICLO, no a la definición permanente:
+
+1) PENDIENTE_ATENCION:
+   - Estado al crear ejecución o al liberar responsable.
+   - Responsable NULL. Puede contener tareas ya realizadas antes de liberar.
+2) ASIGNADO:
+   - Técnico pulsa «Tomar mantenimiento» y queda responsable.
+   - NO indica que empezó físicamente.
+3) EN_EJECUCION:
+   - Técnico pulsa «Iniciar mantenimiento» explícitamente.
+   - Registrar `started_at` una única vez en la primera iniciación.
+   - El mantenimiento puede permanecer días en este estado.
+4) COMPLETADO:
+   - Todos los dispositivos incluidos terminados; tareas obligatorias
+     generales e individuales cumplidas; fecha de cierre registrada.
+5) COMPLETADO_PARCIALMENTE:
+   - Por lo menos un dispositivo COMPLETADO y uno o más OMITIDOS,
+     sin dispositivos SIN_FINALIZAR ni tareas generales obligatorias pendientes.
+6) CANCELADO:
+   - Se cancela el ciclo sin resultado preventivo completo válido o por
+     decisión autorizada; motivo obligatorio. No actualizar vencimientos
+     por equipos que no se completaron. Si ya hay equipos completos,
+     conservar esas ejecuciones válidas y prohibir una cancelación que
+     falsee la historia; preferir cierre parcial cuando cumpla las reglas.
+
+TRANSICIONES PRINCIPALES:
+PENDIENTE_ATENCION -> ASIGNADO al tomar.
+ASIGNADO -> EN_EJECUCION al iniciar.
+ASIGNADO -> PENDIENTE_ATENCION al liberar con motivo.
+EN_EJECUCION -> PENDIENTE_ATENCION al liberar con motivo (sin borrar avances).
+EN_EJECUCION -> COMPLETADO o COMPLETADO_PARCIALMENTE tras validación.
+PENDIENTE/ASIGNADO/EN_EJECUCION -> CANCELADO cuando las reglas permiten
+cancelación justificada; nunca a través de simple eliminación física.
+
+Si otro técnico toma un ciclo previamente comenzado, vuelve a ASIGNADO;
+para continuar pulsa «Reanudar mantenimiento» y vuelve a EN_EJECUCION.
+`started_at` conserva el primer inicio y se agrega evento `RESUMED` con fecha
+actual. No exigir cronómetros, pausas detalladas ni inicio por dispositivo.
+
+CONTROL DE CONCURRENCIA:
+- Solo un responsable vigente por ciclo.
+- Tomar/liberar/iniciar/completar/cancelar se validan dentro de transacciones
+  con `select_for_update` o actualización condicional equivalente.
+- Las peticiones duplicadas deben ser idempotentes o rechazadas sin
+  duplicar resultados; no perder notas/tareas concurrentes.
+
+Al cerrar mantenimiento grupal:
+- COMPLETADO si todos dispositivos COMPLETADOS, tareas generales obligatorias
+  realizadas y no hay omitidos.
+- COMPLETADO_PARCIALMENTE si al menos un completado y resto OMITIDO,
+  y tareas generales obligatorias compatibles con el cierre cumplidas.
+- Si quedan SIN_FINALIZAR, impedir cerrar; indicar cuáles faltan y permitir
+  completarlos, omitirlos o continuar después.
+- Si TODOS fueron OMITIDOS (también el caso individual omitido), NO se
+  permite «completado parcialmente»: ofrecer cancelar justificadamente.
+
+No volver a marcar nuevas tareas de un ciclo cuando se cree el siguiente.
+Nunca reutilizar los checks de ciclos anteriores como si fueran vigentes.
+
+======================================================================
+11. NOTAS, LIBERACIONES, AUDITORÍA Y TRAZABILIDAD
+======================================================================
+
+Registrar historial inmutable de eventos clave:
+- creación, asignación, toma, inicio real, reanudación, liberación,
+  marcado/rectificación de tareas, completado/omitido de dispositivo,
+  cierre parcial/total, cancelación, cambios administrativos relevantes.
+
+En un mantenimiento individual, las notas se ven como notas del equipo;
+en un grupal permitir notas por dispositivo y notas generales.
+
+Al LIBERAR mantenimiento:
+- Exigir una nota breve con qué se hizo y por qué se libera.
+- Registrar actor y fecha/hora del evento, conservar datos anteriores.
+- Borrar SOLO asignación vigente; estado -> PENDIENTE_ATENCION.
+- Mantener `started_at` original y todos los checks y notas.
+- Notificar a técnicos y administradores sobre trabajo disponible.
+- Otro técnico lo toma, consulta historial y puede continuar.
+
+No confundir liberación del responsable con omisión de dispositivo.
+No utilizar una sola columna «fecha_liberacion» que se sobrescriba: un
+ciclo podría liberarse varias veces. Usar eventos históricos por cada acto.
+
+Al completar cada dispositivo, guardar fecha efectiva por equipo, y al
+cerrar grupo guardar fecha de cierre de la ejecución. Pueden ser diferentes.
+No medir automáticamente «productividad de técnicos» como objetivo del MVP.
+La hora de toma o primera iniciación NO representa tiempo trabajado continuo.
+
+Auditar manualmente las operaciones de servicio críticas. Evitar almacenar
+contraseñas, tokens, cookies, secretos o datos sensibles en audit logs.
+Los registros relevantes no deben desaparecer mediante DELETE físico.
+
+======================================================================
+12. NOTIFICACIONES INTERNAS
+======================================================================
+
+Para el MVP: notificaciones dentro de Bitacora, no correo/WhatsApp/SMS.
+Destinatarios: técnicos y administradores según rol, permisos y evento.
+
+Mantenimiento:
+- Avisos de vencimientos próximos y vencidos por dispositivo.
+- Mantenimiento disponible sin responsable.
+- Mantenimiento liberado (volver a notificar a los técnicos/admin).
+- Posible aviso al responsable por mantenimiento iniciado y pendiente.
+
+Incidencias, cuando se implemente módulo posterior:
+- Nueva incidencia y liberación: notificar a todos técnicos/admin.
+- Resolución: notificar al usuario reportante.
+
+Cada aviso: receptor, tipo, relación con recurso, descripción, fecha,
+leído/no leído, referencia para abrir el elemento. Evitar duplicados
+mediante clave de evento/receptor (idempotencia).
+
+HTMX polling moderado para la campana/contador, por ejemplo cada 20-30 s,
+con carga razonable. No usar WebSockets. Alertas de fecha pueden calcularse
+al consultar; si se materializan notificaciones, usar comando de Django
+idempotente ejecutable periódicamente, sin requerir Celery/Redis. Documentar
+cómo programar el comando en el entorno piloto y qué ocurre si no se ejecuta.
+
+======================================================================
+13. PANEL, BÚSQUEDA Y REPORTES
+======================================================================
+
+Dashboard de enfoque OPERATIVO, no evaluación laboral:
+- Dispositivos registrados, por tipo/ubicación y estado.
+- Equipos sin mantenimiento periódico configurado (si corresponde).
+- Mantenimientos próximos a vencer y vencidos, ordenados por fecha.
+- Mantenimientos pendientes, asignados, en ejecución y completados.
+- Equipos omitidos en ciclos anteriores y pendientes de mantenimiento.
+- Cantidad de ejecuciones completadas y parciales en un periodo.
+- Incidencias pendientes/en atención/cerradas (cuando existan).
+- Equipos con incidencias recurrentes (cuando exista módulo).
+
+Filtros por ubicación, tipo de dispositivo, estado y fechas; paginación del
+lado servidor; búsqueda por código alfanumérico y nombre cuando proceda.
+Priorizar tablas comprensibles sobre gráficos decorativos.
+Chart.js solo para gráficos de valor real, con leyendas y texto accesible.
+Exportación CSV con codificación apropiada; HTML imprimible para reportes
+básicos. Excel/PDF complejo solo si se pide y se justifica.
+
+No inventar métricas sobre técnicos ni tiempos de trabajo; no inferir que
+un caso tomado durante 3 días equivale a 72 horas de labor.
+
+======================================================================
+14. INCIDENCIAS: CONTEXTO APROBADO, IMPLEMENTAR DESPUÉS
+======================================================================
+
+ESTE MÓDULO QUEDA PARA UNA ETAPA POSTERIOR. No implementarlo en las primeras
+iteraciones salvo infraestructura transversal necesaria. Su diseño de base
+puede preverse sin acoplar los preventivos a los correctivos.
+
+Decisiones ya acordadas:
+- No crear órdenes de mantenimiento correctivo independientes.
+- Una incidencia contiene reporte, responsable, notas, trabajo correctivo y
+  solución final dentro del módulo `incidents`.
+- Cualquier docente/técnico/admin autorizado identifica equipo por QR o
+  código alfanumérico, describe síntomas y registra incidencia.
+- Estado interno: PENDIENTE_ATENCION (sin técnico), EN_ATENCION (técnico la
+  tomó), CERRADA (finalizada con resultado).
+- Resultado cierre: SOLUCIONADA, NO_SOLUCIONABLE/NO_REPARABLE con permiso y
+  justificación, o INVALIDA/DUPLICADA. No llamar «resuelta» a una avería
+  que sigue existiendo.
+- Al registrar una incidencia: notificar a TODOS los técnicos y administradores.
+- «Tomar incidencia»: asignación transaccional exclusiva, estado EN_ATENCION.
+- «Liberar incidencia»: motivo y resumen breve obligatorios; conserva
+  historial, asignación NULL, estado PENDIENTE_ATENCION; vuelve a notificar
+  a TODOS los técnicos/admin como si fuera nueva.
+- No implementar reasignación formal ni aceptación entre técnicos.
+- No agregar «En evaluación», «En espera», cronómetros ni órdenes correctivas.
+- Notas técnicas opcionales durante atención; resumen obligatorio al liberar
+  y al cerrar.
+- No cada falla implica mantenimiento preventivo.
+- El estado operativo del equipo puede actualizarlo el técnico si está
+  justificado; no asumir automáticamente que un reporte implica equipo roto.
+- No eliminar físicamente incidencias con historial. Permisos por rol/objeto.
+
+Cualquier cierre por imposibilidad técnica debe ser diferenciado y auditado.
+El historial de incidencia es independiente del historial de preventivos,
+pero ambos se consultan desde la ficha del dispositivo.
+
+======================================================================
+15. RECOMENDACIONES UX/UI PARA «BITACORA»
+======================================================================
+
+Dirección visual: MINIMALISTA, PROFESIONAL, INTUITIVA, CONSISTENTE, SIN RUIDO.
+Utilizar Bootstrap 5 como base; CSS propio muy limitado, con variables de
+colores/espaciado. No copiar dashboards recargados ni usar efectos de moda.
+
+Diseñar para uso real por técnicos, docentes y administradores, muchos de
+ellos desde un celular junto a un equipo físico.
+
+Principios obligatorios:
+- Jerarquía visual: título, estado, acción principal y datos esenciales.
+- Navegación estable: menú lateral o superior responsive, breadcrumbs en
+  detalles y retorno claro a listas.
+- Consistencia: mismos estados, iconos, nombres y ubicación de acciones.
+- Reconocimiento antes que recuerdo: mostrar código, equipo y ubicación
+  en vistas y diálogos, sin pedir al usuario memorizar identificadores.
+- Divulgación progresiva: formularios cortos; detalles avanzados opcionales.
+- Prevención de errores: validaciones tempranas y del servidor, confirmación
+  de acciones irreversibles, mensajes específicos y corrección fácil.
+- Retroalimentación: loaders discretos, toasts no intrusivos, estados vacíos,
+  errores comprensibles, éxito tras confirmación del servidor.
+- Accesibilidad: HTML semántico, labels reales, foco visible, navegación por
+  teclado, orden lógico, contraste suficiente, texto no solo colores,
+  botones táctiles razonables y modales accesibles.
+- Responsividad: ancho móvil y escritorio, tablas con overflow/filtros o
+  representación en tarjetas cuando la tabla sea imposible de usar.
+- Evitar múltiples botones para un acto simple. Priorizar: Tomar, Iniciar,
+  Registrar avance, Liberar, Completar, Omitir, Cancelar.
+- Explicar claramente diferencia entre fecha de vencimiento y fecha de
+  ejecución, y entre estado de ejecución y situación temporal.
+- Si hay 1 dispositivo, interfaz simplificada con sus tareas y notas.
+- Si hay varios, lista con progreso y acceso por dispositivo, sin pedir
+  iniciar/terminar cronómetros por cada PC.
+- Al omitir exigir un motivo, al liberar una nota y al completar comprobar
+  todas las tareas obligatorias. Mostrar qué falta, no solo «error».
+- En vistas QR, siempre buscar por código manual, con estados de cámara y
+  alternativas si no funciona.
+- Interfaz en español de Perú; formatos de fecha coherentes y zona horaria.
+- No inventar logo, escudo, tipografía institucional ni colores oficiales:
+  crear identidad visual sobria «Bitacora» hasta que se autoricen recursos.
+
+Pantallas mínimas por fase:
+Login; inicio/dashboard; listado y detalle de ubicaciones; listado, detalle
+y formulario de dispositivos; movimientos; imprimir QR; escanear QR;
+listado y detalle de mantenimientos; formulario de definición; vista de
+ciclo y dispositivos; tareas/notas; bandeja de notificaciones; reportes;
+incidencias cuando se autorice su implementación.
+
+Comportamiento HTMX:
+- Usar partial HTML para filtros y acciones de bajo alcance.
+- Definir targets correctos, gestión de errores HTTP y mensajes.
+- Mantener soporte de peticiones normales cuando sea razonable.
+- Asegurar CSRF en POST/PUT/PATCH/DELETE; no mutar mediante GET.
+- Confirmar permisos en Django aunque un botón esté oculto.
+- Evitar sondeos excesivos y duplicación de scripts JS al reemplazar modales.
+
+======================================================================
+16. SEGURIDAD, PRIVACIDAD Y CALIDAD DE DATOS
+======================================================================
+
+Seguridad no es una etapa final; aplicar desde el primer módulo.
+Usar el checklist oficial de Django y referencias OWASP pertinentes como
+criterios de revisión; no afirmar cumplimiento formal de un estándar sin una
+evaluación independiente. Evaluar protección razonable contra intentos
+repetidos de login (por proxy o biblioteca pequeña y mantenida, si procede),
+sin confundir la autenticación nativa con limitación automática de intentos.
+
+AUTENTICACIÓN/AUTORIZACIÓN:
+- Login/sesiones de Django y grupos con permisos por servidor.
+- Object-level checks: no permitir acceder a un recurso ajeno cambiando ID
+  en URL (IDOR/BOLA); especialmente reportes docentes.
+- Protección de endpoints HTMX y convencionales por igual.
+- Contraseñas mediante hashing de Django, nunca texto plano.
+- No exponer datos personales que no hacen falta para cumplir finalidad.
+
+FORMULARIOS Y ENTRADAS:
+- Validar tipo, longitud, unicidad, rangos de fecha y transiciones.
+- No confiar en campos hidden del cliente para autor, origen del traslado,
+  estado, fechas automáticas ni permisos.
+- Utilizar escaping de templates; evitar `mark_safe` sobre texto de usuario.
+- No construir SQL concatenando entradas; usar ORM y parámetros seguros.
+- Controlar tamaño y tipo de adjuntos; no ejecutar archivos subidos.
+- Proteger páginas contra CSRF y gestionar XSS en JS/HTMX y notas.
+- No permitir cambios persistentes con método GET.
+
+INTEGRIDAD/CONCURRENCIA:
+- Restricciones de BD para unicidad y referencias históricas.
+- Atomicidad para tomar mantenimiento/incidencia y movimientos.
+- Bloqueos cuando dos operadores pueden cambiar el mismo registro.
+- Validar estado previo antes de actualizar; impedir doble cierre.
+- Evitar duplicaciones por doble clic/reintento o cambios entre pestañas.
+- Definir `on_delete` explícitos (PROTECT para historia importante),
+  desactivación lógica cuando sea coherente.
+- Auditoría de actos críticos y motivos de cancelación/omisión/liberación.
+
+ENTORNO Y DESPLIEGUE:
+- SECRET_KEY y contraseñas desde variables de entorno; `.env` no versionado,
+  `.env.example` sin secretos.
+- DEBUG=False en despliegue; ALLOWED_HOSTS y CSRF_TRUSTED_ORIGINS correctos.
+- HTTPS para login y escaneo por cámara; cookies seguras en producción.
+- Cabeceras de seguridad recomendadas por Django, sin romper el despliegue.
+- Archivos estáticos con `collectstatic`; media aislada de ejecución.
+- Backup documentado de PostgreSQL y media; procedimiento de restauración
+  probado sobre datos sintéticos si el entorno permite.
+- `python manage.py check --deploy` con configuración apropiada; resolver
+  advertencias pertinentes y explicar las que dependen de infraestructura.
+- `runserver` solo desarrollo; despliegue mediante servidor WSGI compatible
+  (p. ej., Gunicorn detrás de proxy seguro) u opción equivalente documentada.
+- No crear credenciales de prueba ocultas, puertas traseras ni bypass de roles.
+
+PRIVACIDAD:
+- Tratar datos personales de docentes/técnicos con minimización, control de
+  acceso y retención razonable. Tener presente la Ley peruana N.° 29733 y
+  su reglamentación vigente, sin afirmar certificación de cumplimiento.
+- No utilizar identidades reales del instituto sin autorización.
+
+======================================================================
+17. MODELO DE DATOS, RESTRICCIONES Y DECISIONES PREVIAS
+======================================================================
+
+ANTES de crear modelos, entregar un esquema de relaciones y justificar las
+cardinalidades y campos más importantes. No es necesario implementar todos
+los modelos del proyecto en el primer incremento.
+
+Relaciones esperadas (esquema lógico, no SQL literal):
+- Location 1:N Device (ubicación actual).
+- Device 1:N Movement (historial).
+- Maintenance M:N Device a través de MaintenanceTarget (inscripción).
+- Maintenance 1:N MaintenanceRun (ejecuciones históricas).
+- MaintenanceRun 1:N MaintenanceRunDevice (equipos incluidos en ese ciclo).
+- MaintenanceRunDevice 1:N MaintenanceTaskResult individual.
+- MaintenanceRun 1:N tarea grupal ejecutada (si corresponde).
+- MaintenanceRun 1:N MaintenanceEvent (tomas, inicio, liberaciones, notas).
+- Device 1:N Incident (módulo posterior).
+- Incident 1:N IncidentEvent (módulo posterior).
+- User 1:N eventos/asignaciones históricas.
+
+Invariantes:
+- Código alfanumérico único, no editable después de asignar.
+- Un solo técnico responsable vigente por ejecución general.
+- Un solo estado vigente por ejecución, con transición validada.
+- Una sola participación del mismo dispositivo por ejecución.
+- No dos ejecuciones abiertas del mismo mantenimiento incluyendo el mismo
+  dispositivo (salvo decisión explícita futura y controlada).
+- Un dispositivo OMITIDO no registra ejecución preventiva válida.
+- Un dispositivo COMPLETADO no modifica su fecha real retroactivamente
+  sin control administrativo y auditoría.
+- Los datos de historial no desaparecen al desactivar equipos o planes.
+- La modificación de tareas/inscripciones futuras no cambia snapshots de
+  ciclos anteriores.
+- El mantenimiento recurrente de un grupo NO tiene una fecha global que
+  reemplace las fechas individuales de sus dispositivos.
+
+Si para cumplir los invariantes hace falta agregar entidad adicional,
+justificarla antes de implementarla. Priorizar un modelo normalizado y
+comprensible sobre reducir a toda costa el número de tablas.
+
+======================================================================
+18. PRUEBAS, CASOS LÍMITE Y CRITERIOS DE ACEPTACIÓN
+======================================================================
+
+No basta con que compile o que «se vea bien». Entregar pruebas funcionales,
+de permisos y de negocio. Complementar con inspección real en navegador para
+escritorio y móvil, comprobando al menos login, tablas, formularios, error de
+validación, toma/inicio de mantenimiento, tareas, etiqueta QR y navegación;
+si no se dispone de navegador automatizado, describir la verificación manual
+a realizar. No inventar capturas ni afirmar una revisión visual inexistente.
+Al menos:
+
+INFRAESTRUCTURA:
+[ ] Ejecuta configuración, migraciones y arranque reproducible.
+[ ] El entorno usa PostgreSQL, no SQLite como sustituto en pruebas finales.
+[ ] `manage.py check`, tests y lint concluyen con resultado comunicado.
+[ ] Vistas principales responden con errores de autorización apropiados.
+
+USUARIOS Y ACTIVOS:
+[ ] Roles y permisos reales funcionan incluso con URL escrita manualmente.
+[ ] Código alfanumérico único, legible y estable; buscar sin distinción de caja.
+[ ] Registro de equipo funciona con y sin serie según categoría.
+[ ] Desactivar ubicación/equipo no destruye historial.
+[ ] Dos traslados simultáneos incompatibles no corrompen ubicación/historia.
+[ ] Traslado durante mantenimiento no modifica su resultado.
+[ ] QR abre la ficha correcta; QR inválido falla de modo comprensible.
+[ ] Se imprimen 1 o muchas etiquetas sin códigos cortados.
+[ ] Cámara maneja permisos denegados y alternativa manual.
+
+MANTENIMIENTOS:
+[ ] Se crea mantenimiento con 1 equipo y con varios equipos heterogéneos.
+[ ] Tareas por equipo independientes; tareas generales separadas.
+[ ] Se crea mantenimiento único (fecha prevista, sin recurrencia).
+[ ] Se crea mantenimiento periódico (fecha_base hoy por defecto, editable).
+[ ] Se rechaza periodicidad cero/negativa o configuración inconsistente.
+[ ] Primer vencimiento = base + intervalo; meses calendario con fin de mes.
+[ ] Tomar -> ASIGNADO sin fijar fecha_inicio_real.
+[ ] Iniciar -> EN_EJECUCION fija started_at exactamente una vez.
+[ ] Liberar sin motivo se rechaza; con motivo conserva checks/started_at.
+[ ] Otro técnico retoma, ve notas y puede reanudar sin perder historial.
+[ ] Dos técnicos no pueden tomar la misma ejecución simultáneamente.
+[ ] Completar equipo exige todas sus tareas obligatorias.
+[ ] Ningún técnico puede marcar tareas sin haber iniciado la ejecución o sin
+    ser responsable autorizado, aunque invoque el endpoint directamente.
+[ ] Completar uno no completa automáticamente los demás.
+[ ] Omitir equipo conserva motivo/historia y NO recalcula vencimiento.
+[ ] Trasladar un omitido/sin finalizar no elimina su participación.
+[ ] Grupo completado si todos completados y tareas generales obligatorias OK.
+[ ] Grupo parcial si algunos completados y restantes omitidos.
+[ ] Con uno solo omitido no puede quedar «completado parcialmente».
+[ ] Grupo con pendientes no puede cerrarse sin tratar esos pendientes.
+[ ] Cancelación exige motivo; no registra trabajo ficticio.
+[ ] Próximo vencimiento por cada equipo completado = fecha real + intervalo.
+[ ] Equipo omitido mantiene el vencimiento anterior.
+[ ] Nuevo ciclo crea tareas limpias y conserva historial anterior.
+[ ] El mantenimiento único no crea ciclos futuros.
+[ ] No se duplica resultado por doble POST o reintento.
+[ ] Usuario sin permisos no puede marcar tareas/omitir/completar.
+[ ] Cierre general guarda timestamp distinto de fecha por dispositivo.
+
+NOTIFICACIONES Y UI:
+[ ] Avisos no se duplican en el mismo evento/receptor.
+[ ] HTMX actualiza fragmentos sin perder contexto ni omitir CSRF.
+[ ] Estados vacíos, validaciones, errores y móvil son comprensibles.
+[ ] Filtros, paginación y búsqueda funcionan con datasets de prueba.
+
+INCIDENCIAS (SOLO CUANDO SE IMPLEMENTEN):
+[ ] Registro crea pendiente y notifica a técnicos/admin.
+[ ] Toma es exclusiva transaccional.
+[ ] Liberación con resumen vuelve a pendiente, quita responsable, conserva
+    notas y notifica de nuevo a técnicos/admin.
+[ ] Cierre distingue solucionada, no reparable e inválida/duplicada.
+[ ] No hay órdenes correctivas independientes.
+[ ] Solución correctiva no reinicia plan preventivo.
+
+Pruebas de bordes: fechas nulas donde correspondan, meses de 28/29/30/31
+días, multiusuario, usuarios desactivados, equipos retirados, cambios de
+ubicación, ausencia de técnico, intento de cambio tras cierre, duplicación
+por reintentos, tareas opcionales, un grupo con todas las máquinas omitidas,
+y modificación de plantilla entre dos ciclos.
+
+Para pruebas de concurrencia y `select_for_update`, usar PostgreSQL real y
+`TransactionTestCase` (la transacción envolvente de `TestCase` puede enmascarar
+comportamientos). No afirmar que la concurrencia está probada si no se
+reprodujeron realmente dos transacciones.
+
+======================================================================
+19. DOCUMENTACIÓN Y CALIDAD DE ENTREGA PARA SUSTENTACIÓN ACADÉMICA
+======================================================================
+
+Entregar progresivamente artefactos verídicos y consistentes con el código:
+- README completo: requisitos, instalación, entorno, migraciones, arranque,
+  ejecución de tests, creación del administrador y datos demo.
+- `.env.example`, `.gitignore`, dependencias fijadas y reproducibles.
+- `docs/ARQUITECTURA.md`: monolito, responsabilidades y dependencias.
+- `docs/MODELO_DATOS.md`: entidades, cardinalidades, invariantes y diagramas
+  (Mermaid o PlantUML en texto, sin inventar diagramas no compatibles).
+- `docs/REGLAS_NEGOCIO.md`: estados, transiciones, fechas, permisos,
+  cancelación, liberación, omisión, recurrencia y ejemplos.
+- `docs/REQUERIMIENTOS.md`: RF-001... y criterios de aceptación.
+- `docs/PRUEBAS.md`: casos, comandos, resultados reales y pendientes.
+- `docs/SEGURIDAD.md`: riesgos, controles, configuraciones y limitaciones.
+- `docs/DECISIONES.md`: decisiones técnicas y alternativas descartadas.
+- `docs/AVANCE.md`: qué está implementado / no implementado por módulo.
+- Manual breve de usuario (administrador, técnico, docente cuando proceda).
+- Evidencia reproducible con datos sintéticos; no afirmar despliegue oficial.
+
+Se aceptan capturas reales del sistema ya ejecutado, pero nunca imágenes
+simuladas presentadas como evidencia de funciones implementadas.
+No escribir en documentación académica que se validó en ambientes del instituto
+si solo se usó un entorno local o de demostración.
+
+Mantener auditoría de cambios del proyecto mediante commits claros.
+No incluir nombres, DNIs, correos o equipos reales sin autorización.
+
+======================================================================
+20. ORDEN DE DESARROLLO SUGERIDO Y DEPENDENCIAS
+======================================================================
+
+Fase 0 — BASE Y CONVENCIONES:
+  Repositorio, Django, PostgreSQL, settings entorno, apps, templates base,
+  Bootstrap, HTMX, tests, formateo, README, seguridad base.
+
+Fase 1 — CUENTAS:
+  Login/logout, grupos administrador/técnico/docente, permisos, vistas de
+  perfil administrativo, base de auditoría de usuario.
+
+Fase 2 — UBICACIONES:
+  Tipos, CRUD seguro, listados, filtros y desactivación.
+
+Fase 3 — DISPOSITIVOS:
+  Categorías, ficha, estados operativos, código único y búsquedas.
+
+Fase 4 — MOVIMIENTOS:
+  Traslado ejecutado, servicio transaccional, historial y advertencias.
+
+Fase 5 — QR:
+  Etiquetas individual/lote, ficha mediante enlace, cámara integrada,
+  búsqueda manual, permisos y pruebas móvil.
+
+Fase 6 — CONFIGURACIÓN DE MANTENIMIENTOS PREVENTIVOS:
+  Definición único/periódico, dispositivos, tareas por tipo/ámbito,
+  fechas base/objetivo, cálculos de vencimiento, primera ejecución.
+
+Fase 7 — EJECUCIÓN Y AVANCES PREVENTIVOS:
+  Ciclo con 6 estados, toma, inicio explícito, reanudación, liberación,
+  tareas/notas, omisión, completado por dispositivo, cierre total/parcial,
+  historial y transacciones. Es la fase con mayor riesgo funcional.
+
+Fase 8 — RECURRENCIA:
+  Próximo vencimiento por dispositivo, ciclos futuros manuales,
+  selección de equipos próximos/vencidos, duplicaciones y pruebas de fechas.
+
+Fase 9 — NOTIFICACIONES:
+  Avisos internos, idempotencia, consultas de vencimiento, HTMX polling.
+
+Fase 10 — DASHBOARD/REPORTES:
+  Conteos reales, filtros, CSV, vista imprimible y gráficos necesarios.
+
+Fase 11 — SEGURIDAD/QA/DESPLIEGUE PILOTO:
+  Integración completa, tests regresión, revisión accesibilidad responsive,
+  backups, check --deploy, datos sintéticos, manuales y demostración.
+
+Fase 12 — INCIDENCIAS (DESPUÉS, SEGÚN ORDEN DEL USUARIO):
+  Ciclo simplificado, reportes, toma/liberación, historial y resolución,
+  notificaciones y ficha unificada por dispositivo.
+
+Las pruebas de seguridad, permisos y negocio NO se dejan únicamente para la
+fase 11: deben acompañar cada fase anterior.
+
+Si el usuario solicita por ejemplo «fases 2, 3 y 4», implementar esas fases
+con las dependencias ya existentes; si no están implementadas, señalarlo y
+crear solo lo imprescindible para que el incremento sea funcional.
+No introducir incidencias cuando el usuario encargó solo preventivos.
+
+======================================================================
+21. PROTOCOLO DE IMPLEMENTACIÓN PARA CODEX (OBLIGATORIO)
+======================================================================
+
+ANTES DE PROGRAMAR:
+1. Inspecciona el árbol del repositorio, versiones, dependencias, migraciones,
+   settings, tests y documentación existentes. No asumas que está vacío.
+2. Resume las fases ya implementadas y lo que falta, con evidencia del código.
+3. Para los módulos solicitados, identifica precondiciones y riesgos.
+4. Expón un plan corto con archivos/entidades/rutas/pruebas afectados.
+5. Si falta una decisión CRÍTICA imposible de inferir (por ejemplo política
+   de rectificar un cierre), presenta una opción concreta y solicita decisión;
+   en cuestiones menores usa el valor más simple y documéntalo.
+
+DURANTE:
+6. Haz cambios incrementales y coherentes; no sobreescribas trabajos previos
+   de otros desarrolladores ni borres migraciones ya aplicadas.
+7. Implementa primero las invariantes en el dominio y validaciones del servidor.
+8. Añade migraciones con nombres coherentes, restricciones e índices.
+9. Crea endpoints con protección de métodos, auth y permisos.
+10. Construye formularios y plantillas Bootstrap responsivas; HTMX solo donde
+    mejore realmente la experiencia de uso.
+11. Añade casos de prueba positivos, negativos, seguridad, permisos y bordes.
+12. Ejecuta comandos y corrige fallos. Si faltan herramientas o servicios,
+    informa lo que realmente no pudo verificarse; no simules resultados.
+13. Conserva logs técnicos útiles sin exponer secretos o datos personales.
+14. Actualiza docs para que reflejen exactamente el comportamiento del código.
+
+AL FINAL DE CADA ITERACIÓN:
+15. Proporciona resumen verificable de tareas terminadas.
+16. Enumera comandos de migración/prueba y resultados observados.
+17. Señala explícitamente funciones parciales y pendientes.
+18. Explica decisiones técnicas nuevas y su compatibilidad con este contexto.
+19. Deja indicaciones para que otro agente o desarrollador pueda continuar.
+20. Sugiere la siguiente fase lógica, sin implementarla si no está pedida.
+
+La respuesta del agente debe ser concisa, técnica, en español y sin afirmar
+que todo funciona si no se probó. No uses frases de marketing ni descripciones
+que sustituyan implementación real.
+
+======================================================================
+22. REQUERIMIENTOS FUNCIONALES CLAVE (IDENTIFICADORES REFERENCIALES)
+======================================================================
+
+RF-001 Autenticación, logout y permisos por rol.
+RF-002 CRUD seguro de ubicaciones y desactivación lógica.
+RF-003 Registro de categorías y dispositivos con ficha individual.
+RF-004 Código alfanumérico público único y búsqueda manual.
+RF-005 Movimiento transaccional con origen/destino/historial.
+RF-006 QR individual y etiquetas de impresión por selección.
+RF-007 Escáner de cámara dentro de Bitacora con fallbacks seguros.
+RF-008 Crear mantenimiento único o periódico, con 1 o N dispositivos.
+RF-009 Configurar tareas individuales y generales, según categoría.
+RF-010 Calcular fecha base, primer vencimiento y posteriores por equipo.
+RF-011 Primera ejecución y ejecuciones posteriores con historial aislado.
+RF-012 Tomar mantenimiento exclusivamente por un técnico.
+RF-013 Iniciar explícitamente y registrar primera fecha de inicio real.
+RF-014 Registrar tareas y notas por dispositivo o generales.
+RF-015 Liberar con motivo, sin borrar avances, y permitir nuevo técnico.
+RF-016 Omitir dispositivo en una ejecución sin modificar su vencimiento.
+RF-017 Completar equipo con verificación y fecha real independiente.
+RF-018 Cerrar grupo total/parcial con validación de todos los resultados.
+RF-019 Registrar eventos, notas y auditoría de acciones críticas.
+RF-020 Alertas de mantenimiento vencido/próximo por dispositivo.
+RF-021 Notificaciones internas al liberar y cuando existan trabajos nuevos.
+RF-022 Dashboard, filtros, búsquedas y reportes básicos.
+RF-023 Registrar incidencia desde dispositivo por QR/código (fase posterior).
+RF-024 Tomar/liberar/cerrar incidencia con eventos (fase posterior).
+RF-025 Consultar historial integrado por dispositivo.
+
+Para cada RF implementado debe existir al menos un criterio de aceptación y
+un caso de prueba o evidencia verificable. Vincular RF con las fases.
+
+======================================================================
+23. DECISIONES EXCLUIDAS QUE NO DEBEN REINTRODUCIRSE EN SILENCIO
+======================================================================
+
+NO crear «Jornada de mantenimiento» como una pantalla/flujo distinto.
+NO órdenes de mantenimiento correctivo independientes.
+NO «fecha programada de atención» reprogramable para preventivos periódicos.
+NO «En evaluación» ni «En espera» en incidencias.
+NO reasignación formal de incidencias con aceptación de otro técnico.
+NO estado «En proceso» obligatorio por cada máquina del mantenimiento grupal.
+NO pulsar «Iniciar» por cada máquina; solo iniciar la ejecución general.
+NO marcar como completado un equipo por trasladarlo al laboratorio.
+NO marcar como completado un grupo con tareas obligatorias faltantes.
+NO eliminar dispositivo omitido del historial de su ejecución.
+NO cronómetros de reparación ni panel de control de productividad individual.
+NO suponer mantenimiento preventivo automático al corregir una incidencia.
+NO resetear la frecuencia periódica por cancelación/liberación/omisión.
+NO usar una única próxima fecha por grupo si los equipos tienen fechas reales
+   distintas; cada dispositivo conserva su propio calendario.
+NO APIs, servicios externos ni frameworks adicionales sin necesidad.
+
+======================================================================
+24. EJEMPLOS DE ENCARGOS REUTILIZABLES PARA EL USUARIO
+======================================================================
+
+EJEMPLO A — iniciar proyecto:
+«Lee el archivo Prompt_Maestro_Codex_Bitacora.txt completo. Implementa
+solo las fases 0 y 1 con pruebas y documentación. No avances a ubicaciones.»
+
+EJEMPLO B — entregar 3 módulos:
+«Lee el archivo maestro y el repositorio. Implementa fases 2, 3 y 4
+(Ubicaciones, Dispositivos, Movimientos), completas y probadas. Respeta
+las relaciones y los servicios transaccionales. No implementes QR todavía.»
+
+EJEMPLO C — núcleo preventivo:
+«Aplica las fases 6 y 7 según el prompt maestro. Empieza verificando modelos
+y migraciones. Implementa mantenimiento individual y grupal con tareas,
+responsable, estados, inicio explícito, liberación y cierre seguro.
+Entrega pruebas de transición, permisos, concurrencia y resultado por equipo.»
+
+EJEMPLO D — recurrencia:
+«Implementa la fase 8, sin modificar el flujo aprobado de toma/inicio/liberación.
+Prueba meses calendario, equipos omitidos y dispositivos de un mismo grupo
+terminados en fechas diferentes.»
+
+EJEMPLO E — auditoría y corrección:
+«Inspecciona el repositorio completo de Bitacora y compáralo con la
+especificación maestra. Enumera discrepancias verificadas por criticidad,
+propón correcciones y ejecuta únicamente las que autorice el encargo.
+No reescribas el proyecto ni inventes pruebas aprobadas.»
+
+EJEMPLO F — continuar después de otro agente:
+«Lee Prompt_Maestro_Codex_Bitacora.txt, README y docs/AVANCE.md; inspecciona
+código, migraciones y tests. Identifica qué falta del módulo [X] y completa
+solo ese módulo sin introducir regresiones ni romper interfaces existentes.»
+
+FIN DEL PROMPT MAESTRO.

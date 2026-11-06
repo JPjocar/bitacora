@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% load labels %}
+{% block title %}Roles · Bitacora{% endblock %}
+{% block content %}
+<p class="eyebrow">ADMINISTRACIÓN</p><h1>Roles y permisos</h1>
+<p class="text-secondary">Los roles definen el acceso de cada cuenta. Para asignar un rol, edita el usuario.</p>
+<div class="row g-3">{% for group in groups %}<div class="col-lg-4"><section class="card h-100"><div class="card-body p-4"><h2 class="h4">{{ group.name }}</h2><p class="small text-secondary">Acceso a su perfil y cambio de contraseña.</p><ul class="ps-3">{% for permission in group.permissions.all %}<li class="mb-2">{{ permission|permission_label }}</li>{% empty %}<li>Sin acceso a la administración de usuarios y ubicaciones.</li>{% endfor %}</ul></div></section></div>{% empty %}<p class="alert alert-warning">Los roles todavía no están configurados. Contacte al responsable del sistema.</p>{% endfor %}</div>
+{% endblock %}

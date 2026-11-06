@@ -1,0 +1,21 @@
+:root { --bs-primary: #245a73; --bs-primary-rgb: 36,90,115; }
+body { background: #f6f8fa; color: #253745; min-height: 100vh; }
+main { min-height: calc(100vh - 140px); }
+.navbar { min-height: 72px; }
+.navbar-brand { font-size: 1.65rem; letter-spacing: -.05em; }
+.brand-dot { color: #b46535; }
+.eyebrow { color: #526c7c; font-size: .75rem; font-weight: 700; letter-spacing: .12em; margin-bottom: .65rem; }
+.card { border-color: #dce4e9; border-radius: .7rem; box-shadow: 0 2px 5px #20304004; }
+.btn-primary { --bs-btn-bg: #245a73; --bs-btn-border-color: #245a73; --bs-btn-hover-bg: #194258; --bs-btn-hover-border-color: #194258; }
+.btn-outline-primary { --bs-btn-color: #245a73; --bs-btn-border-color: #245a73; --bs-btn-hover-bg: #245a73; --bs-btn-hover-border-color: #245a73; }
+a { color: #245a73; text-underline-offset: .17em; }
+th { background: #edf2f5 !important; font-size: .8rem; color: #52616d !important; }
+.table > :not(caption) > * > * { padding: 1rem; }
+.form-panel { max-width: 720px; }
+.auth-panel { max-width: 440px; padding-block: 2rem; }
+.preserve-lines { white-space: pre-wrap; overflow-wrap: anywhere; }
+.skip-link { position: absolute; z-index: 2000; background: white; padding: 1rem; }
+:focus-visible { outline: 3px solid #b46535 !important; outline-offset: 3px; }
+.htmx-indicator { opacity: 0; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity: 1; }
+@media (max-width: 575px) { .btn { min-height: 44px; } h1 { overflow-wrap: anywhere; } .table { min-width: 560px; } }

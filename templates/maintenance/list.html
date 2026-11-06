@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Mantenimientos · Bitacora{% endblock %}
+{% block content %}
+<p class="eyebrow">PREVENTIVOS</p><div class="d-flex flex-wrap justify-content-between gap-3 mb-4"><div><h1>Mantenimientos</h1><p class="text-secondary mb-0">Equipos, tareas y fechas de los mantenimientos únicos y periódicos.</p></div>{% if perms.maintenance.add_maintenance %}<div><a class="btn btn-primary" href="{% url 'maintenance:create' %}">Nuevo mantenimiento</a></div>{% endif %}</div>
+<form method="get" class="card card-body mb-4" action="{% url 'maintenance:list' %}" hx-get="{% url 'maintenance:list' %}" hx-target="#results" hx-swap="outerHTML" hx-push-url="true" hx-sync="this:replace" hx-indicator="#loading"><div class="row g-3">
+<div class="col-md-5"><label for="q" class="form-label">Mantenimiento, nombre o código del equipo</label><input class="form-control" type="search" name="q" id="q" value="{{ q }}" maxlength="120"></div>
+<div class="col-md-3"><label for="kind" class="form-label">Tipo</label><select class="form-select" id="kind" name="kind"><option value="">Todos</option><option value="unique" {% if kind == 'unique' %}selected{% endif %}>Único</option><option value="recurring" {% if kind == 'recurring' %}selected{% endif %}>Periódico</option></select></div>
+<div class="col-md-2">{% include 'components/active_filter.html' %}</div><div class="col-md-2 align-self-end"><button class="btn btn-outline-primary w-100">Filtrar</button></div></div><div class="small mt-2"><a href="{% url 'maintenance:list' %}">Limpiar filtros</a><span class="htmx-indicator ms-3" id="loading" role="status">Buscando…</span></div></form>
+{% include 'maintenance/_list.html' %}
+{% endblock %}

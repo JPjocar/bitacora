@@ -50,6 +50,23 @@
     serializadas y cancelación lógica de callbacks tardíos. Node se usa solo para tests.
 23. Permiso explícito de impresión para admin/técnico. Docente conserva consulta y
     escaneo de equipos visibles. Las acciones de lectura no producen eventos de negocio.
+24. Fase 6 en maintenance: siete modelos del esquema maestro. La ejecución inicial exige
+    copias de participantes/tareas desde esta fase; no supone implementar acciones de fase 7.
+    Restricciones de estado inicial y copias de solo lectura hasta habilitar servicios operativos.
+25. Meses con calendar.monthrange y ajuste al último día válido, sin dateutil adicional.
+    Vencimiento inicial copiado por participante; no fecha global que sustituya sus fechas.
+26. Configuración modificable con motivo/versionado; ninguna edición reescribe ejecuciones
+    creadas, incluso pendientes. Plantillas antiguas inactivas e inscripciones conservadas.
+    No cambia tipo ni fecha prevista del único. No hay reprogramación/cancelación implícita.
+27. Administrador configura, técnico consulta, docente sin acceso. Nuevas inscripciones de
+    activos no retirados; fuera de servicio permitido, inscritos inactivados se conservan.
+    Cada equipo exige al menos una tarea individual aplicable, no necesariamente obligatoria.
+28. Límites de piloto: 200 equipos y 50 tareas por configuración. Formset con alta de filas
+    por POST, compatible sin JS. No se añadió otra librería/frontend. Tareas copiadas en lotes.
+29. UUID de envío y firma de contenido para reintentos; UNIQUE de BD para carreras entre
+    selecciones distintas. No es permiso ni identidad pública del mantenimiento.
+30. Integración de traslado mediante selector de lectura; confirmar aviso de preventivo
+    pendiente no cambia su resultado. Fase 7 debe incluir los nuevos estados en ese selector.
 
 Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 
@@ -66,6 +83,8 @@ Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 - [Pillow: instalación](https://pillow.readthedocs.io/en/stable/installation/basic-installation.html).
 - [html5-qrcode: cámara, archivos y cierre](https://scanapp.org/html5-qrcode-docs/docs/apis/classes/Html5Qrcode).
 - [ZXing-C++: decodificador independiente para Python](https://github.com/zxing-cpp/zxing-cpp/tree/master/wrappers/python).
+- [Django 5.2: formsets, límites, orden y eliminación](https://docs.djangoproject.com/en/5.2/topics/forms/formsets/).
+- [Django 5.2: constraints y unicidad con valores nulos](https://docs.djangoproject.com/en/5.2/ref/models/constraints/).
 
 Las versiones realmente instaladas están fijadas en requirements, sin asumir que sean
 las últimas disponibles en futuras fechas. Los cambios futuros deben revisar las fuentes.

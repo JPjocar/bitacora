@@ -6,6 +6,7 @@ from apps.core.forms import BootstrapFormMixin
 from apps.locations.models import Location
 
 from .models import Category, Device
+from .selectors import movement_warning
 
 
 class CategoryForm(BootstrapFormMixin, forms.ModelForm):
@@ -132,7 +133,8 @@ class MovementForm(BootstrapFormMixin, forms.Form):
         )
         self.initial["version"] = device.version
         self.initial["effective_at"] = timezone.localtime().replace(second=0, microsecond=0)
-        if not device.movement_warning:
+        self.movement_warning = movement_warning(device)
+        if not self.movement_warning:
             self.fields.pop("confirm_warning")
 
 

@@ -7,6 +7,7 @@ from apps.core.permissions import require_permission
 from apps.locations.models import Location
 
 from .models import Category, CategoryEvent, Device, DeviceEvent, Movement, generate_device_code
+from .selectors import movement_warning
 
 CATEGORY_FIELDS = ("name", "kind", "description", "is_active")
 DEVICE_FIELDS = (
@@ -191,7 +192,7 @@ def move_device(
         )
     if not destination.is_active:
         raise ValidationError({"destination": "El destino está inactivo."})
-    if device.movement_warning and confirm_warning is not True:
+    if movement_warning(device) and confirm_warning is not True:
         raise ValidationError(
             {"confirm_warning": "Confirme que leyó la advertencia antes de registrar el traslado."}
         )

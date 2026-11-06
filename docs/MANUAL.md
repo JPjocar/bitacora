@@ -79,3 +79,29 @@ El localhost predeterminado solo abre la instancia en esa computadora. Un teléf
 necesita un origen alcanzable y HTTPS configurado. Reinicie el servidor tras cambiar
 el entorno. Cambiar el dominio afecta los QR ya impresos: conserve el origen anterior
 mediante redirección controlada o reimprima. No use el dominio de ejemplo de los checks.
+
+**Preventivos (administrador):** Mantenimientos → Nuevo mantenimiento. Elija Único o
+Periódico antes de llenar campos; cambiar tipo abre un formulario nuevo. Indique nombre,
+descripción opcional y equipos. Único pide fecha prevista; Periódico pide fecha base e
+intervalo en días/meses. La fecha base no significa mantenimiento realizado.
+
+Configure tareas verificables. «Por dispositivo» crea una copia independiente para cada
+equipo, opcionalmente limitada a su categoría. «General de la ejecución» se incluye una
+vez y no admite categoría. Cada equipo necesita al menos una tarea individual aplicable.
+Marque obligatoria/opcional, indique orden y use Agregar otra tarea si necesita más filas.
+Agregar filas no guarda; para quitar una tarea marque Eliminar y después guarde. Límites:
+200 equipos y 50 tareas. No se usa una pantalla separada para grupos.
+
+Al guardar verá la primera ejecución pendiente con equipos, fechas y tareas. Todavía no
+hay acciones para tomar, iniciar, avanzar o cerrar. El técnico puede consultar esta pantalla
+e historial; el docente no tiene acceso al módulo.
+
+**Editar configuración:** explique el motivo. La ejecución conserva equipos, fechas y
+tareas originales, aunque siga pendiente. En periódicos, cambiar base/intervalo configura
+futuros ciclos, cuya creación pertenece a otra fase. El único no permite cambiar fecha
+prevista ni generar otra ejecución. Desactivar conserva historia y no cancela. Si otro
+usuario editó antes, recargue y revise antes de guardar nuevamente.
+
+Desde la ficha de equipo, Ver mantenimientos filtra por su código. Trasladar un equipo
+con preventivo pendiente muestra advertencia y pide confirmación: no completa, omite
+ni cambia el vencimiento preventivo.

@@ -6,6 +6,9 @@ TECHNICIAN = "Técnico"
 TEACHER = "Docente"
 ROLE_PERMISSIONS = {
     ADMINISTRATOR: {
+        "maintenance.add_maintenance",
+        "maintenance.change_maintenance",
+        "maintenance.view_maintenance",
         "accounts.view_user",
         "accounts.add_user",
         "accounts.change_user",
@@ -26,6 +29,7 @@ ROLE_PERMISSIONS = {
         "assets.add_movement",
     },
     TECHNICIAN: {
+        "maintenance.view_maintenance",
         "assets.print_device_label",
         "locations.view_location",
         "assets.view_device",

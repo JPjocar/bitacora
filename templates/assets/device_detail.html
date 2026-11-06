@@ -5,6 +5,7 @@
 <p class="eyebrow">{{ device.category.name }}</p><h1>{{ device.name }}</h1>
 <p class="h3 font-monospace text-primary mb-3">{{ device.code }}</p>
 <div class="d-flex flex-wrap gap-2 mb-4">
+{% if perms.maintenance.view_maintenance %}<a class="btn btn-outline-secondary" href="{% url 'maintenance:list' %}?q={{ device.code|urlencode }}">Ver mantenimientos</a>{% endif %}
 {% if perms.assets.print_device_label %}<a class="btn btn-outline-primary" href="{% url 'assets:labels' %}?device={{ device.public_id }}">Imprimir etiqueta</a>{% endif %}
 {% if perms.assets.change_device %}<a class="btn btn-primary" href="{% url 'assets:edit' device.public_id %}">Editar ficha</a>{% elif perms.assets.update_device_operation %}<a class="btn btn-primary" href="{% url 'assets:operation' device.public_id %}">Actualizar estado</a>{% endif %}
 {% if perms.assets.add_movement %}<a class="btn btn-outline-primary" href="{% url 'assets:move' device.public_id %}">Registrar traslado</a>{% endif %}

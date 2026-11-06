@@ -25,6 +25,7 @@
         <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Inicio</a></li>
         {% if perms.assets.view_device or perms.assets.view_device_limited %}<li class="nav-item"><a class="nav-link" href="{% url 'assets:list' %}">Dispositivos</a></li><li class="nav-item"><a class="nav-link" href="{% url 'assets:scanner' %}">Escanear QR</a></li>{% endif %}
         {% if perms.assets.view_movement %}<li class="nav-item"><a class="nav-link" href="{% url 'assets:movements' %}">Movimientos</a></li>{% endif %}
+        {% if perms.maintenance.view_maintenance %}<li class="nav-item"><a class="nav-link" href="{% url 'maintenance:list' %}">Mantenimientos</a></li>{% endif %}
         {% if perms.locations.view_location %}<li class="nav-item"><a class="nav-link" href="{% url 'locations:list' %}">Ubicaciones</a></li>{% endif %}
         {% if perms.accounts.view_user %}<li class="nav-item"><a class="nav-link" href="{% url 'accounts:list' %}">Usuarios</a></li>{% endif %}
         {% if perms.auth.view_group %}<li class="nav-item"><a class="nav-link" href="{% url 'accounts:roles' %}">Roles</a></li>{% endif %}

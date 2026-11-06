@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.locations",
     "apps.assets",
+    "apps.maintenance",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

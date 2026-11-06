@@ -17,6 +17,16 @@ erDiagram
     Location ||--o{ Movement : origen
     Location ||--o{ Movement : destino
     User ||--o{ Movement : actor
+    Maintenance ||--|{ MaintenanceTarget : inscribe
+    Device ||--o{ MaintenanceTarget : participa
+    Maintenance ||--|{ MaintenanceTaskTemplate : configura
+    Maintenance ||--|{ MaintenanceRun : conserva
+    MaintenanceRun ||--|{ MaintenanceRunDevice : incluye
+    MaintenanceTarget ||--o{ MaintenanceRunDevice : identifica
+    MaintenanceRun ||--|{ MaintenanceTaskResult : copia
+    MaintenanceRunDevice |o--o{ MaintenanceTaskResult : tareas_individuales
+    MaintenanceTaskTemplate ||--o{ MaintenanceTaskResult : origen
+    Maintenance ||--|{ MaintenanceEvent : audita
 ```
 
 `User` extiende AbstractUser desde la primera migración, evitando una sustitución futura
@@ -84,3 +94,29 @@ Tercer incremento: `assets/0004_alter_device_options` añade el permiso
 `print_device_label` a Device. No crea tablas/columnas ni reescribe migraciones previas.
 `sync_roles` lo asigna a Administrador y Técnico. Los QR se derivan del UUID existente
 y del origen público configurado; las selecciones de impresión solo existen en memoria.
+
+Fase 6, `maintenance/0001_initial`: siete tablas, con referencias PROTECT.
+
+- `Maintenance`: nombre, descripción, único/periódico, fechas e intervalo consistentes,
+  activo, versión, creador, timestamps y clave/firma del envío. CHECK exige fecha prevista
+  sin recurrencia o fecha base/intervalo positivo sin fecha prevista.
+- `MaintenanceTarget`: inscripción M:N, única por mantenimiento/equipo; activo permite
+  retirar/reactivar sin borrar historia.
+- `MaintenanceTaskTemplate`: nombre, orden, obligatoria/opcional, ámbito y categoría
+  opcional. General no tiene categoría. Orden único entre plantillas activas. Al cambiar
+  el conjunto se conservan inactivas las plantillas anteriores.
+- `MaintenanceRun`: número, estado pendiente, creación y copia JSON de configuración/
+  versión/fechas. Relación 1:N para historial; esta fase solo crea la primera ejecución.
+- `MaintenanceRunDevice`: inscripción, ejecución, nombre/categoría copiados, vencimiento
+  propio y resultado Sin finalizar. UNIQUE(ejecución, inscripción). Código inmutable y
+  ubicación actual se consultan desde el dispositivo existente.
+- `MaintenanceTaskResult`: copia de nombre, orden, ámbito y obligatoriedad, con enlaces
+  a plantilla/ejecución. Participante obligatorio si individual, NULL si general.
+  UNIQUE con NULLS NOT DISTINCT impide duplicar también las tareas generales.
+- `MaintenanceEvent`: creación/cambios, ejecución opcional, actor y valores antes/después.
+
+`maint_run_initial_only`, `maint_participant_initial_only` y `maint_task_initial_only`
+impiden crear trabajo realizado fuera de la fase disponible. Las copias rechazan
+update/bulk_update/delete y save posterior. Fase 7 deberá ampliar restricciones y permitir
+solo servicios operativos validados; no retirar protecciones sin pruebas. No hay campos
+de inicio/fin/responsable ni fechas reales ficticias. La primera ejecución no está asignada.

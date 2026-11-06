@@ -17,6 +17,8 @@
 | Registrar/consultar movimientos | Sí | Sí | No |
 | Escanear cámara/imagen/código y ver QR de equipos visibles | Sí | Sí | Sí, ficha limitada |
 | Imprimir etiquetas individuales o por selección | Sí | Sí | No |
+| Configurar/editar/desactivar mantenimientos preventivos | Sí | No | No |
+| Consultar mantenimientos, primera ejecución y auditoría | Sí | Sí | No |
 | Eliminar físicamente registros o modificar eventos | No | No | No |
 
 Las comprobaciones se basan en permisos Django, no solo en nombres de grupos o botones.
@@ -87,8 +89,8 @@ Movimientos:
   todo. Dos formularios con la misma versión no producen dos traslados incompatibles.
 - No se editan ni eliminan movimientos anteriores. Una ubicación o equipo referenciado
   no se elimina. La consulta histórica muestra la identidad de ubicación y su nombre actual.
-- No se registra reparación o preventivo por mover un dispositivo. Advertencias de
-  mantenimiento pendiente se integrarán cuando exista ese módulo, sin simularlo ahora.
+- Un traslado no registra reparación ni preventivo. Si existe una ejecución preventiva
+  pendiente, exige confirmar la advertencia y conserva tareas, participación y fechas.
 
 QR y etiquetas:
 
@@ -105,3 +107,29 @@ QR y etiquetas:
   Interfaz: selección sobre la página actual, reiniciada al filtrar/paginar.
 - Imprimir/escanear no crea lotes de negocio, movimientos, eventos ni cambios de estado.
   La imagen del escáner se procesa localmente y no se sube al servidor.
+
+Configuración preventiva (fase 6):
+
+- Un concepto Mantenimiento admite 1–200 equipos y 1–50 tareas. No hay Jornadas.
+- Único: fecha prevista. Periódico: fecha base e intervalo entero positivo en días/meses
+  calendario. Valores iniciales en Lima. Fechas pasadas/futuras nunca acreditan trabajo.
+- Primer vencimiento por equipo = base + intervalo. En meses se limita el día al último
+  del mes de destino. El único usa la fecha prevista. Se guarda una copia por participante.
+  No se calculan aún vencimientos desde cierres reales.
+- Nuevas inscripciones: equipos activos no retirados; fuera de servicio está permitido.
+  Inscritos que después se inactivan se conservan. Quitar una inscripción futura no borra
+  al participante existente. Reactivar reutiliza la inscripción.
+- Cada equipo necesita al menos una tarea individual aplicable; puede ser opcional.
+  La categoría debe estar representada entre los equipos elegidos. Tareas generales sin
+  categoría: una copia por ejecución. Nombres normalizados no duplicados por ámbito/categoría.
+- Creación atómica: configuración, primera ejecución pendiente sin asignar/iniciar,
+  participantes Sin finalizar, tareas sin completar y auditoría.
+- Edición con versión vigente y motivo: cambia configuración, no las copias existentes,
+  incluso si están pendientes. Base/intervalo nuevos solo afectan ciclos futuros.
+  No cambia tipo único/periódico ni reprograma fecha del único. Desactivar no cancela.
+- Reenvío con misma clave/contenido no duplica. Clave usada con contenido distinto se
+  rechaza. Ediciones simultáneas no sobrescriben cambios ni duplican historial.
+- Docente sin acceso por URL/HTMX; Django Admin solo lectura.
+
+Pendientes: tomar, iniciar/reanudar, avanzar, omitir, liberar, completar, cancelar y crear
+otra ejecución. No hay cierre ni recurrencia automática en esta entrega.

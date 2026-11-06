@@ -1,7 +1,8 @@
 # Bitacora
 
 Monolito modular para gestión de equipos y mantenimiento de laboratorios. Esta entrega
-implementa **usuarios, roles, ubicaciones, dispositivos, movimientos, QR, etiquetas y escáner**.
+implementa **usuarios, roles, ubicaciones, dispositivos, movimientos, QR, etiquetas,
+escáner y configuración de mantenimientos preventivos**.
 Piloto académico con datos sintéticos; no representa un despliegue institucional autorizado.
 
 ## Estado inicial y alcance
@@ -22,10 +23,12 @@ servicios, permisos ni dependencias. El prompt permanece sin modificaciones.
 - Traslados físicos con origen obtenido en servidor, destino activo, motivo, fecha efectiva,
   historial protegido y actualización atómica de ubicación. No equivalen a reparación.
 
-El tercer incremento reutiliza `apps/assets` y la identidad UUID existente: QR PNG,
-etiquetas individuales/por selección y escáner de cámara/imagen con búsqueda manual.
-Antes de modificar se verificaron 116 pruebas. La suite tiene **145 pruebas Django**
-aprobadas en PostgreSQL y **21 pruebas JavaScript**; detalles en `docs/PRUEBAS.md`.
+El cuarto incremento incorpora `apps/maintenance`: configuración única/periódica,
+inscripciones, tareas por equipo/categoría o generales, calendario, primera ejecución
+pendiente con copias independientes y auditoría. Administradores configuran y técnicos
+consultan. No incluye toma, inicio, avance ni cierre. La base previa pasó 145 pruebas;
+la suite final tiene **197 pruebas Django y 21 JavaScript aprobadas**. Evidencia y límites
+en `docs/PRUEBAS.md`. No se añadieron dependencias.
 
 ## Entorno verificado
 
@@ -104,6 +107,17 @@ Para agregar dos dispositivos y un traslado ficticios a esa demo:
 Requiere la demo base y `sync_roles`. No restablece contraseñas ni modifica equipos
 ya existentes con esos nombres. Las seis categorías iniciales se crean con migraciones.
 
+Para agregar un preventivo único y otro periódico a esos equipos sintéticos:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/manage_local.py seed_maintenance_demo --confirm-demo
+```
+
+Solo con DEBUG=True, demo de dispositivos y permisos sincronizados. Es idempotente y
+conserva registros previos. Las ejecuciones quedan pendientes, sin trabajo acreditado.
+La migración nueva es `maintenance/0001_initial`; ejecute migrate y sync_roles y reinicie
+el servidor para cargar la app y las rutas nuevas.
+
 ## Actualizar desde una entrega anterior
 
 ```powershell
@@ -155,6 +169,8 @@ Con el servidor y los datos demo disponibles:
 .\.venv\Scripts\python.exe scripts/smoke_http.py --assets
 # Incluye validación HTTP de QR, etiquetas y escáner:
 .\.venv\Scripts\python.exe scripts/smoke_http.py --qr
+# Con seed_maintenance_demo también ejecutado:
+.\.venv\Scripts\python.exe scripts/smoke_http.py --qr --maintenance
 ```
 
 Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislado:
@@ -171,7 +187,7 @@ Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislad
 
 Pendientes: inspección visual real en escritorio/móvil, despliegue HTTPS, limitación
 de intentos de login en el proxy y prueba de restauración de backups. No se implementaron
-mantenimientos, incidencias, notificaciones ni reportes. Los traslados no dependen
-de esos módulos. Advertencias de mantenimiento pendiente se integrarán cuando exista
-ese módulo, sin inventar estados o resultados ahora.
+ejecución/avances/cierre de preventivos, ciclos siguientes, incidencias, notificaciones
+ni reportes. Los traslados avisan si hay preventivo pendiente, piden confirmación y
+conservan tareas/vencimientos. La siguiente fase es ejecución y avances preventivos.
 Quedan pendientes cámara física, lectura móvil y una impresión real de etiquetas.

@@ -17,6 +17,7 @@ def main():
     parser.add_argument(
         "--qr", action="store_true", help="Verifica también QR, etiquetas y escáner."
     )
+    parser.add_argument("--maintenance", action="store_true", help="Verifica la demo preventiva.")
     options = parser.parse_args()
     raw = Path(options.credentials_file).read_bytes()
     encoding = "utf-16" if raw.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
@@ -134,6 +135,26 @@ def main():
                     if status == 200:
                         assert labels.count('class="device-label"') == 1
                 print(f"HTTP correcto: {username}; PNG decodificado, etiquetas y escáner seguro.")
+        if options.maintenance:
+            status, listing, _ = request("/mantenimientos/")
+            assert status == (403 if username == "demo_docente" else 200)
+            assert request("/mantenimientos/nuevo/")[0] == expected_users
+            if username != "demo_docente":
+                maintenance_path = re.search(r'href="(/mantenimientos/[0-9]+/)"', listing)[1]
+                status, detail, _ = request(maintenance_path)
+                assert status == 200 and "Pendiente de atención" in detail
+                assert "Sin finalizar" in detail and "Revisar conexiones" in detail
+                assert request(maintenance_path + "historial/")[0] == 200
+                assert request(maintenance_path + "editar/")[0] == expected_users
+                status, fragment, _ = request(
+                    "/mantenimientos/?q=demostraci%C3%B3n", headers={"HX-Request": "true"}
+                )
+                assert status == 200 and 'id="results"' in fragment and "<!doctype" not in fragment
+            if username == "demo_admin":
+                for mode, field in (("unique", "planned_date"), ("recurring", "base_date")):
+                    status, form_html, _ = request("/mantenimientos/nuevo/?kind=" + mode)
+                    assert status == 200 and f'name="{field}"' in form_html
+            print(f"HTTP correcto: {username}; preventivos, configuración, permisos e historial.")
         token = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', home)[1]
         assert (
             request("/cuentas/salir/", urlencode({"csrfmiddlewaretoken": token}).encode())[0] == 200

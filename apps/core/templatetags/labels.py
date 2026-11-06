@@ -28,6 +28,13 @@ def field_label(value):
         "status": "Estado operativo",
         "observations": "Observaciones",
         "reason": "Motivo",
+        "is_recurring": "Periódico",
+        "base_date": "Fecha base",
+        "planned_date": "Fecha prevista",
+        "interval_value": "Intervalo",
+        "interval_unit": "Unidad",
+        "devices": "Equipos inscritos (ID)",
+        "tasks": "Configuración de tareas",
     }.get(value, value)
 
 
@@ -44,6 +51,9 @@ def event_value(value):
 def permission_label(permission):
     return {
         "accounts.add_user": "Crear usuarios",
+        "maintenance.add_maintenance": "Configurar mantenimientos preventivos",
+        "maintenance.change_maintenance": "Editar y desactivar configuraciones preventivas",
+        "maintenance.view_maintenance": "Consultar mantenimientos preventivos e historial",
         "accounts.change_user": "Editar y desactivar usuarios; restablecer contraseñas",
         "accounts.view_user": "Consultar usuarios",
         "accounts.assign_role": "Asignar roles de negocio",

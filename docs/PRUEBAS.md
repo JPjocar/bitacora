@@ -1,4 +1,57 @@
-# Verificación del tercer incremento: QR, etiquetas y escáner
+# Verificación del cuarto incremento: configuración preventiva (fase 6)
+
+**6 de noviembre de 2026, America/Lima.** Prompt completo releído y estado/modelos/
+migraciones/servicios/permisos revisados. PostgreSQL local estaba detenido: primer intento
+agotó conexión; se reinició el clúster aislado conservando datos. Base previa: **145 pruebas
+OK en 41,309 s**. Suite final: **197 pruebas OK en 63,763 s**, con PostgreSQL 18.4 real.
+Además **21 pruebas JavaScript OK** de regresión QR. Ninguna prueba usa SQLite.
+
+| Comprobación | Resultado |
+| --- | --- |
+| `test --noinput` | 197 OK: 145 previas + 52 nuevas; once casos concurrentes en total |
+| `node --test tests/js/*.test.cjs` | 21 OK |
+| `migrate`, `sync_roles` | maintenance/0001_initial aplicada, permisos de tres roles sincronizados |
+| `check`, `makemigrations --check --dry-run` | Sin problemas ni cambios pendientes |
+| Ruff check/format | Sin errores; 106 archivos Python con formato correcto |
+| `pip check` | Sin incompatibilidades; no se añadieron dependencias |
+| `collectstatic --noinput` | 2 copiados, 179 sin cambios |
+| `check --deploy --fail-level WARNING` | Sin problemas con DEBUG=False y origen HTTPS de ejemplo |
+| `smoke_http.py --qr --maintenance --base-url http://127.0.0.1:8003` | Correcto con los tres roles |
+| `seed_maintenance_demo --confirm-demo` | Único y periódico creados pendientes, sin registrar trabajo realizado |
+
+Pruebas nuevas:
+
+- `test_maintenance.py`: 31 casos (calendario/dominio/demo). Días, meses, bisiestos,
+  overflow, fechas incoherentes, creación individual/grupal heterogénea, categorías,
+  tareas opcionales/generales, equipos inactivos/retirados, reintentos, versiones, motivo,
+  no-op, copias independientes, retención, DB constraints, rollback y traslado sin efecto
+  preventivo. Demo explícita e idempotente. Los ejemplos de fechas futuras prueban solo
+  la función de calendario; no equivalen a ejecutar/completar equipos ni generar otro ciclo.
+- `test_maintenance_views.py`: 18 casos. Roles/URL directa, creación/reenvío, tipo y fechas
+  por defecto en Lima, errores, formset/orden/omisión/categoría, fila adicional sin JS ni
+  guardado, límites, edición por versión, filtros HTMX/restauración, paginación, XSS, CSRF,
+  ausencia de rutas operativas, admin readonly y confirmación de traslado pendiente.
+- `test_maintenance_concurrency.py`: 3 casos con conexiones PostgreSQL distintas,
+  barrera y timeout. Mismo envío simultáneo crea una ejecución; misma clave con equipos
+  diferentes rechaza uno; dos ediciones no sobrescriben tareas ni historial.
+
+Defectos detectados y corregidos: helper de prueba de overflow repetía un argumento;
+alta de fila adicional necesitaba sus valores iniciales para no convertir una fila vacía
+en una tarea modificada inválida; se añadió comprobación explícita. Lint/formato corregidos.
+Todos los casos pasan después de los cambios. Logs: `.local/tests-baseline-maintenance.txt`,
+`.local/tests-maintenance-focused.txt`, `.local/tests-maintenance-final.txt` (ignorados).
+
+HTTP real verifica autenticación, permisos, listado, detalle pendiente, historial, formularios
+único/periódico y filtros parciales, además de las rutas previas de activos/QR. No acredita
+render visual ni funcionamiento DOM. Browser devolvió «No browser is available» y lista vacía.
+
+Pendiente manual: revisar formulario en escritorio/móvil; selección de equipos, tareas por
+categoría, orden, eliminar y agregar filas sin perder datos; errores legibles; navegación;
+filtrado HTMX real; mostrar copias conservadas tras edición y confirmación de traslado.
+No se probaron toma/inicio/liberación/avance/cierre/ciclos posteriores: están fuera de fase 6.
+HTTPS/proxy real, CI remoto, restauración de backups y verificaciones físicas QR siguen pendientes.
+
+## Registro del tercer incremento: QR, etiquetas y escáner
 
 **6 de noviembre de 2026, America/Lima.** Se releyeron las 1.145 líneas del prompt y
 se revisaron modelos, migraciones, servicios, permisos y dependencias existentes.

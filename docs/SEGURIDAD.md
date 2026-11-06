@@ -51,8 +51,9 @@ operativo del técnico no acepta cambio de ficha o ubicación. El origen de un m
 su autor y su fecha registrada se obtienen en servidor. Las confirmaciones de advertencia
 se vuelven a comprobar bajo bloqueo del equipo. El historial usa FKs PROTECT.
 
-No hay integraciones ni datos de mantenimiento/incidencias en esta entrega. No se afirma
-haber probado un traslado durante mantenimiento real: ese módulo aún no existe.
+La integración preventiva consulta si hay ejecución pendiente y exige confirmar el aviso.
+No se afirma haber probado traslados durante trabajo preventivo en ejecución: las acciones
+de toma/inicio/avance/cierre pertenecen a la fase posterior.
 
 QR: `BITACORA_PUBLIC_URL` fija el origen, independiente del encabezado Host. En producción
 debe ser HTTPS; `check --deploy` lo exige. Mantenga estable el dominio y configure también
@@ -66,3 +67,10 @@ credenciales, parámetros, fragmentos, rutas codificadas/administrativas y URLs 
 Las imágenes elegidas (PNG/JPEG/WebP, hasta 10 MB) se leen localmente; no hay upload.
 Al cerrar el modal, ocultar la página o navegar se solicita detener la cámara y se
 descartan callbacks antiguos. La prueba física de permisos/HTTPS/cámara está pendiente.
+
+Preventivos: permisos en vistas y servicios, recarga del actor para descartar permisos
+obsoletos. Estado, actor y copias se generan en servidor. Formsets con tamaño limitado;
+el dominio revalida equipos, categorías, tareas y fechas. Agregar filas también exige
+CSRF. La clave de envío deduplica, no autoriza. Bloqueos y versión protegen ediciones;
+creación/inscripciones/copias/auditoría son atómicas. No hay endpoints operativos ni
+acceso Django Admin para marcar tareas o modificar ejecuciones directamente.

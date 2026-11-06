@@ -8,6 +8,9 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY:
     raise ImproperlyConfigured("Defina DJANGO_SECRET_KEY en el entorno.")
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
+BITACORA_PUBLIC_URL = os.environ.get(
+    "BITACORA_PUBLIC_URL", "http://127.0.0.1:8000" if DEBUG else ""
+)
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 CSRF_TRUSTED_ORIGINS = list(
     filter(None, os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(","))

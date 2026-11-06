@@ -15,6 +15,8 @@
 | Consultar ficha limitada de equipos activos no retirados | Sí | Sí | Sí |
 | Actualizar estado y observaciones del dispositivo | Sí | Sí | No |
 | Registrar/consultar movimientos | Sí | Sí | No |
+| Escanear cámara/imagen/código y ver QR de equipos visibles | Sí | Sí | Sí, ficha limitada |
+| Imprimir etiquetas individuales o por selección | Sí | Sí | No |
 | Eliminar físicamente registros o modificar eventos | No | No | No |
 
 Las comprobaciones se basan en permisos Django, no solo en nombres de grupos o botones.
@@ -87,3 +89,19 @@ Movimientos:
   no se elimina. La consulta histórica muestra la identidad de ubicación y su nombre actual.
 - No se registra reparación o preventivo por mover un dispositivo. Advertencias de
   mantenimiento pendiente se integrarán cuando exista ese módulo, sin simularlo ahora.
+
+QR y etiquetas:
+
+- Solo codifican el origen público configurado y la ruta de ficha con UUID. No incluyen
+  código interno, datos técnicos, ubicación, contraseñas ni permisos. Editar o trasladar
+  el equipo no modifica la identidad ni el PNG mientras se conserve el mismo origen.
+- La ficha, el PNG y el escáner exigen sesión y alcance por objeto. Login conserva la
+  ficha de destino. Un UUID/código conocido nunca habilita una ficha excluida.
+- El escáner acepta el código alfanumérico normalizado o una URL de ficha del origen
+  configurado, sin credenciales, parámetros ni fragmentos. No abre URLs externas ni
+  rutas administrativas. Equipo desconocido/no visible produce el mismo mensaje.
+- Impresión para administrador/técnico: 1–100 identificadores por solicitud, duplicados
+  eliminados, selección inválida rechazada completa, hasta 15 etiquetas por hoja A4.
+  Interfaz: selección sobre la página actual, reiniciada al filtrar/paginar.
+- Imprimir/escanear no crea lotes de negocio, movimientos, eventos ni cambios de estado.
+  La imagen del escáner se procesa localmente y no se sube al servidor.

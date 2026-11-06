@@ -7,6 +7,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "static" / "vendor"
 ASSETS = {
+    "html5-qrcode.min.js": (
+        "html5-qrcode@2.3.8/html5-qrcode.min.js",
+        "c9d8RFSL+u3exBOJ4Yp3HUJXS4znl9f+z66d1y54ig+ea249SpqR+w1wyvXz/lk+",
+    ),
     "bootstrap.min.css": (
         "bootstrap@5.3.8/dist/css/bootstrap.min.css",
         "sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB",

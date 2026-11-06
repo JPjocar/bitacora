@@ -5,6 +5,7 @@
 <p class="eyebrow">{{ device.category.name }}</p><h1>{{ device.name }}</h1>
 <p class="h3 font-monospace text-primary mb-3">{{ device.code }}</p>
 <div class="d-flex flex-wrap gap-2 mb-4">
+{% if perms.assets.print_device_label %}<a class="btn btn-outline-primary" href="{% url 'assets:labels' %}?device={{ device.public_id }}">Imprimir etiqueta</a>{% endif %}
 {% if perms.assets.change_device %}<a class="btn btn-primary" href="{% url 'assets:edit' device.public_id %}">Editar ficha</a>{% elif perms.assets.update_device_operation %}<a class="btn btn-primary" href="{% url 'assets:operation' device.public_id %}">Actualizar estado</a>{% endif %}
 {% if perms.assets.add_movement %}<a class="btn btn-outline-primary" href="{% url 'assets:move' device.public_id %}">Registrar traslado</a>{% endif %}
 {% if perms.assets.view_movement %}<a class="btn btn-outline-secondary" href="{% url 'assets:movements' %}?q={{ device.code|urlencode }}">Ver movimientos</a>{% endif %}
@@ -23,4 +24,5 @@
 <dt class="col-sm-4">Registro</dt><dd class="col-sm-8">{{ device.created_at|date:'d/m/Y H:i' }} · Hora de Lima</dd>
 {% endif %}</dl></div>
 {% if events is not None %}{% include 'components/events.html' %}{% endif %}
+<section class="card card-body mt-4"><h2 class="h5">Código QR del equipo</h2><p>Abre esta ficha al iniciar sesión con tu cuenta.</p><img src="{% url 'assets:qr_png' device.public_id %}" width="220" height="220" class="img-fluid align-self-start" alt="Código QR de {{ device.code }}"></section>
 {% endblock %}

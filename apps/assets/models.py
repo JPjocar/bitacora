@@ -144,6 +144,7 @@ class Device(RetainedModel):
         verbose_name = "dispositivo"
         verbose_name_plural = "dispositivos"
         permissions = [
+            ("print_device_label", "Puede imprimir etiquetas de equipos"),
             ("update_device_operation", "Puede actualizar estado y observaciones"),
             ("view_device_limited", "Puede consultar la ficha limitada de equipos"),
         ]

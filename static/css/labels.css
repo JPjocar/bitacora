@@ -1,0 +1,14 @@
+@page { size: A4 portrait; margin: 10mm; }
+body { background: #e9ecef; }
+.label-sheet { width: 190mm; margin: 0 auto 12mm; display: grid; grid-template-columns: repeat(3, 62mm); grid-auto-rows: 50mm; gap: 2mm; background: white; }
+.device-label { box-sizing: border-box; border: 0.2mm solid #555; padding: 1mm; text-align: center; color: #000; background: #fff; break-inside: avoid; page-break-inside: avoid; }
+.device-label img { display: block; width: 32mm; height: 32mm; margin: 0 auto; }
+.label-code { font: bold 13pt/1.15 monospace; white-space: nowrap; }
+.label-category, .label-name { font: 9pt/1.2 Arial, sans-serif; overflow-wrap: anywhere; }
+@media screen { main { overflow-x: auto; } }
+@media print {
+  body { background: #fff; margin: 0; }
+  .print-toolbar { display: none; }
+  .label-sheet { margin: 0; break-after: page; page-break-after: always; }
+  .label-sheet:last-child { break-after: auto; page-break-after: auto; }
+}

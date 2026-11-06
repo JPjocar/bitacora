@@ -53,3 +53,16 @@ se vuelven a comprobar bajo bloqueo del equipo. El historial usa FKs PROTECT.
 
 No hay integraciones ni datos de mantenimiento/incidencias en esta entrega. No se afirma
 haber probado un traslado durante mantenimiento real: ese módulo aún no existe.
+
+QR: `BITACORA_PUBLIC_URL` fija el origen, independiente del encabezado Host. En producción
+debe ser HTTPS; `check --deploy` lo exige. Mantenga estable el dominio y configure también
+ALLOWED_HOSTS/CSRF_TRUSTED_ORIGINS y el proxy según el despliegue. Los PNG y etiquetas
+requieren autenticación y llevan Cache-Control privado/no-store igual que las fichas.
+Las imágenes impresas no contienen secretos y no sustituyen la autenticación.
+
+El escáner no navega al texto decodificado ni hace peticiones a ese origen. Lo envía
+por POST/CSRF al servidor propio, que valida origen, ruta exacta y visibilidad. Rechaza
+credenciales, parámetros, fragmentos, rutas codificadas/administrativas y URLs externas.
+Las imágenes elegidas (PNG/JPEG/WebP, hasta 10 MB) se leen localmente; no hay upload.
+Al cerrar el modal, ocultar la página o navegar se solicita detener la cámara y se
+descartan callbacks antiguos. La prueba física de permisos/HTTPS/cámara está pendiente.

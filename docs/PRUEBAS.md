@@ -1,4 +1,62 @@
-# Verificación del segundo incremento: dispositivos y movimientos
+# Verificación del tercer incremento: QR, etiquetas y escáner
+
+**6 de noviembre de 2026, America/Lima.** Se releyeron las 1.145 líneas del prompt y
+se revisaron modelos, migraciones, servicios, permisos y dependencias existentes.
+Base anterior: **116 pruebas OK en 51,334 s**. Suite final: **145 pruebas Django OK
+en 58,155 s**, sobre PostgreSQL 18.4 real, sin SQLite. JavaScript: **21 pruebas OK**
+con Node y dispositivos simulados. No hay navegador/cámara física conectados.
+
+| Comprobación | Resultado |
+| --- | --- |
+| `test --noinput` | 145 OK, incluidas las ocho pruebas concurrentes previas |
+| `node --test tests/js/*.test.cjs` | 21 OK; cancelación, cierre, errores y adaptación del formulario |
+| `migrate`, `sync_roles` | `assets/0004_alter_device_options` aplicada; tres roles sincronizados |
+| `check`, `makemigrations --check --dry-run` | Sin problemas ni migraciones pendientes |
+| `pip check`, Ruff lint/formato | Sin incompatibilidades ni errores |
+| `collectstatic --noinput` | 6 copiados, 174 sin cambios |
+| `check --deploy --fail-level WARNING` | Sin problemas con DEBUG=False y origen HTTPS de ejemplo |
+| `smoke_http.py --qr --base-url http://127.0.0.1:8002` | Correcto para admin/técnico/docente; incluye checks anteriores |
+
+`tests/test_qr.py`: 29 casos. El decodificador independiente zxing-cpp confirma el
+contenido exacto de PNG, margen blanco y legibilidad digital aproximada a 32 mm/300 dpi.
+Se verifican persistencia del QR tras edición/traslado, Host distinto, login con retorno,
+roles/visibilidad, CSRF, URL maliciosa/externa/malformada, código manual, equipos no visibles,
+impresión individual, duplicados, límite de selección, hojas de 15 y ausencia de mutaciones.
+Los checks rechazan orígenes inválidos y HTTP en la comprobación de despliegue.
+
+`tests/js/qr-controller.test.cjs` (13 casos) prueba serialización con promesas diferidas:
+cierre antes/durante/después del arranque, resultados repetidos/tardíos, sustitución de
+imagen, cierre antes de leer archivo, errores de permisos/dispositivos/parada y reintento.
+`tests/js/scanner.test.cjs` (8 casos) usa un DOM simulado para los eventos del modal/página,
+mensajes, HTTP inseguro, biblioteca ausente, archivos inválidos, envío seguro y liberación
+de pistas. No se ejecutó html5-qrcode con una cámara real ni en un navegador.
+
+El smoke HTTP autentica las tres cuentas demo, obtiene y decodifica PNG reales, envía
+código y URL por POST con CSRF, rechaza URL externa, comprueba permiso de etiquetas y
+deduplicación, y descarga los estáticos nuevos. No produce datos de negocio. Salida de
+suite en `.local/tests-qr.txt`; secretos y logs locales permanecen ignorados por Git.
+
+Limitaciones verificadas: Browser devolvió «No browser is available» y una lista vacía.
+Pendientes: escritorio/móvil visual, sustitución HTMX en DOM real, Bootstrap modal real,
+cámara frontal/trasera y sus permisos, lectura desde archivo en navegador, cámara móvil
+normal → login → ficha, y una hoja física A4 con lectura posterior. La prueba digital
+del PNG no certifica impresión, márgenes del driver ni funcionamiento en teléfonos.
+HTTPS/proxy, ejecución CI remota y restauración de backups siguen pendientes.
+
+Lista manual para completar cuando haya dispositivo e impresora:
+
+1. Configurar origen público HTTPS alcanzable; probar el enlace desde otra máquina.
+2. Imprimir 1, 15 y 16 etiquetas a 100 % en A4, sin encabezados/pies; verificar código
+   completo, QR/margen blanco, nombre breve y cambio de hoja sin duplicados/recortes.
+3. Leer etiquetas con cámara nativa sin sesión y confirmar retorno a ficha por cada rol.
+4. En escáner integrado permitir/denegar cámara, ocuparla desde otra app, cerrar modal
+   durante solicitud y después del inicio, ocultar pestaña y confirmar indicador apagado.
+5. Probar PNG/JPG/WebP válidos, imagen sin QR, archivo incorrecto, QR externo/no existente
+   y búsqueda manual. Repetir en móvil/escritorio, con HTTP local y HTTPS.
+6. Filtrar dispositivos por HTMX, seleccionar e imprimir; confirmar pérdida informada
+   de selección al cambiar página/filtros y ausencia de impresión para docente.
+
+## Registro del segundo incremento: dispositivos y movimientos
 
 **6 de noviembre de 2026, America/Lima.** Mismas versiones y PostgreSQL 18.4 real.
 Antes de modificar código se ejecutaron las 62 pruebas existentes: OK en 35,185 s.
@@ -44,7 +102,7 @@ Defectos/incidentes encontrados y corregidos:
 Pendiente: revisión visual escritorio/móvil y ejecución JS. El intento de conectar un
 navegador devolvió «No browser is available». Revisar manualmente búsqueda HTMX, fichas
 por rol, creación con errores y confirmación de traslado en móvil/escritorio. No hay
-capturas simuladas. Tampoco se probó mantenimiento/incidencias/QR, porque no existen aún.
+capturas simuladas. En ese incremento no se probó mantenimiento/incidencias/QR.
 Permanece pendiente CI remoto, HTTPS/proxy real y restauración de backups.
 
 ## Registro histórico de la primera entrega (usuarios, roles y ubicaciones)

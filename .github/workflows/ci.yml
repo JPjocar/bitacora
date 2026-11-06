@@ -17,6 +17,7 @@ jobs:
     env:
       DJANGO_SECRET_KEY: ci-only-not-a-production-secret-key-abcdefghijklmnopqrstuvwxyz12345
       DJANGO_DEBUG: 'true'
+      BITACORA_PUBLIC_URL: https://bitacora.example.edu
       PGDATABASE: bitacora
       PGUSER: bitacora
       PGPASSWORD: ci-only-local-password
@@ -29,6 +30,10 @@ jobs:
           python-version: '3.12'
           cache: pip
       - run: python -m pip install -r requirements-dev.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/js/*.test.cjs
       - run: python -m pip check
       - run: python -m ruff check .
       - run: python -m ruff format --check .

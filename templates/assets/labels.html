@@ -1,0 +1,11 @@
+{% load static %}
+<!doctype html>
+<html lang="es-PE"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Etiquetas · Bitacora</title>
+<link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}"><link rel="stylesheet" href="{% static 'css/labels.css' %}"><script src="{% static 'js/labels.js' %}" defer></script></head>
+<body><main>
+<div class="print-toolbar container py-4"><h1 class="h3">Etiquetas de equipos</h1><p>A4 vertical, escala 100 %, sin encabezados ni pies del navegador. Cada etiqueta mide 62 × 50 mm; se imprimen hasta 15 por hoja. Comprueba una hoja de prueba antes de pegar las etiquetas.</p>
+<a class="btn btn-outline-secondary" href="{% url 'assets:list' %}">Volver a dispositivos</a>
+{% if sheets %}<button class="btn btn-primary" type="button" id="print-labels" disabled>Imprimir etiquetas</button><p id="print-status" class="mt-2" role="status">Preparando imágenes…</p>{% endif %}
+{% for error in errors %}<p class="alert alert-danger" role="alert">{{ error }}</p>{% endfor %}</div>
+{% for sheet in sheets %}<section class="label-sheet" aria-label="Hoja {{ forloop.counter }}">{% for label in sheet %}<article class="device-label"><img src="data:image/png;base64,{{ label.png }}" alt="QR de {{ label.device.code }}" width="240" height="240"><div class="label-code">{{ label.device.code }}</div><div class="label-category">{{ label.device.category.name|truncatechars:18 }}</div><div class="label-name">{{ label.device.name|truncatechars:18 }}</div></article>{% endfor %}</section>{% endfor %}
+</main></body></html>

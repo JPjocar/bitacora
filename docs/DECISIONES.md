@@ -18,7 +18,8 @@
    `createsuperuser`/`changepassword` siguen siendo herramientas internas de recuperación.
 8. Bootstrap/HTMX locales, versiones fijas, sin bundler ni Node para el producto.
    HTMX solo en filtros; operaciones persistentes con formularios estándar y PRG.
-9. No instalar QR/Pillow/Chart.js antes del módulo que los necesite. Ruff solo en desarrollo.
+9. QR/Pillow se incorporan con la fase QR. Chart.js sigue pendiente. Ruff y zxing-cpp
+   (decodificador independiente para verificar PNG) solo en desarrollo/pruebas.
 10. Clúster PostgreSQL local aislado para comprobar con datos sintéticos, reutilizando
     los binarios instalados sin tocar el servicio existente. No sustituir por SQLite.
 11. `.env` se carga únicamente con un lanzador de desarrollo de biblioteca estándar;
@@ -30,7 +31,7 @@
 14. Detalles técnicos de texto libre opcional con ayudas por tipo. Permite describir
     equipos heterogéneos sin columnas RAM/CPU obligatorias o esquemas JSON innecesarios.
 15. UUID público para URL estable; código corto criptográficamente aleatorio para búsqueda
-    manual. El UUID aún no se codifica en QR: esa fase no se solicitó.
+    manual. La fase QR ahora codifica la URL de ficha existente sin agregar identificadores.
 16. Desactivación separada del estado operativo: archivar es administrativo; retirar del
     control operativo no implica baja patrimonial. Los traslados conservan ambos valores.
 17. Movimientos con fecha/hora efectiva no futura y cronología no decreciente. Se rechaza
@@ -40,6 +41,15 @@
 19. Movimientos cerrados como hechos históricos sin edición o reversión administrativa
     en esta fase. Una corrección de registro erróneo requiere diseñar un flujo posterior;
     no se modifica el historial ni se registra un traslado ficticio para compensarlo.
+20. Origen público explícito: nunca construir el QR a partir de Host recibido. Check
+    de sintaxis/origen y check de HTTPS para despliegue; localhost solo para desarrollo.
+21. Etiquetas HTML imprimibles A4, 62 × 50 mm, QR de 32 mm, margen blanco de cuatro
+    módulos, negro sobre blanco. Hasta 100 identificadores y 15 etiquetas por hoja.
+    Sin biblioteca PDF ni tabla de lotes. Se requiere calibración física de impresora.
+22. html5-qrcode 2.3.8 local y fijado, API de bajo nivel para UI en español. Operaciones
+    serializadas y cancelación lógica de callbacks tardíos. Node se usa solo para tests.
+23. Permiso explícito de impresión para admin/técnico. Docente conserva consulta y
+    escaneo de equipos visibles. Las acciones de lectura no producen eventos de negocio.
 
 Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 
@@ -52,6 +62,10 @@ Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 - [PostgreSQL 18: initdb](https://www.postgresql.org/docs/18/app-initdb.html).
 - [Django: transacciones](https://docs.djangoproject.com/en/5.2/topics/db/transactions/) y [select_for_update](https://docs.djangoproject.com/en/5.2/ref/models/querysets/#select-for-update).
 - [Python 3.12: secrets](https://docs.python.org/3.12/library/secrets.html).
+- [qrcode: API y generación con Pillow](https://pypi.org/project/qrcode/).
+- [Pillow: instalación](https://pillow.readthedocs.io/en/stable/installation/basic-installation.html).
+- [html5-qrcode: cámara, archivos y cierre](https://scanapp.org/html5-qrcode-docs/docs/apis/classes/Html5Qrcode).
+- [ZXing-C++: decodificador independiente para Python](https://github.com/zxing-cpp/zxing-cpp/tree/master/wrappers/python).
 
 Las versiones realmente instaladas están fijadas en requirements, sin asumir que sean
 las últimas disponibles en futuras fechas. Los cambios futuros deben revisar las fuentes.

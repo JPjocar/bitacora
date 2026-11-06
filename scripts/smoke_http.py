@@ -14,6 +14,9 @@ def main():
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--credentials-file", default=".local/demo-credentials.txt")
     parser.add_argument("--assets", action="store_true", help="Verifica también seed_assets_demo.")
+    parser.add_argument(
+        "--qr", action="store_true", help="Verifica también QR, etiquetas y escáner."
+    )
     options = parser.parse_args()
     raw = Path(options.credentials_file).read_bytes()
     encoding = "utf-16" if raw.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
@@ -25,13 +28,14 @@ def main():
     for username, password in credentials.items():
         client = build_opener(HTTPCookieProcessor(CookieJar()))
 
-        def request(path, data=None, headers=None, _client=client):
+        def request(path, data=None, headers=None, binary=False, _client=client):
             req = Request(options.base_url + path, data=data, headers=headers or {})
             try:
                 response = _client.open(req, timeout=10)
             except HTTPError as error:
                 response = error
-            return response.status, response.read().decode("utf-8"), response.geturl()
+            body = response.read()
+            return response.status, body if binary else body.decode("utf-8"), response.geturl()
 
         status, login, _ = request("/cuentas/ingresar/")
         assert status == 200
@@ -63,7 +67,7 @@ def main():
         if username == "demo_admin":
             for path in ["/ubicaciones/nueva/", "/cuentas/usuarios/nuevo/", "/cuentas/contrasena/"]:
                 assert request(path)[0] == 200
-        if options.assets:
+        if options.assets or options.qr:
             status, listing, _ = request("/dispositivos/")
             assert status == 200 and "EQ-" in listing
             detail_path = re.search(r'href="(/dispositivos/[0-9a-f-]+/)"', listing)[1]
@@ -88,6 +92,48 @@ def main():
                 ]
                 assert request(movement_path)[0] == 200
             print(f"HTTP correcto: {username}; dispositivos, ficha, categorías y movimientos.")
+            if options.qr:
+                from io import BytesIO
+
+                import zxingcpp
+                from PIL import Image
+
+                status, png, _ = request(detail_path + "qr.png", binary=True)
+                assert status == 200 and png.startswith(b"\x89PNG")
+                payload = zxingcpp.read_barcode(Image.open(BytesIO(png))).text
+                assert payload.endswith(detail_path)
+                status, scanner, _ = request("/dispositivos/escaner/")
+                assert status == 200 and "Buscar manualmente" in scanner
+                token = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', scanner)[1]
+                for query in (payload, re.search(r"EQ-[A-Z2-9]{8}", detail)[0].lower()):
+                    status, _, url = request(
+                        "/dispositivos/escaner/",
+                        urlencode({"query": query, "csrfmiddlewaretoken": token}).encode(),
+                    )
+                    assert status == 200 and url == options.base_url + detail_path
+                status, invalid, url = request(
+                    "/dispositivos/escaner/",
+                    urlencode(
+                        {"query": "https://external.example/", "csrfmiddlewaretoken": token}
+                    ).encode(),
+                )
+                assert status == 200 and "Código no reconocido" in invalid
+                assert url == options.base_url + "/dispositivos/escaner/"
+                identifier = detail_path.rstrip("/").rsplit("/", 1)[1]
+                for data in (
+                    None,
+                    urlencode(
+                        {"device": [identifier, identifier], "csrfmiddlewaretoken": token},
+                        doseq=True,
+                    ).encode(),
+                ):
+                    status, labels, _ = request(
+                        "/dispositivos/etiquetas/?device=" + identifier, data=data
+                    )
+                    assert status == expected_operations
+                    if status == 200:
+                        assert labels.count('class="device-label"') == 1
+                print(f"HTTP correcto: {username}; PNG decodificado, etiquetas y escáner seguro.")
         token = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', home)[1]
         assert (
             request("/cuentas/salir/", urlencode({"csrfmiddlewaretoken": token}).encode())[0] == 200
@@ -96,6 +142,16 @@ def main():
     for filename in ["bootstrap.min.css", "bootstrap.bundle.min.js", "htmx.min.js"]:
         assert request(f"/static/vendor/{filename}")[0] == 200
     print("HTTP correcto: recursos Bootstrap y HTMX locales.")
+    if options.qr:
+        for path in [
+            "vendor/html5-qrcode.min.js",
+            "js/qr-controller.js",
+            "js/scanner.js",
+            "js/labels.js",
+            "css/labels.css",
+        ]:
+            assert request(f"/static/{path}")[0] == 200
+        print("HTTP correcto: lector QR, control de cámara y estilos de impresión locales.")
 
 
 if __name__ == "__main__":

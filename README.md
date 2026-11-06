@@ -1,7 +1,7 @@
 # Bitacora
 
 Monolito modular para gestión de equipos y mantenimiento de laboratorios. Esta entrega
-implementa **usuarios, roles, ubicaciones, dispositivos y movimientos**, más su infraestructura.
+implementa **usuarios, roles, ubicaciones, dispositivos, movimientos, QR, etiquetas y escáner**.
 Piloto académico con datos sintéticos; no representa un despliegue institucional autorizado.
 
 ## Estado inicial y alcance
@@ -22,14 +22,16 @@ servicios, permisos ni dependencias. El prompt permanece sin modificaciones.
 - Traslados físicos con origen obtenido en servidor, destino activo, motivo, fecha efectiva,
   historial protegido y actualización atómica de ubicación. No equivalen a reparación.
 
-El segundo incremento reutiliza la base existente y añade `apps/assets`, sin nuevas
-dependencias. Las pruebas anteriores se ejecutaron antes de modificarla: 62 OK. La suite
-ampliada tiene **116 pruebas aprobadas** en PostgreSQL; detalles en `docs/PRUEBAS.md`.
+El tercer incremento reutiliza `apps/assets` y la identidad UUID existente: QR PNG,
+etiquetas individuales/por selección y escáner de cámara/imagen con búsqueda manual.
+Antes de modificar se verificaron 116 pruebas. La suite tiene **145 pruebas Django**
+aprobadas en PostgreSQL y **21 pruebas JavaScript**; detalles en `docs/PRUEBAS.md`.
 
 ## Entorno verificado
 
 Python 3.12.13; Django 5.2.19; PostgreSQL 18; psycopg 3.3.8; django-htmx 1.29.0;
-Bootstrap 5.3.8; HTMX 2.0.11; Ruff 0.17.4. Dependencias completas fijadas en
+Bootstrap 5.3.8; HTMX 2.0.11; qrcode 8.2; Pillow 12.3.0; html5-qrcode 2.3.8;
+Ruff 0.17.4 y zxing-cpp 3.1.1 (solo pruebas). Dependencias completas fijadas en
 `requirements.txt` y `requirements-dev.txt`. No se usa SQLite.
 
 ## Instalación reproducible (PowerShell)
@@ -102,9 +104,10 @@ Para agregar dos dispositivos y un traslado ficticios a esa demo:
 Requiere la demo base y `sync_roles`. No restablece contraseñas ni modifica equipos
 ya existentes con esos nombres. Las seis categorías iniciales se crean con migraciones.
 
-## Actualizar desde la primera entrega
+## Actualizar desde una entrega anterior
 
 ```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 .\.venv\Scripts\python.exe scripts/manage_local.py migrate
 .\.venv\Scripts\python.exe scripts/manage_local.py sync_roles
 ```
@@ -112,25 +115,37 @@ ya existentes con esos nombres. Las seis categorías iniciales se crean con migr
 Reinicie el servidor para cargar `apps/assets` y sus rutas. Los roles existentes reciben
 los nuevos permisos; no se recrean las cuentas. No hay migraciones destructivas.
 
+Configure `BITACORA_PUBLIC_URL` en `.env` o el entorno **antes de imprimir**: por ejemplo
+`http://127.0.0.1:8000` en desarrollo o el origen HTTPS estable del instituto en despliegue.
+No incluye rutas, credenciales ni parámetros. El valor local predeterminado no sirve
+desde otro teléfono: allí localhost apuntaría al propio teléfono. No se ha desplegado
+HTTPS. Si cambia el dominio configurado, debe conservar el anterior mediante una
+redirección controlada o volver a imprimir etiquetas. Véase el manual para escanear.
+
 ## Comprobaciones
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/manage_local.py check
 .\.venv\Scripts\python.exe scripts/manage_local.py makemigrations --check --dry-run
 .\.venv\Scripts\python.exe scripts/manage_local.py test --noinput -v 2
+node --test tests/js/*.test.cjs
 .\.venv\Scripts\python.exe -m ruff check .
 .\.venv\Scripts\python.exe -m ruff format --check .
 .\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe scripts/manage_local.py collectstatic --noinput
 $env:DJANGO_DEBUG = 'false'
+$env:BITACORA_PUBLIC_URL = 'https://bitacora.example.edu'
 .\.venv\Scripts\python.exe scripts/manage_local.py check --deploy --fail-level WARNING
 Remove-Item Env:DJANGO_DEBUG
+Remove-Item Env:BITACORA_PUBLIC_URL
 ```
 
 La suite crea y elimina `test_bitacora`. Las pruebas de concurrencia comprueban conexiones
 PostgreSQL distintas y ejecutan dos transacciones reales; no admiten SQLite.
 Los resultados y límites efectivos se encuentran en [docs/PRUEBAS.md](docs/PRUEBAS.md).
 Se incluye un workflow de GitHub Actions; su ejecución remota está pendiente.
+Node 22 o posterior se usa únicamente para las pruebas de JavaScript, sin npm ni bundler.
+El dominio de ejemplo del check no constituye un despliegue ni una URL para imprimir.
 
 Con el servidor y los datos demo disponibles:
 
@@ -138,6 +153,8 @@ Con el servidor y los datos demo disponibles:
 .\.venv\Scripts\python.exe scripts/smoke_http.py --credentials-file .local/demo-credentials.txt
 # Con seed_assets_demo también ejecutado:
 .\.venv\Scripts\python.exe scripts/smoke_http.py --assets
+# Incluye validación HTTP de QR, etiquetas y escáner:
+.\.venv\Scripts\python.exe scripts/smoke_http.py --qr
 ```
 
 Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislado:
@@ -154,7 +171,7 @@ Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislad
 
 Pendientes: inspección visual real en escritorio/móvil, despliegue HTTPS, limitación
 de intentos de login en el proxy y prueba de restauración de backups. No se implementaron
-QR, mantenimientos, incidencias, notificaciones ni reportes. Los traslados no dependen
+mantenimientos, incidencias, notificaciones ni reportes. Los traslados no dependen
 de esos módulos. Advertencias de mantenimiento pendiente se integrarán cuando exista
 ese módulo, sin inventar estados o resultados ahora.
-El siguiente incremento sugerido es QR, únicamente cuando se solicite.
+Quedan pendientes cámara física, lectura móvil y una impresión real de etiquetas.

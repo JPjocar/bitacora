@@ -53,3 +53,29 @@ mantiene los datos para corregirlos. Los enlaces de lista permiten volver al con
 **Responsable técnico:** ejecutar migrate y sync_roles al instalar. Crear superusuario
 interactivamente para habilitar el primer administrador. Consultar README para pruebas
 y documentación de seguridad antes de cualquier despliegue.
+
+**Imprimir QR (administrador o técnico):** abra la ficha → Imprimir etiqueta. Para varias,
+marque las casillas de Dispositivos y pulse Imprimir seleccionados. La selección solo
+abarca la página visible y se pierde al cambiar filtros/página. En la vista previa espere
+«Etiquetas listas», pulse Imprimir y elija A4 vertical, escala 100 %, sin encabezados/pies
+del navegador. El formato es 62 × 50 mm, hasta 15 etiquetas por hoja. Compruebe una hoja
+real: el código completo y el margen blanco alrededor del QR deben verse sin recortes.
+Nombre/categoría se abrevian; el código nunca se abrevia. No hay lotes de mantenimiento.
+
+**Escanear (los tres roles):** desde Escanear QR pulse Abrir cámara, conceda permiso y
+apunte al QR completo. Cerrar cámara detiene la captura. También puede seleccionar una
+imagen PNG/JPG/WebP de hasta 10 MB, procesada localmente, o escribir el código de etiqueta
+(se aceptan minúsculas y espacios periféricos). Solo se abrirá una ficha disponible para
+su cuenta. Un QR externo o equipo inexistente/no autorizado muestra un error.
+
+Con la cámara habitual del teléfono, abra el enlace detectado: si falta sesión, ingrese
+y volverá a la ficha. Dentro de Bitacora, permiso denegado, cámara ausente/ocupada o falta
+de HTTPS muestran alternativas de imagen/código. Libere la cámara de otras aplicaciones
+o conceda permiso en el navegador y vuelva a abrir el modal. Sin JavaScript puede buscar
+manualmente. Una IP local con HTTP normalmente no habilita cámara integrada.
+
+**Origen de etiquetas:** configure BITACORA_PUBLIC_URL antes de imprimir para uso real.
+El localhost predeterminado solo abre la instancia en esa computadora. Un teléfono
+necesita un origen alcanzable y HTTPS configurado. Reinicie el servidor tras cambiar
+el entorno. Cambiar el dominio afecta los QR ya impresos: conserve el origen anterior
+mediante redirección controlada o reimprima. No use el dominio de ejemplo de los checks.

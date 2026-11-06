@@ -1,10 +1,13 @@
 from django.urls import path
 
-from . import views
+from . import qr_views, views
 
 app_name = "assets"
 urlpatterns = [
     path("", views.device_list, name="list"),
+    path("escaner/", qr_views.scanner, name="scanner"),
+    path("etiquetas/", qr_views.labels, name="labels"),
+    path("<uuid:public_id>/qr.png", qr_views.qr_png, name="qr_png"),
     path("nuevo/", views.device_edit, name="create"),
     path("categorias/", views.category_list, name="categories"),
     path("categorias/nueva/", views.category_edit, name="category_create"),

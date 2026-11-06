@@ -79,3 +79,8 @@ Migraciones del segundo incremento, sin alterar las previas:
 - `assets/0001_initial`: cinco modelos, FKs PROTECT, índices únicos y CHECKs.
 - `assets/0002_initial_categories`: seis categorías; reversión de datos no destructiva (noop).
 - `assets/0003_text_length_validation`: validadores de longitud en textos también para servicios.
+
+Tercer incremento: `assets/0004_alter_device_options` añade el permiso
+`print_device_label` a Device. No crea tablas/columnas ni reescribe migraciones previas.
+`sync_roles` lo asigna a Administrador y Técnico. Los QR se derivan del UUID existente
+y del origen público configurado; las selecciones de impresión solo existen en memoria.

@@ -34,6 +34,9 @@ class DemoClient:
         request = Request(
             self.base + path,
             data=urlencode(data, doseq=True).encode() if data is not None else None,
+            headers={"Origin": self.base, "Referer": self.base + path}
+            if data is not None and urlsplit(self.base).scheme == "https"
+            else {},
         )
         try:
             response = self.client.open(request, timeout=15)

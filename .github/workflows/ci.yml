@@ -29,7 +29,23 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pip install -r requirements-dev.txt -r requirements-pilot.txt
+      - name: Audit pinned Python dependencies in an isolated environment
+        run: |
+          python -m venv "$RUNNER_TEMP/bitacora-audit"
+          "$RUNNER_TEMP/bitacora-audit/bin/python" -m pip install pip-audit==2.10.1
+          "$RUNNER_TEMP/bitacora-audit/bin/python" -m pip_audit --no-deps --disable-pip -r requirements.txt -r requirements-pilot.txt
+          "$RUNNER_TEMP/bitacora-audit/bin/python" -m pip_audit --no-deps --disable-pip -r requirements.txt -r requirements-dev.txt
+      - name: PostgreSQL 18 clients for recovery verification
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common ca-certificates curl
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl --fail -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg main\n' "$VERSION_CODENAME" | sudo tee /etc/apt/sources.list.d/bitacora-pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -42,6 +58,12 @@ jobs:
       - run: python manage.py check
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py test --noinput -v 2
+      - run: python manage.py collectstatic --noinput
+      - name: Verify synthetic backup and restore
+        run: |
+          python manage.py seed_demo --confirm-demo > "$RUNNER_TEMP/bitacora-demo-credentials.txt"
+          python manage.py backup_pilot .local/ci-backup --pg-bin /usr/lib/postgresql/18/bin
+          python manage.py verify_pilot_backup .local/ci-backup --pg-bin /usr/lib/postgresql/18/bin
       - run: python manage.py check --deploy --fail-level WARNING
         env:
           DJANGO_DEBUG: 'false'

@@ -1,0 +1,3 @@
+-r requirements.txt
+# WSGI compatible con Windows y Linux; sin dependencias adicionales.
+waitress==3.0.2

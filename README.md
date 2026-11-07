@@ -3,7 +3,7 @@
 Monolito modular para gestión de equipos y mantenimiento de laboratorios. Esta entrega
 implementa **usuarios, roles, ubicaciones, dispositivos, movimientos, QR, etiquetas,
 escáner, configuración, ejecución y recurrencia de mantenimientos preventivos,
-notificaciones internas, dashboard y reportes básicos**.
+notificaciones internas, dashboard, reportes básicos e incidencias con atención correctiva**.
 Piloto académico con datos sintéticos; no representa un despliegue institucional autorizado.
 
 ## Estado inicial y alcance
@@ -24,11 +24,12 @@ servicios, permisos ni dependencias. El prompt permanece sin modificaciones.
 - Traslados físicos con origen obtenido en servidor, destino activo, motivo, fecha efectiva,
   historial protegido y actualización atómica de ubicación. No equivalen a reparación.
 
-El séptimo incremento incorpora avisos internos por disponibilidad, liberación y
-vencimiento por equipo; bandeja propia y contador HTMX cada 30 segundos. El panel
-operativo reúne inventario, prevención y ejecuciones, con filtros, CSV e impresión.
-La base previa pasó 305 pruebas. Evidencia actual y límites en `docs/PRUEBAS.md`.
-Una tabla nueva (`notifications.Notification`), sin dependencias adicionales.
+El octavo incremento incorpora reporte desde la ficha del equipo tras buscar por QR/código,
+toma exclusiva, notas técnicas, liberación y cierre diferenciado. Incluye avisos al
+personal y al reportante, historial por equipo e indicadores/reportes de incidencias.
+La base previa pasó 353 pruebas; la suite actual pasó **415 Django y 21 JavaScript**.
+Dos tablas nuevas (`Incident`, `IncidentEvent`) y extensión de Notification, sin paquetes
+adicionales. Evidencia y límites en `docs/PRUEBAS.md`.
 
 ## Entorno verificado
 
@@ -188,6 +189,8 @@ Con el servidor y los datos demo disponibles:
 # Materializar avisos (repetible) y verificar bandeja, panel y reportes:
 .\.venv\Scripts\python.exe scripts/manage_local.py generate_notifications
 .\.venv\Scripts\python.exe scripts/smoke_dashboard_http.py --confirm-demo
+# Incidencias: crea y conserva tres reportes SINTÉTICOS con los tres resultados de cierre:
+.\.venv\Scripts\python.exe scripts/smoke_incidents_http.py --confirm-demo
 ```
 
 Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislado:
@@ -203,9 +206,10 @@ Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislad
 - [Pruebas](docs/PRUEBAS.md), [seguridad](docs/SEGURIDAD.md), [avance](docs/AVANCE.md).
 
 Pendientes: inspección visual real en escritorio/móvil, despliegue HTTPS, limitación
-de intentos de login en el proxy y prueba de restauración de backups. No se implementaron
-incidencias. Active la tarea periódica de avisos según `docs/MANUAL.md`; sin ella los
+de intentos de login en el proxy y prueba de restauración de backups.
+Active la tarea periódica de avisos según `docs/MANUAL.md`; sin ella los
 avisos de fecha no se actualizan. El cierre o fecha real de un equipo completado
-no se revierte en este MVP. La siguiente fase es incidencias, bajo nuevo encargo. Los traslados
+no se revierte en este MVP; tampoco se reabren incidencias cerradas. El siguiente incremento
+recomendado es QA visual y preparación del piloto, bajo nuevo encargo. Los traslados
 conservan los resultados preventivos. Los ciclos siguientes se crean manualmente.
 Quedan pendientes cámara física, lectura móvil y una impresión real de etiquetas.

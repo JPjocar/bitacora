@@ -199,8 +199,9 @@ Recurrencia e historial (fase 8):
 
 ## Notificaciones y panel (fases 9–10)
 
-- Solo avisos internos, sin correo ni mensajería. Destinatarios activos en los grupos
-  Administrador/Técnico con ambos permisos de notificaciones y consulta preventiva.
+- Solo avisos internos, sin correo ni mensajería. Para preventivos, destinatarios activos
+  Administrador/Técnico con permisos de notificaciones y consulta preventiva. Las fuentes
+  correctivas usan permisos de incidencias; el cierre avisa al reportante autorizado.
 - Alta inicial, RUN_CREATED y cada RELEASED generan avisos explícitos y atómicos.
   Cada nueva liberación tiene su propio evento y vuelve a avisar. Tomar/cerrar/cancelar
   resuelve la disponibilidad previa; no borra avisos ni modifica su lectura.
@@ -227,3 +228,44 @@ Recurrencia e historial (fase 8):
 - CSV UTF-8 con BOM y separador `;`, neutralización de fórmulas; máximo 10 000 filas,
   sin truncado silencioso. Configuraciones inválidas se advierten y bloquean CSV.
   Impresión HTML con filtros visibles. No se abre trabajo por cron, fecha, escaneo o traslado.
+
+## Incidencias (fase 12)
+
+- Una incidencia pertenece a un equipo y a su reportante; contiene el reporte original,
+  responsable actual y cierre. Trabajo correctivo y notas se registran en eventos internos
+  inmutables, sin órdenes correctivas independientes, tareas preventivas copiadas ni agenda.
+- Reportan docente/técnico/admin con add_incident y acceso al equipo, mientras esté activo
+  y no retirado. Equipo fuera de servicio sí admite reportes. Síntomas: 1–3000 caracteres
+  después de quitar espacios periféricos; actor/estado/fechas se obtienen en servidor.
+- PENDIENTE_ATENCION sin responsable al crear o liberar. Técnico con take_incident toma
+  transaccionalmente y pasa a EN_ATENCION; no hay ASIGNADO/Iniciar/En espera/En evaluación.
+- Solo el responsable con attend_incident o un administrador con override_incident y
+  motivo puede escribir notas, liberar o cerrar. Por defecto el administrador no toma.
+  Notas opcionales, hasta 3000 caracteres, siempre nuevos eventos; no sobrescriben historia.
+- Liberar requiere motivo hasta 300 y resumen de lo realizado/pendiente hasta 1000;
+  vuelve a pendiente y borra solo la asignación. Cada liberación genera otro aviso a
+  todos los técnicos/admin activos con permisos. Otro técnico puede tomar sin aceptación formal.
+- CERRADA exige closed_at, closed_by, resultado y resumen hasta 3000. Resultados:
+  SOLUCIONADA, NO_REPARABLE, INVALIDA_DUPLICADA. No reparable exige permiso específico
+  (solo admin por defecto) y justificación. No se describe una falla no reparada como resuelta.
+- El administrador puede descartar un inválido/duplicado pendiente con motivo, sin crear
+  una asignación ficticia. Los otros cierres exigen En atención. Se conserva el último
+  responsable si existía y el actor real del cierre; no se reabren ni rectifican cierres.
+- Todas las acciones llevan versión, bloqueo del padre y atomicidad de estado/evento/avisos.
+  Doble toma/liberación/cierre se rechaza sin duplicar resultados. Alta usa UUID de formulario
+  y firma de actor/equipo/síntomas: reenvío idéntico devuelve el mismo registro; otro payload
+  exige formulario nuevo. Mismo síntoma con otra clave puede ser un reporte válido diferente.
+- Crear y liberar notifican al personal; tomar/cerrar resuelve su disponibilidad anterior.
+  Cerrar notifica una vez al reportante activo/autorizado con el resultado real.
+  Clave `incident-event:<pk>` evita colisiones con eventos preventivos. Sin escrituras por GET.
+- Docente solo lista/consulta sus incidencias y avisos correspondientes; nunca casos ajenos
+  ni avisos preventivos, aunque una fila antigua le estuviera dirigida. Nota técnica,
+  motivo y resumen de liberación internos; estado, síntomas propios y resumen de cierre públicos
+  para el reportante. Archivar equipo después no borra su derecho a seguir el reporte.
+- Reportar/cerrar no cambia automáticamente estado operativo, ubicación ni preventivos.
+  El cambio físico sigue usando save_device con permiso/motivo y los traslados su servicio.
+  No se recalcula recurrencia por una corrección de falla.
+- Ficha muestra incidencias y preventivos por equipo con paginación independiente; alcance
+  docente propio. Dashboard/CSV requieren acceso completo para incluir incidencias. Recurrentes:
+  al menos dos reportes por equipo dentro del período de creación, excluyendo inválidos/
+  duplicados. Estado de incidencia no filtra inventario ni métricas preventivas.

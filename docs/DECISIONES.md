@@ -118,6 +118,31 @@
     ciclos automáticos. Desactivar configuración/inscripción/equipo o retirar equipo quita
     la obligación de las proyecciones vigentes, conservando resultados y avisos históricos.
 
+52. Fase 12: una incidencia contiene atención correctiva e historial; dos modelos y ningún
+    tipo nuevo de orden. Reutiliza auditoría, roles, formularios Bootstrap y notificaciones.
+53. Tres estados y tres resultados: SOLUCIONADA, NO_REPARABLE e INVALIDA_DUPLICADA. Se
+    agrupan inválida/duplicada como permite el maestro; no se agrega relación a otro reporte.
+54. Técnico toma y atiende; admin supervisa con override y motivo. No reparable requiere
+    permiso específico (solo admin por defecto), también concedible expresamente a un
+    responsable. Admin puede descartar un pendiente inválido; otros cierres exigen atención.
+55. Síntomas originales y cierre retenidos, sin edición del reporte ni reapertura. Un cierre
+    equivocado requiere diseñar un flujo correctivo posterior; el MVP bloquea su reversión.
+56. Notas técnicas son eventos anexados. Docente ve sus síntomas/estados/resumen de cierre,
+    sin notas, motivo o resumen interno de liberación. Puede seguir su caso tras archivar
+    el equipo; el acceso a la ficha mantiene el filtro de dispositivos autorizados.
+57. UUID del formulario y firma actor/equipo/síntomas para alta idempotente. Versiones y
+    bloqueos del padre para acciones; no se confunde síntoma repetido con duplicado automático.
+58. Nueva fuente FK de Notification en lugar de otra bandeja o GenericForeignKey; CHECK
+    de fuente exclusiva y prefijo incident-event. Recipiente/permiso/propiedad se validan
+    antes de listar, contar, leer o abrir. Docente recibe solo sus cierres autorizados.
+59. Ficha con historiales de incidencias y preventivos paginados por separado (10 filas),
+    respetando permisos. Se reutiliza escáner/código para llegar a Reportar incidencia.
+60. Recurrencia correctiva: al menos dos reportes válidos por equipo en fechas de reporte
+    del período, excluyendo inválidos/duplicados. No predicción ni clasificación de falla.
+    Métricas de abiertos permanecen visibles; período limita cierres y el recuento recurrente.
+61. No se actualiza automáticamente estado físico ni recurrencia preventiva. Cambiar estado
+    continúa en assets.save_device y exige motivo. Traslado no cierra trabajo correctivo.
+
 Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 
 - [Django 5.2: versiones](https://docs.djangoproject.com/en/5.2/releases/), [autenticación](https://docs.djangoproject.com/en/5.2/topics/auth/default/).

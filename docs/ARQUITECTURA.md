@@ -110,3 +110,27 @@ La evaluación temporal se hace en memoria con una consulta para todas las inscr
 sin consultar por cada equipo. Las listas se paginan a 20; exportación limitada a 10 000.
 No se agregan gráficos, dependencias ni una API. HTML convencional funciona sin HTMX.
 CSV e impresión reutilizan el mismo filtro y proyección del panel y exigen los mismos permisos.
+
+`incidents` contiene Incident y su IncidentEvent, sin una entidad de orden correctiva.
+`services.report_incident` valida el equipo mediante visible_devices y bloquea solo su
+fila; firma y UUID protegen reenvíos. Acciones bloquean la incidencia, validan versión,
+estado, permiso y responsable antes de guardar columnas operativas explícitas. Notas
+son eventos anexados, no un campo que se sobreescribe. Auditoría/notificación se confirman
+en la misma transacción. No hay señales ni escrituras en datos preventivos o de activos.
+
+`notifications.handle_incident_event` es integración explícita por servicio. Notification
+añade una FK nullable a IncidentEvent y tres tipos, conservando sus fuentes anteriores.
+Su CHECK exige exactamente una fuente coherente con el tipo. El acceso a avisos comprueba
+receptor y permisos del módulo fuente; view_own_incident solo permite fuentes cuyo
+reportante es el usuario. La bandeja docente reutiliza contador/vistas/lectura existentes.
+
+Selectores de incidentes acotan por reportante antes de filtrar/paginar. Vistas no exponen
+notas o motivos internos al docente. La ficha de assets consulta los selectores de cada
+módulo y muestra historial preventivo e incidencias con paginación independiente, sin
+fusionar sus estados. Los controles de estado físico siguen en assets.save_device.
+
+El dashboard consulta indicadores correctivos solo para quien tiene view_incident;
+las dos secciones nuevas de CSV/impresión comparten la validación y protección existentes.
+Subquery cuenta reportes válidos por equipo sin consultas por fila. No agrega tablas,
+predicción ni relojes de trabajo. Se reutilizan los flujos QR/código existentes para
+llegar a la ficha y reportar desde ella, sin otro lector o API.

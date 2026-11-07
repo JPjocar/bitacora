@@ -14,7 +14,7 @@
 | RF-010 | Vencimiento vigente por equipo | Fecha real más reciente + intervalo actual o base + intervalo; omitidos/cancelados no anclan fechas | CalendarTests, test_recurrence.py |
 | RF-011 | Primera y siguientes ejecuciones manuales | Copias independientes, tareas limpias, sin duplicación ni ciclos futuros del único; historial por ejecución | Tests de recurrencia, vistas, concurrencia y migración |
 | RF-020 | Situación temporal y avisos por equipo | Fechas vigentes, ventana de 7 días, hoy/vencido; comando idempotente sin crear ciclos | test_recurrence_views.py, test_notifications.py |
-| RF-021 (preventivos) | Avisos internos y lectura | Destinatarios autorizados, disponibilidad/liberación, bandeja propia y contador cada 30 s | test_notifications.py, test_notification_concurrency.py |
+| RF-021 | Avisos internos y lectura | Disponibilidad/liberación preventiva y correctiva, cierre al reportante; bandeja propia por permisos de fuente | test_notifications.py, test_incidents.py, test_incident_views.py |
 | RF-022 | Dashboard y reportes básicos | Conteos operativos, filtros, tablas paginadas, CSV seguro y HTML imprimible | test_dashboard.py, smoke_dashboard_http.py |
 | RF-012 | Toma por técnico | Exclusiva, sin inicio implícito, permisos y versión | test_execution.py, test_execution_concurrency.py |
 | RF-013 | Inicio/reanudación | Primer inicio inmutable, eventos RESUMED después de liberar | Dominio y flujo HTTP |
@@ -26,11 +26,15 @@
 | RF-019 (ejecución) | Eventos operativos | Actor/fecha, cambios previos, atomicidad e inmutabilidad | Tests de ejecución/rollback |
 | RF-019 (preventivos parcial) | Auditoría de configuración | Actor/fecha/cambios, inmutabilidad y rollback | test_maintenance.py |
 | RF-019 (parcial) | Auditoría de usuarios, ubicaciones, categorías y equipos | Actor/fecha y cambios atómicos, eventos no editables y relaciones PROTECT | Pruebas de rollback, retención y eventos |
+| RF-019 (incidencias) | Eventos correctivos | Reporte, toma, nota, liberación y cierre con actor/fecha/versión, retención y atomicidad | test_incidents.py |
+| RF-023 | Reportar desde QR/código | Reutiliza escáner y ficha; síntomas válidos, equipo autorizado activo, reportante del servidor y creación idempotente | test_incidents.py, test_incident_views.py, smoke_incidents_http.py |
+| RF-024 | Atención correctiva | Toma exclusiva, notas internas, liberación con motivo/resumen, cierre diferenciado, no reparable con permiso y motivo | Tests de dominio, vistas y seis carreras PostgreSQL |
+| RF-025 | Historial integrado por equipo | Ficha con auditoría, preventivos por ejecución e incidencias; paginación independiente y alcance docente propio | test_incident_views.py, test_incident_integration.py |
 | Infraestructura | Django + PostgreSQL y monolito | Migraciones reproducibles, check, lint y tests reales | `docs/PRUEBAS.md` |
 | Concurrencia de esta entrega | Ediciones y último administrador | Dos conexiones no sobrescriben cambios ni eliminan ambos administradores | `tests/test_concurrency.py` |
 
-Pendientes: RF-023 a RF-025, auditoría y avisos de incidencias de RF-021.
-RELEASED y RUN_CREATED generan avisos dentro de sus transacciones desde fases 9–10.
-El historial de esta entrega es preventivo, por mantenimiento/ejecución; no completa el
-historial integrado de incidencias de RF-025. El dashboard no presenta indicadores de
-incidencias ni evaluaciones de productividad individual.
+RF-001 a RF-025 tienen implementación y evidencia funcional local según alcance de cada
+fila; ello no equivale a validación institucional ni despliegue. El dashboard incorpora
+pendientes/en atención/cerradas y equipos con al menos dos reportes válidos en período,
+sin productividad individual. Continúan pendientes revisión visual/física, CI remoto,
+HTTPS, restauración de backups y activación de tarea horaria. Cierres sin reversión en MVP.

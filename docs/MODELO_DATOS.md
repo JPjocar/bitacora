@@ -178,3 +178,39 @@ UNIQUE(recipient,event_key) e índice compuesto para contar no leídos vigentes.
 `event:<pk>` o `due:<target>:<fecha ISO>:<tipo>`. Cada liberación es otro evento;
 el mismo vencimiento/tipo solo avisa una vez a cada receptor. El comando puede resolver
 o reactivar sin cambiar el texto histórico o la lectura. `dashboard` no crea tablas.
+
+## Fase 12: Incident e IncidentEvent
+
+Migración `incidents/0001_initial`, dependiente de assets/0004 y del usuario personalizado.
+Dos tablas: reporte/estado vigente y eventos correctivos. No una tabla de órdenes correctivas.
+
+```mermaid
+erDiagram
+    Device ||--o{ Incident : tiene
+    User ||--o{ Incident : reporta
+    User o|--o{ Incident : responsable_actual
+    User o|--o{ Incident : cierra
+    Incident ||--|{ IncidentEvent : historial
+    User ||--o{ IncidentEvent : actua
+    IncidentEvent o|--o{ Notification : origina
+```
+
+Device/reportante obligatorios con PROTECT. Síntomas originales, created_at, UUID único
+de formulario y firma SHA-256 de actor/equipo/síntomas se conservan. Estado de tres valores,
+responsable nullable, versión positiva y datos de cierre. CHECK de estado coherente:
+pendiente sin responsable/cierre, en atención con responsable sin cierre y cerrada con
+resultado/resumen/actor/fecha; closed_at >= created_at. No se exige responsable al cierre
+porque admin puede descartar un pendiente inválido sin asignación ficticia. Las otras
+transiciones se validan en servicios. Índices estado/fecha, equipo/fecha y reportante/fecha.
+
+IncidentEvent reutiliza AuditEvent (actor, acción, fecha, cambios JSON). Contiene reporte,
+toma, nota, liberación y cierre, incluyendo motivo/resumen y versiones cuando corresponde.
+No se borra ni edita desde aplicación/Admin. Incident permite guardar solo campos operativos
+explícitos; su queryset rechaza update/bulk_update/delete. SQL/shell siguen siendo acceso
+administrativo de confianza, no una alternativa al servicio.
+
+`notifications/0002_incident_notifications` añade incident_event nullable y tipos INC_NEW,
+INC_RELEASED, INC_CLOSED, y amplía el CHECK a exactamente una fuente: evento preventivo,
+inscripción/vencimiento o evento de incidencia. Filas anteriores quedan con FK nueva NULL;
+UNIQUE(receptor,event_key) conserva idempotencia. Claves correctivas con prefijo propio.
+No se cambia mantenimiento, calendario, usuario ni dispositivo. El panel sigue sin tablas.

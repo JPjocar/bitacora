@@ -1,4 +1,69 @@
-# Verificación del séptimo incremento: notificaciones y dashboard (fases 9–10)
+# Verificación del octavo incremento: incidencias y atención correctiva (fase 12)
+
+**6 de noviembre de 2026, America/Lima.** Prompt completo releído y revisión de modelos,
+migraciones, servicios, permisos y dependencias previa a programar. Base: **353 pruebas
+OK en 170,006 s**. Regresión completa: **415 pruebas OK en 127,874 s**, PostgreSQL real.
+**21 pruebas JavaScript OK**. Ninguna dependencia nueva ni cambio del esquema preventivo.
+
+| Comprobación | Resultado |
+| --- | --- |
+| `test --noinput` | 415 OK: 353 previas + 62 nuevas, 33 carreras PostgreSQL totales |
+| Pruebas focalizadas | 91 OK en 25,187 s; integración/migración/vistas 31 OK en 9,672 s |
+| Migraciones | incidents/0001_initial y notifications/0002_incident_notifications aplicadas |
+| Conservación en base demo | Hashes de nueve tablas previas idénticos: dispositivo, siete preventivas y notificaciones; nueva FK excluida del hash |
+| `sync_roles` | Permisos correctivos y avisos docentes sincronizados |
+| `check`, `makemigrations --check --dry-run` | Sin problemas ni cambios pendientes |
+| Ruff check/format | Sin errores; 165 archivos Python con formato correcto |
+| pip check / collectstatic | Sin incompatibilidades; 0 archivos nuevos, 182 sin cambios |
+| `check --deploy --fail-level WARNING` | Correcto con DEBUG=False y origen HTTPS de ejemplo |
+| JavaScript | 21 OK, regresión de escáner |
+| `smoke_incidents_http.py --confirm-demo --base-url http://127.0.0.1:8007` | Tres cierres, roles, reenvío, CSRF, notas privadas, avisos, ficha y reportes correctos |
+| `smoke_dashboard_http.py --confirm-demo --base-url http://127.0.0.1:8007` | Correcto tras ampliar fuentes y bandeja docente |
+| `smoke_http.py --qr --maintenance --base-url http://127.0.0.1:8007` | Tres roles y módulos previos correctos |
+
+Pruebas nuevas:
+
+- `test_incidents.py` (24): reporte por tres roles, estado físico sin cambios, UUID/firma,
+  validaciones, inactivos/retirados/actor sin permisos, toma y exclusión, versiones,
+  propiedad, notas, liberación repetida, relevo técnico, override justificado, tres resultados,
+  no reparable con permiso, descarte pendiente, cierre inmutable, reportante inactivo,
+  independencia preventiva, constraints/retención y rollback de auditoría/avisos.
+- `test_incident_views.py` (20): campos del servidor, errores, docente propio en HTML/HTMX,
+  acciones prohibidas, técnico ajeno, PRG/reenvío, no reparable autorizado, privacidad de
+  notas/liberaciones, archivo del equipo, ficha integrada, avisos propios y revocación,
+  filtros/paginación, restauración HTMX, CSRF/métodos/GET sin escribir, XSS/no-store,
+  sesión inactiva, fuente preventiva restringida y ubicaciones de filtro acotadas.
+- `test_incident_concurrency.py` (6): conexiones PostgreSQL distintas con barrera y
+  lock_timeout; alta duplicada, dos técnicos toman, doble liberación, doble cierre,
+  nota contra liberación y liberación contra cierre. Solo una versión se aplica;
+  avisos/eventos no se duplican y no se pierde una nota que sí se guardó.
+- `test_incident_integration.py` (11): métricas/recurrentes, inválidos excluidos, período,
+  filtros, ambas exportaciones, permisos parciales, traslado/archivo, fuente de aviso
+  exclusiva, fecha local Lima y paginación de ficha con consultas acotadas.
+- `test_incident_migration.py` (1): conserva aviso preventivo de esquema 0001 al agregar
+  la nueva fuente; fuente correctiva funciona después y el evento preventivo no cambia.
+
+El test previo de acceso docente a avisos se actualizó: ahora puede consultar su bandeja
+correctiva, pero se sigue rechazando acceso revocado/inactivo y fuentes ajenas/preventivas.
+Un smoke previo asumía que todo aviso enlazaba a mantenimiento; se corrigió para aceptar
+ambas fuentes autorizadas y se repitió satisfactoriamente. Lint/formato corregidos.
+
+HTTP real conservó tres reportes sintéticos: /incidencias/1/ docente, solucionada;
+/incidencias/2/ admin, no reparable con justificación; /incidencias/3/ técnico, inválida/
+duplicada descartada por admin. Primer caso incluye nota, liberación, toma y aviso al
+reportante marcado leído. Un reenvío devuelve el mismo reporte y el segundo cierre se
+rechaza. Docente no ve el caso ajeno, notas internas ni reportes del panel. No hay datos reales.
+
+Logs ignorados: `.local/tests-baseline-incidents.txt`, `tests-incident-domain.txt`,
+`tests-incidents-focused.txt`, `tests-incidents-integration.txt`, `tests-incidents-full.txt`,
+`server-incidents.txt`; los hashes de conservación también son locales. Credenciales y
+.env no se versionan. Browser devolvió «No browser is available» y listado vacío: no se
+verificó visual/DOM, foco, interacción Bootstrap/HTMX ni diseño impreso en un navegador.
+Pendiente revisar en 1366/390 px reporte, filtros, confirmación, notas, cierre, ficha y
+contador docente. Continúan pendientes cámara/impresión física, HTTPS/CI remoto y backups.
+No se implementó reapertura/rectificación de cierres ni una tarea de avisos del sistema.
+
+## Registro del séptimo incremento: notificaciones y dashboard (fases 9–10)
 
 **6 de noviembre de 2026, America/Lima.** Prompt de 1 145 líneas releído completo;
 inspección previa de modelos, migraciones, servicios, permisos y dependencias.

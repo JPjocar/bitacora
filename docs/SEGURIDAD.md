@@ -95,7 +95,7 @@ El detalle y los eventos por ciclo se acotan al mantenimiento de la URL. Docente
 403 incluso por URL directa/HTMX. Consultar vencimientos/historial no crea trabajo. El
 smoke con escritura requiere --confirm-demo y servidor local, usando cuentas sintéticas.
 
-Notificaciones: requiere usuario activo con permisos de avisos y preventivos. Todas las
+Notificaciones: requiere usuario activo con permiso de avisos y acceso al módulo fuente. Todas las
 consultas y escrituras se acotan al receptor autenticado, incluido el administrador;
 la lectura ajena responde 404. Sin URLs de retorno controladas por cliente: se derivan
 de las FK. Lectura individual/masiva por POST con CSRF. GET no marca ni genera avisos.
@@ -110,3 +110,30 @@ prefijos de fórmulas, incluso con espacio/control inicial, y limita filas. El H
 escapa y no confía en el valor de nombres/códigos como marcado. No hay escrituras de
 estado operativo desde el panel. Activación del programador y permisos del .env son
 responsabilidad del piloto, con el procedimiento en MANUAL.md.
+
+Incidencias: reportante autenticado, equipo de la ruta verificado con visible_devices,
+activo/no retirado revalidado bajo bloqueo; no se aceptan actor, responsable, estado o
+cierre inyectados desde formulario. Docente solo accede a sus casos; 404 al cambiar ID
+por un ajeno. Los filtros se aplican sobre ese conjunto y no muestran ubicaciones ajenas.
+Privacidad se aplica también al historial de ficha y avisos antiguos de usuarios demovidos.
+Un docente puede seguir su reporte de un equipo archivado, sin obtener acceso a su ficha
+completa ni a casos ajenos.
+
+Notas, motivos y resúmenes de liberación son internos. Docente recibe únicamente estados
+y el resumen final destinado al reportante; se advierte al autor que ese resumen será
+compartido. Texto escapado, tamaños acotados y sin adjuntos o marcado interpretado.
+Consultas de detalle/lista, filtros HTMX y contador son GET sin mutaciones; acciones
+exigen POST y CSRF, permiso y versión revalidados en servicio. Ni ocultar botones ni
+conocer un ID/UUID concede autorización. Acción desconocida 404; método no admitido 405.
+
+Toma exclusiva con bloqueo del padre y control de versión; liberación/cierre y sus avisos
+son atómicos. NO_REPARABLE exige permiso específico y justificación. Admin override exige
+motivo; por defecto no tiene permiso de toma. Registro idempotente con token UUID único
+y firma normalizada, sin sustituir el control por objeto. Las incidencias cerradas y
+reportes originales no tienen vía de edición/borrado en UI ni Admin. Nuevos reportes no
+reescriben uno anterior. El cierre correctivo no ejecuta servicios preventivos ni altera
+estado físico automáticamente. Tests verifican seis carreras reales y rollback de fallos.
+
+Panel restringe datos/reportes correctivos por permiso completo de incidencias, incluso
+para usuarios que sí tengan permisos del panel previo. Se conservan BOM, neutralización
+de fórmulas, límite de filas, validación de filtros y no-store de las exportaciones.

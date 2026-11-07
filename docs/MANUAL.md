@@ -162,7 +162,7 @@ cambió la configuración; ambos datos tienen una finalidad distinta.
 ## Avisos internos y panel
 
 Administrador y técnico encuentran **Avisos** y **Panel** en la navegación. El docente
-no tiene acceso a estas pantallas ni a las exportaciones. El contador consulta solo sus
+accede a su bandeja de cierres de incidencias, sin panel ni exportaciones. El contador consulta solo sus
 avisos vigentes sin leer cada 30 segundos; no hay correo, SMS ni notificaciones fuera de la app.
 La bandeja ofrece sin leer/vigentes, leídas, resueltas y todas, con 20 filas por página.
 **Ver mantenimiento y marcar leída** abre el ciclo o calendario original mediante POST;
@@ -207,4 +207,49 @@ y separador punto y coma. **Versión imprimible** ofrece los mismos datos y filt
 use Imprimir del navegador. Las fechas con hora incluyen el huso de Lima. Si supera el
 límite, reduzca filtros; no se recortan filas. Si hay una fecha preventiva inválida,
 el panel muestra el recurso a revisar y bloquea CSV para evitar exportaciones incompletas.
-No hay estadísticas de incidencias ni de rendimiento individual de técnicos.
+El panel incluye incidencias y recurrencia de reportes, sin rendimiento individual de técnicos.
+
+## Incidencias y atención correctiva
+
+**Reportar (docente, técnico o administrador):** busque el equipo con el escáner existente
+(cámara, archivo o código manual), abra su ficha y seleccione **Reportar incidencia**.
+Compruebe código/nombre/ubicación y describa síntomas. No incluya contraseñas ni datos
+personales. El reporte queda pendiente y avisa a técnicos y administradores. No cambia
+el estado operativo ni registra un preventivo. No se reporta sobre equipos archivados
+o retirados. Reenviar el mismo formulario devuelve el mismo reporte; para una falla
+distinta, abra un formulario nuevo. No hay deduplicación automática por síntomas.
+
+**Seguimiento docente:** Incidencias muestra únicamente sus reportes, incluso si el
+equipo se archiva después. Filtre por código/nombre/síntomas, estado, resultado, tipo,
+ubicación o fechas de reporte (Lima). El detalle muestra estado y resumen final; las
+notas técnicas, motivos y resúmenes de liberación son internos. Al cerrar recibe un
+aviso propio, con resultado Solucionada, No reparable o Inválida o duplicada. El resumen
+de cierre es visible para el reportante: escriba solo información que corresponda compartir.
+
+**Atender (técnico):** abra un pendiente y confirme **Tomar incidencia**. La toma es
+exclusiva y pasa directamente a En atención; no hay inicio separado ni cronómetros.
+Puede registrar notas técnicas opcionales. **Liberar incidencia** exige motivo y resumen
+breve de lo hecho/pendiente, quita la asignación, conserva notas y avisa de nuevo.
+Otro técnico podrá tomarla y continuar desde su historial, sin una reasignación formal.
+
+**Cerrar:** el responsable elige Solucionada o Inválida o duplicada y escribe resumen
+obligatorio. **No reparable** requiere permiso específico y motivo; por defecto solo lo
+tiene el administrador. Una avería no reparable queda cerrada con ese resultado, nunca
+se presenta como solucionada. El administrador puede intervenir con justificación; puede
+descartar un reporte inválido pendiente sin asignarlo a un técnico. Para los otros
+resultados el caso debe estar en atención. El cierre se conserva y no se reabre/rectifica
+en este MVP. Si recibe conflicto de versión, recargue y revise antes de repetir.
+
+El estado físico se actualiza por **Actualizar estado del equipo**, con su servicio y
+motivo habituales. No se infiere desde el cierre de incidencia. Trasladar el equipo no
+cierra/libera la incidencia y corregir una falla no altera tareas ni fechas preventivas.
+
+La ficha integra auditoría física, incidencias y ejecuciones preventivas con paginación
+independiente (10 filas por historial nuevo). El docente ve sus incidencias y la ficha
+limitada autorizada; nunca el historial preventivo ni casos ajenos. Las listas de
+incidencias tienen 20 filas y funcionan con o sin HTMX.
+
+El panel añade tablas/reportes **Incidencias** y **Equipos con incidencias recurrentes**.
+El estado de incidencia solo filtra ese módulo. El período filtra cierres manteniendo
+abiertos visibles; para recurrencia cuenta fechas de reporte: al menos dos por equipo,
+excluyendo inválidos/duplicados. Es una consulta histórica, sin diagnóstico ni predicción.

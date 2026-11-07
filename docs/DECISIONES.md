@@ -76,13 +76,30 @@
 34. Verificación y resumen breve obligatorios al completar; notas y observaciones por
     tarea opcionales. Tareas se guardan por equipo/contexto, sin nota por cada clic.
 35. Cálculo siguiente por equipo usa intervalo vigente al completar, serializado contra
-    edición administrativa. Es copia histórica; fase 8 resolverá calendarios y ciclos futuros.
+    edición administrativa. Es copia histórica; fase 8 incorpora el calendario vigente y ciclos manuales.
 36. Registro anterior autorizado admite fecha efectiva anterior al inicio en la aplicación
     para registro extemporáneo; nunca futura. Fecha registrada y primer inicio quedan intactos.
 37. Se bloquea reversión de completado/omisión/cierre; no se implementa una corrección
     retrospectiva sin el flujo y pruebas necesarios. Cancelar no invalida equipos completos.
 38. No se incorpora aún módulo de notificaciones. RELEASED conserva cada liberación para
     futura integración idempotente; tampoco se generan ciclos siguientes automáticamente.
+39. Fase 8 reutiliza siete modelos: no tabla calendario, agenda ni jornada. Fecha vigente
+    derivada; due_date/next_due_date de participantes conservan sus valores históricos.
+40. Calendario anclado a la fecha efectiva más reciente, no al último registro creado.
+    Un registro extemporáneo de trabajo antiguo no desplaza uno posterior. Omitidos,
+    pendientes y cancelados no reinician calendario. Base solo se usa sin completado previo.
+41. Un solo ciclo abierto por mantenimiento, acorde a «después de cerrar, crear siguiente».
+    Índice único parcial evita dos aperturas aun con equipos distintos. No se agregan
+    flags de estado redundantes por equipo ni restricciones con joins entre tablas.
+42. Permiso create_next_run para técnico/admin; solo inscripciones vigentes y equipos activos
+    no retirados. Fuera de servicio permitido. Incluir fechas a más de 7 días exige motivo.
+    El umbral de propuesta es 7 días civiles de Lima, una decisión local documentada.
+43. Versión de configuración + PK del predecesor para rechazar reenvíos. Bloqueos/número único
+    protegen concurrencia. No hace falta persistir otro token ni duplicar el identificador.
+44. Generador de copias compartido con creación inicial; plantillas actuales según categoría,
+    tareas sin marcar y notas vacías. Nueva categoría sin cobertura requiere corregir plantilla.
+45. Historial por número, detalle con copias y auditoría filtrada por ciclo. Listado principal
+    refleja solo el estado más reciente. Calendario consultado con una query, sin N+1.
 
 Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 
@@ -101,6 +118,7 @@ Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 - [ZXing-C++: decodificador independiente para Python](https://github.com/zxing-cpp/zxing-cpp/tree/master/wrappers/python).
 - [Django 5.2: formsets, límites, orden y eliminación](https://docs.djangoproject.com/en/5.2/topics/forms/formsets/).
 - [Django 5.2: constraints y unicidad con valores nulos](https://docs.djangoproject.com/en/5.2/ref/models/constraints/).
+- [Django 5.2: Subquery y OuterRef](https://docs.djangoproject.com/en/5.2/ref/models/expressions/#subquery-expressions).
 
 Las versiones realmente instaladas están fijadas en requirements, sin asumir que sean
 las últimas disponibles en futuras fechas. Los cambios futuros deben revisar las fuentes.

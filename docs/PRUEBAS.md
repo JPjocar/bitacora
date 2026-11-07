@@ -1,4 +1,64 @@
-# Verificación del quinto incremento: ejecución preventiva (fase 7)
+# Verificación del sexto incremento: recurrencia, vencimientos e historial (fase 8)
+
+**6 de noviembre de 2026, America/Lima.** Prompt completo releído y revisión de modelos,
+migraciones, servicios, permisos, dependencias y pruebas antes de modificar. Base previa:
+**257 pruebas OK en 105,107 s**. Suite final: **305 pruebas OK en 97,483 s**, PostgreSQL
+18 real; además **21 pruebas JavaScript OK**. Sin SQLite, paquetes ni tablas nuevos.
+
+| Comprobación | Resultado |
+| --- | --- |
+| `test --noinput` | 305 OK: 257 previas + 48 nuevas; 23 casos concurrentes totales |
+| `migrate`, `sync_roles` | maintenance/0003_recurring_runs aplicada y permisos sincronizados |
+| `check`, `makemigrations --check --dry-run` | Sin problemas ni cambios pendientes |
+| Ruff check/format | Sin errores; 125 archivos Python con formato correcto |
+| `pip check` | Sin incompatibilidades |
+| `collectstatic --noinput` | 1 copiado, 180 sin cambios |
+| `check --deploy --fail-level WARNING` | Sin problemas con DEBUG=False y origen HTTPS de ejemplo |
+| `node --test tests/js/*.test.cjs` | 21 OK |
+| `smoke_http.py --qr --maintenance --base-url http://127.0.0.1:8005` | Correcto con tres roles y módulos anteriores |
+| `smoke_execution_http.py --confirm-demo --recurrence --base-url http://127.0.0.1:8005` | Flujo operativo + segundo ciclo pendiente + fechas/historial correctos |
+
+Pruebas nuevas:
+
+- `test_recurrence.py`: 26 casos. Fecha base y calendario vigente, caso maestro con
+  25/28-11 → 25/28-01 y omitido vencido, límites hoy/7/8 días, creación limpia, subset
+  por categoría, cobertura tras cambiar categoría, omisión/cancelación reiteradas,
+  último completado por fecha real, cálculo antes de cerrar el grupo, permisos/actor activo,
+  reenvíos, versión/predecesor, inactivos/retirados/fuera de servicio, selección temprana,
+  configuración futura, reactivación, rollback, constraints y overflow. Selector sin N+1:
+  una consulta para todos los equipos y sus ubicaciones/categorías/fechas.
+- `test_recurrence_views.py`: 16 casos. Roles/URL/POST, propuesta inicial, errores,
+  redirección al ciclo correcto, historial preservado y parent scope, filtro del estado
+  más reciente, paginación de 22 ejecuciones y 21 equipos, eventos de un solo ciclo,
+  únicos, datos legados inválidos, HTMX/restauración, XSS, no-store, CSRF y métodos.
+- `test_recurrence_concurrency.py`: 5 casos con conexiones PostgreSQL independientes,
+  barrera y lock_timeout: dos aperturas iguales, selecciones disjuntas, apertura contra
+  configuración, desactivación del equipo y cierre anterior. Nunca quedan dos abiertas.
+- `test_recurrence_migration.py`: datos con esquema 0002 migrados a 0003, filas/tareas/
+  configuración originales intactas; segunda ejecución posible e índice impide otra abierta.
+  El test previo de migración restaura ahora las hojas actuales del grafo, conservando
+  compatibilidad de la suite al agregar nuevas migraciones.
+
+HTTP real en 8005: creó un periódico sintético `/mantenimientos/4/`, completó un equipo,
+omitió otro, cerró parcialmente y abrió la ejecución 2. Confirma tareas nuevas sin marcar,
+ausencia de notas del ciclo anterior en el nuevo, notas antiguas conservadas al volver,
+reenvío rechazado, exactamente dos filas de historial y eventos filtrados por ciclo.
+La segunda ejecución queda pendiente como evidencia. No se modificaron datos reales.
+
+Incidentes corregidos: las pruebas de métodos inseguros debían enviar CSRF válido para
+llegar al rechazo 405, pues sin token se rechaza antes con 403. La corrección pasó aislada
+y en la repetición completa de 305 casos. Datos legados con intervalo desbordado muestran
+un error en calendario/formulario en lugar de 500. Lint/formato corregidos.
+Logs locales ignorados: `.local/tests-baseline-recurrence.txt`, `tests-recurrence-domain.txt`,
+`tests-recurrence-focused.txt`, `tests-recurrence-final.txt`.
+
+Browser devolvió «No browser is available» y lista vacía. Pendiente revisión visual en
+escritorio/móvil de calendario, filtros HTMX, selección propuesta, motivo anticipado,
+historial paginado y retorno entre ciclos. HTTP no certifica DOM/foco/teclado ni Bootstrap.
+HTTPS real, CI remoto, restauración de backups y pruebas físicas QR siguen pendientes.
+No se implementaron notificaciones, dashboard ni incidencias. Siguiente fase: notificaciones.
+
+## Registro del quinto incremento: ejecución preventiva (fase 7)
 
 **6 de noviembre de 2026, America/Lima.** Prompt completo releído e inspección de modelos,
 migraciones, servicios, permisos y dependencias antes de modificar. Base previa: **197

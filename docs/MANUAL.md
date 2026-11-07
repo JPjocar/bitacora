@@ -97,7 +97,7 @@ puede tomarla y trabajar desde esa pantalla. El docente no tiene acceso al módu
 
 **Editar configuración:** explique el motivo. La ejecución conserva equipos, fechas y
 tareas originales, aunque siga pendiente. En periódicos, cambiar base/intervalo configura
-futuros ciclos, cuya creación pertenece a otra fase. El único no permite cambiar fecha
+los siguientes ciclos manuales. El único no permite cambiar fecha
 prevista ni generar otra ejecución. Desactivar conserva historia y no cancela. Si otro
 usuario editó antes, recargue y revise antes de guardar nuevamente.
 
@@ -133,4 +133,28 @@ se permite si ya hay equipos completos. El cierre general registra fecha/hora pr
 **Intervención administrativa:** el administrador puede actuar con motivo sobre una
 ejecución de otro responsable, incluso liberar al responsable desactivado. No toma como
 técnico. Los cambios quedan a nombre del actor real. No hay reversión de completados o
-cierres ni creación de ciclos siguientes en esta fase.
+cierres. Los cambios excepcionales requieren motivo y quedan auditados.
+
+**Vencimientos por equipo:** desde el detalle del mantenimiento periódico abra esa opción.
+La tabla muestra última fecha real completada, vencimiento vigente, situación temporal y
+disponibilidad. Filtre por código/nombre o vencido/hoy/próximo/posterior. Próximo significa
+7 días. Un equipo omitido sigue con su fecha anterior; otro completado calcula su propia
+fecha. El enlace de última ejecución permite comprobar el trabajo que sirve como ancla.
+
+**Crear siguiente ejecución (técnico o administrador):** cierre o cancele la actual y
+abra Crear siguiente ejecución. Se marcan como propuesta los equipos vencidos o próximos.
+Revise códigos/fechas y seleccione las inscripciones vigentes que atenderá; si incluye
+otros equipos con fecha posterior, explique el motivo. No se incluyen inactivos/retirados.
+Al confirmar verá una nueva ejecución pendiente, sin técnico ni inicio y con tareas limpias.
+Tomar e Iniciar siguen siendo acciones posteriores explícitas. No hay apertura automática.
+
+Si aparece un conflicto de configuración/predecesor, recargue: pudo cambiar el intervalo
+o crearse otro ciclo. No basta con reenviar. Solo puede haber una ejecución abierta del
+mismo mantenimiento, aunque seleccione equipos distintos. El mantenimiento único no tiene
+esta acción. Un cambio de categoría del equipo puede exigir actualizar sus tareas primero.
+
+**Historial de ejecuciones:** lista números, estados, conteos y fechas. Abra una ejecución
+para ver sus datos originales, tareas, notas y resultados. Eventos de esta ejecución filtra
+la auditoría para ese ciclo. Volver a la ejecución más reciente no modifica el historial.
+Las fechas congeladas del trabajo pueden diferir de los vencimientos vigentes si después
+cambió la configuración; ambos datos tienen una finalidad distinta.

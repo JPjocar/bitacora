@@ -126,7 +126,7 @@ Fase 7, `maintenance/0002_execution_workflow`, sin tablas nuevas:
 - Run añade seis estados, responsable nullable, primer inicio, cierre/cancelación,
   actor de cierre, motivo de cancelación, notas y versión. CHECK exige asignación en
   ASIGNADO/EN_EJECUCION, NULL en pendiente, inicio en ejecución y datos de cierre coherentes.
-  Se conserva número 1: la apertura de ciclos siguientes pertenece a fase 8.
+  En fase 7 se restringía el número a 1; fase 8 amplía la numeración.
 - RunDevice añade fecha real civil, actor/timestamp de finalización, resumen, motivo de
   omisión, notas y próximo vencimiento calculado al completar. CHECK distingue Sin finalizar,
   Completado y Omitido; omitidos nunca tienen fecha real ni next_due_date.
@@ -141,5 +141,17 @@ equipos, tareas, due_date y configuración copiada permanecen protegidos. Django
 es readonly. Los permisos nuevos pertenecen a MaintenanceRun y se aprovisionan con sync_roles.
 
 next_due_date es una copia del cálculo al completar con el intervalo entonces vigente.
-No se reescribe al editar la definición. Fase 8 debe derivar la fecha vigente desde la
-última fecha real individual y configuración actual, conservando estos valores históricos.
+No se reescribe al editar la definición. Desde fase 8 se deriva la fecha vigente desde
+la fecha real individual más reciente y configuración actual, conservando esas copias.
+
+Fase 8, `maintenance/0003_recurring_runs`: sin nuevas columnas ni tablas. Sustituye
+`maint_run_first_number` por `maint_run_positive_number` (número >= 1) y añade
+`maint_one_open_run`, UNIQUE(mantenimiento) condicionado a pendiente/asignado/en ejecución.
+Junto con UNIQUE(mantenimiento, número) y UNIQUE(ejecución, inscripción), impide doble
+apertura y duplicación de equipos, sin copiar el estado del ciclo en cada participante.
+
+La apertura valida versión de configuración y PK del predecesor, asigna siguiente número,
+copia las tareas actuales y registra RUN_CREATED con actor, equipos, fechas y motivo.
+No modifica el predecesor ni incrementa la versión de configuración por una apertura.
+El calendario usa subconsultas por inscripción para última fecha real, ejecución fuente
+y presencia en un ciclo abierto. TargetSchedule es presentación en memoria, no tabla.

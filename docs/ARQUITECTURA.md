@@ -76,4 +76,21 @@ sin bloquear equipos/ubicaciones ajenos a la operación.
 con POST y PRG. Cada formulario lleva versión; no se confían actor, estado ni fechas
 automáticas al cliente. La vista compartida de mantenimiento presenta estado/responsable,
 progreso y acciones autorizadas, conservando un único concepto de mantenimiento.
-No se añadió API, notificador, reloj de trabajo ni generador de ciclos.
+No se añadió API, notificador ni reloj de trabajo.
+
+`maintenance.recurrence.create_next_run` bloquea mantenimiento → predecesor → equipos
+por PK → categorías, compatible con ejecución y configuración. Exige cierre previo,
+versión y predecesor vigentes. Comparte create_run_snapshot con el alta inicial: evita
+duplicar generación de participantes/tareas. La auditoría se confirma con las copias.
+El índice parcial de una ejecución abierta refuerza en PostgreSQL el flujo del MVP.
+
+`selectors.target_schedule` deriva fechas sin escrituras ni consultas por cada equipo:
+Subquery para la fecha real más reciente y su ejecución fuente, luego add_interval probado
+para días/meses. SOON_DAYS=7 delimita propuestas. Omitidos/cancelados no son anclas.
+Configurar un intervalo valida también el cálculo frente a completados existentes para
+evitar desbordamientos. Un dato legado inválido se presenta con error, sin generar ciclos.
+
+Historial paginado y URL por ejecución con parent scope. El listado principal usa
+Subquery para estado/responsable del último ciclo, sin cargar todas las ejecuciones.
+Las fechas vigentes y las copias históricas se muestran separadamente. Solo GET para
+consultas y POST/CSRF para apertura; no cron ni trabajo generado por alcanzar una fecha.

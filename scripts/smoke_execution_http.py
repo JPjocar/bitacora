@@ -77,6 +77,11 @@ def main():
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--credentials-file", default=".local/demo-credentials.txt")
     parser.add_argument("--confirm-demo", action="store_true")
+    parser.add_argument(
+        "--recurrence",
+        action="store_true",
+        help="Crea también un segundo ciclo periódico y verifica su historial.",
+    )
     options = parser.parse_args()
     if not options.confirm_demo or urlsplit(options.base_url).hostname not in (
         "localhost",
@@ -99,9 +104,15 @@ def main():
         (teacher, "demo_docente"),
     ):
         client.login(username, credentials[username])
-    status, html, _ = admin.request("/mantenimientos/nuevo/")
+    kind = "recurring" if options.recurrence else "unique"
+    status, html, _ = admin.request("/mantenimientos/nuevo/?kind=" + kind)
     assert status == 200
     fields = Inputs(html)
+    date_fields = (
+        {"base_date": fields.value("base_date"), "interval_value": 2, "interval_unit": "MESES"}
+        if options.recurrence
+        else {"planned_date": fields.value("planned_date")}
+    )
     devices = [field["value"] for field in fields.fields if field.get("name") == "devices"][:2]
     assert len(devices) == 2, "Requiere seed_assets_demo con dos equipos activos."
     name = "Verificación HTTP preventiva " + uuid4().hex[:8]
@@ -110,9 +121,9 @@ def main():
         {
             "csrfmiddlewaretoken": fields.value("csrfmiddlewaretoken"),
             "creation_key": fields.value("creation_key"),
-            "kind": "unique",
+            "kind": kind,
             "name": name,
-            "planned_date": fields.value("planned_date"),
+            **date_fields,
             "devices": devices,
             "tasks-TOTAL_FORMS": 2,
             "tasks-INITIAL_FORMS": 0,
@@ -189,6 +200,45 @@ def main():
         "reanudación, completado, omisión, cierre parcial e historial."
     )
     print("Registro sintético conservado: " + maintenance_path)
+    if options.recurrence:
+        status, calendar, _ = technician.request(maintenance_path + "vencimientos/")
+        assert status == 200 and "Sin ejecución completada" in calendar
+        assert teacher.request(maintenance_path + "vencimientos/")[0] == 403
+        next_path = maintenance_path + "siguiente/"
+        status, html, _ = technician.request(next_path)
+        assert status == 200
+        fields = Inputs(html)
+        selection = [field["value"] for field in fields.fields if field.get("name") == "targets"]
+        assert len(selection) == 2
+        data = {
+            "csrfmiddlewaretoken": fields.value("csrfmiddlewaretoken"),
+            "version": fields.value("version"),
+            "previous_run_id": fields.value("previous_run_id"),
+            "targets": selection,
+            "reason": "Revisión anticipada sintética de segundo ciclo",
+        }
+        status, current, url = technician.request(next_path, data)
+        assert status == 200 and "Consulta de la ejecución 2" in current
+        assert "Pendiente de atención" in current
+        assert current.count("Tareas realizadas: 0 / 1") == 2
+        assert "Conexiones verificadas antes de liberar" not in current
+        new_id = re.search(r"/ejecuciones/(\d+)/", url)[1]
+        assert new_id != run_id
+        status, historic, _ = technician.request(maintenance_path + f"ejecuciones/{run_id}/")
+        assert status == 200 and "Completado parcialmente" in historic
+        assert "Conexiones verificadas antes de liberar" in historic
+        status, _, replay_url = technician.request(next_path, data)
+        assert status == 200 and replay_url == options.base_url + next_path
+        status, history, _ = technician.request(maintenance_path + "ejecuciones/")
+        assert status == 200
+        assert len(re.findall(r'href="/mantenimientos/\d+/ejecuciones/\d+/"', history)) == 2
+        status, events, _ = technician.request(maintenance_path + "historial/?run=" + new_id)
+        assert status == 200 and "Siguiente ejecución creada" in events
+        assert "Equipo completado" not in events
+        print(
+            "HTTP correcto: calendario individual, segunda ejecución con tareas limpias, "
+            "reenvío rechazado e historial anterior conservado."
+        )
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ def event_action(value):
         "COMPLETED": "Mantenimiento completado",
         "PARTIALLY_COMPLETED": "Mantenimiento completado parcialmente",
         "CANCELLED": "Mantenimiento cancelado",
+        "RUN_CREATED": "Siguiente ejecución creada",
     }.get(value, value)
 
 
@@ -47,6 +48,8 @@ def field_label(value):
         "is_recurring": "Periódico",
         "base_date": "Fecha base",
         "planned_date": "Fecha prevista",
+        "run_number": "Número de ejecución",
+        "due_dates": "Vencimientos por equipo",
         "interval_value": "Intervalo",
         "interval_unit": "Unidad",
         "devices": "Equipos inscritos (ID)",
@@ -79,6 +82,7 @@ def permission_label(permission):
     return {
         "accounts.add_user": "Crear usuarios",
         "maintenance.add_maintenance": "Configurar mantenimientos preventivos",
+        "maintenance.create_next_run": "Crear manualmente la siguiente ejecución preventiva",
         "maintenance.take_maintenance": "Tomar mantenimiento como técnico",
         "maintenance.execute_maintenance": "Ejecutar el mantenimiento del que es responsable",
         "maintenance.override_maintenance": "Intervenir sobre otro responsable con motivo",

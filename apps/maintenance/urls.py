@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import execution_views, views
+from . import execution_views, recurrence_views, views
 
 app_name = "maintenance"
 urlpatterns = [
@@ -32,6 +32,10 @@ urlpatterns = [
     path("", views.maintenance_list, name="list"),
     path("nuevo/", views.maintenance_edit, name="create"),
     path("<int:pk>/", views.maintenance_detail, name="detail"),
+    path("<int:pk>/ejecuciones/", recurrence_views.executions, name="executions"),
+    path("<int:pk>/ejecuciones/<int:run_id>/", views.maintenance_detail, name="run_detail"),
+    path("<int:pk>/vencimientos/", recurrence_views.due_dates, name="due_dates"),
+    path("<int:pk>/siguiente/", recurrence_views.next_run, name="next_run"),
     path("<int:pk>/editar/", views.maintenance_edit, name="edit"),
     path("<int:pk>/historial/", views.maintenance_history, name="history"),
 ]

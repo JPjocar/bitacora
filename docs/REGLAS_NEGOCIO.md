@@ -22,6 +22,7 @@
 | Tomar como responsable | No | Sí | No |
 | Iniciar/reanudar, avanzar, liberar, omitir, completar y cerrar | Con motivo administrativo | Solo su ejecución | No |
 | Registrar fecha real anterior | Con motivo | No, salvo permiso explícito | No |
+| Crear siguiente ejecución y consultar vencimientos/historial | Sí | Sí | No |
 | Eliminar físicamente registros o modificar eventos | No | No | No |
 
 Las comprobaciones se basan en permisos Django, no solo en nombres de grupos o botones.
@@ -168,5 +169,33 @@ Ejecución preventiva (fase 7):
 - Avisos de traslado incluyen pendiente/asignado/en ejecución con equipo sin finalizar.
   Configuración inactiva no cancela ni bloquea terminar el trabajo ya creado.
 
-Pendientes: crear otra ejecución y notificaciones. El evento de liberación queda registrado
-para futura integración; no se emiten avisos internos en esta fase.
+Recurrencia e historial (fase 8):
+
+- Fecha vigente por inscripción activa = fecha real más reciente de un participante
+  COMPLETADO + intervalo vigente. Sin completados: base vigente + intervalo. El orden
+  se basa en la fecha efectiva, no en fecha de registro/número de ciclo: un registro tardío
+  de trabajo antiguo no hace retroceder el calendario. Un equipo completo ya es válido
+  aunque el resto del grupo siga abierto. Omitidos/cancelados/pendientes no aportan ancla.
+- due_date de la participación y next_due_date calculado al completarla son historia.
+  Cambiar base/intervalo recalcula consultas y próximos ciclos, no esas copias. Sin último
+  completado, cambiar la base afecta la fecha inicial futura; con completado se usa su fecha.
+- «Próximo» significa dentro de 7 días civiles de Lima; vencido, hoy y posterior se derivan
+  al consultar, sin estados persistidos ni ejecución automática.
+- Una sola ejecución abierta por mantenimiento, respaldada por índice único parcial.
+  Crear siguiente exige periódico activo, cierre/cancelación previa, versión de configuración
+  y predecesor vigentes, permiso específico y 1–200 inscripciones activas de ese mantenimiento.
+  Técnicos y administradores tienen el permiso; docente no.
+- Se proponen vencidos/hoy/próximos disponibles. Se permite incluir otros activos no retirados
+  con motivo obligatorio. Fuera de servicio no impide selección. Inactivos/retirados conservan
+  fecha e historia, pero no entran al nuevo ciclo. Quitar/reactivar inscripción conserva identidad.
+- Nueva ejecución numerada correlativamente, pendiente, sin responsable/inicio/notas.
+  Copia tareas actuales según categoría/ámbito, sin marcas/observaciones/actores anteriores.
+  Cada equipo debe conservar cobertura individual. Un cambio de categoría puede requerir
+  corregir las plantillas antes de crear otro ciclo. Las generales se copian una sola vez.
+- Reenvío con predecesor antiguo o versión obsoleta se rechaza, incluso si el ciclo nuevo
+  ya cerró. Creación/copias/evento RUN_CREATED son atómicos. No hay nuevo ciclo del único.
+- Historial paginado con detalle propio por ejecución, copias originales y eventos acotados.
+  El listado principal filtra el estado de la ejecución más reciente, no el de ciclos previos.
+
+Pendientes: notificaciones internas. Las fechas y eventos ya pueden consultarse; no se
+materializan avisos ni se abre trabajo por cron, fecha, escaneo o traslado.

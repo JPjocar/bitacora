@@ -15,7 +15,7 @@ class ExecutionMigrationTests(TransactionTestCase):
     def test_existing_pending_configuration_and_snapshots_survive_migration(self):
         setup_assets(self)
         old_target = [("maintenance", "0001_initial")]
-        latest = [("maintenance", "0002_execution_workflow")]
+        latest = MigrationExecutor(connection).loader.graph.leaf_nodes()
         executor = MigrationExecutor(connection)
         try:
             executor.migrate(old_target)

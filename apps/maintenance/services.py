@@ -18,6 +18,7 @@ from .models import (
     MaintenanceTaskResult,
     MaintenanceTaskTemplate,
 )
+from .selectors import due_for_target, targets_with_last_completion
 
 FIELDS = (
     "name",
@@ -171,6 +172,11 @@ def save_maintenance(
         .order_by("pk")
     }
     tasks = _validate_tasks(tasks, devices)
+    if maintenance_id:
+        for target in targets_with_last_completion(maintenance, active_only=False).filter(
+            device_id__in=device_ids
+        ):
+            due_for_target(maintenance, target.last_completed_on)
     after = configuration(maintenance)
     signature = hashlib.sha256(
         json.dumps(
@@ -234,31 +240,14 @@ def save_maintenance(
             MaintenanceTaskTemplate.objects.create(maintenance=maintenance, order=order, **task)
     run = None
     if not maintenance_id:
-        run = MaintenanceRun.objects.create(
-            maintenance=maintenance, configuration={**after, "version": 1}
+        targets = list(maintenance.targets.select_related("device").order_by("device_id"))
+        run = create_run_snapshot(
+            maintenance=maintenance,
+            number=1,
+            targets=targets,
+            due_dates={target.pk: maintenance.initial_due_date for target in targets},
+            categories=categories,
         )
-        templates = list(maintenance.task_templates.filter(is_active=True))
-        task_copies = []
-        for target in maintenance.targets.select_related("device").order_by("device_id"):
-            device = target.device
-            participant = MaintenanceRunDevice.objects.create(
-                run=run,
-                target=target,
-                device_name=device.name,
-                category_id=device.category_id,
-                category_name=categories[device.category_id].name,
-                due_date=maintenance.initial_due_date,
-            )
-            for template in templates:
-                if template.scope == "DISPOSITIVO" and template.category_id in (
-                    None,
-                    device.category_id,
-                ):
-                    task_copies.append(_copy_task(run, template, participant))
-        for template in templates:
-            if template.scope == "GRUPAL":
-                task_copies.append(_copy_task(run, template))
-        MaintenanceTaskResult.objects.bulk_create(task_copies, batch_size=500)
     MaintenanceEvent.objects.create(
         maintenance=maintenance,
         run=run,
@@ -267,6 +256,38 @@ def save_maintenance(
         changes=changes,
     )
     return maintenance
+
+
+def create_run_snapshot(*, maintenance, number, targets, due_dates, categories):
+    """Caller validates and holds the maintenance/device/category locks."""
+    run = MaintenanceRun.objects.create(
+        maintenance=maintenance,
+        number=number,
+        configuration={**configuration(maintenance), "version": maintenance.version},
+    )
+    templates = list(maintenance.task_templates.filter(is_active=True))
+    task_copies = []
+    for target in targets:
+        device = target.device
+        participant = MaintenanceRunDevice.objects.create(
+            run=run,
+            target=target,
+            device_name=device.name,
+            category_id=device.category_id,
+            category_name=categories[device.category_id].name,
+            due_date=due_dates[target.pk],
+        )
+        for template in templates:
+            if template.scope == "DISPOSITIVO" and template.category_id in (
+                None,
+                device.category_id,
+            ):
+                task_copies.append(_copy_task(run, template, participant))
+    for template in templates:
+        if template.scope == "GRUPAL":
+            task_copies.append(_copy_task(run, template))
+    MaintenanceTaskResult.objects.bulk_create(task_copies, batch_size=500)
+    return run
 
 
 def _copy_task(run, template, participant=None):

@@ -219,6 +219,7 @@ class MaintenanceRun(ConfigurationSnapshot):
     class Meta(ConfigurationSnapshot.Meta):
         ordering = ["-number"]
         permissions = [
+            ("create_next_run", "Puede crear la siguiente ejecución preventiva"),
             ("take_maintenance", "Puede tomar mantenimiento como técnico"),
             ("execute_maintenance", "Puede ejecutar su mantenimiento asignado"),
             ("override_maintenance", "Puede intervenir con motivo sobre otro responsable"),
@@ -229,8 +230,13 @@ class MaintenanceRun(ConfigurationSnapshot):
                 fields=["maintenance", "number"], name="maint_run_number_unique"
             ),
             models.CheckConstraint(
-                condition=models.Q(number=1),
-                name="maint_run_first_number",
+                condition=models.Q(number__gte=1),
+                name="maint_run_positive_number",
+            ),
+            models.UniqueConstraint(
+                fields=["maintenance"],
+                condition=models.Q(state__in=["PENDIENTE_ATENCION", "ASIGNADO", "EN_EJECUCION"]),
+                name="maint_one_open_run",
             ),
             models.CheckConstraint(
                 condition=(

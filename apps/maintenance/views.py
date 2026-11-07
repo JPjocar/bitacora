@@ -2,7 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, OuterRef, Q, Subquery
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_safe
 from django.views.decorators.vary import vary_on_headers
@@ -24,7 +25,12 @@ def maintenance_list(request):
     kind = request.GET.get("kind", "")
     active = request.GET.get("active", "")
     state = request.GET.get("state", "")
-    records = Maintenance.objects.prefetch_related("runs__responsible")
+    latest = MaintenanceRun.objects.filter(maintenance_id=OuterRef("pk")).order_by("-number")
+    records = Maintenance.objects.annotate(
+        current_state=Subquery(latest.values("state")[:1]),
+        current_number=Subquery(latest.values("number")[:1]),
+        current_responsible=Subquery(latest.values("responsible__username")[:1]),
+    )
     if query:
         records = records.filter(
             Q(name__icontains=query)
@@ -36,7 +42,14 @@ def maintenance_list(request):
     if active in ("true", "false"):
         records = records.filter(is_active=active == "true")
     if state in MaintenanceRun.State.values:
-        records = records.filter(runs__state=state)
+        records = records.filter(current_state=state)
+    page = Paginator(records, 20).get_page(request.GET.get("page"))
+    for item in page:
+        item.current_state_label = (
+            MaintenanceRun.State(item.current_state).label
+            if item.current_state
+            else "Sin ejecución"
+        )
     template = (
         "maintenance/_list.html"
         if request.htmx and not request.htmx.history_restore_request
@@ -46,7 +59,7 @@ def maintenance_list(request):
         request,
         template,
         {
-            "page_obj": Paginator(records, 20).get_page(request.GET.get("page")),
+            "page_obj": page,
             "q": query,
             "kind": kind,
             "active": active,
@@ -59,9 +72,10 @@ def maintenance_list(request):
 @login_required
 @permission_required("maintenance.view_maintenance", raise_exception=True)
 @require_safe
-def maintenance_detail(request, pk):
+def maintenance_detail(request, pk, run_id=None):
     maintenance = get_object_or_404(Maintenance, pk=pk)
-    run = maintenance.runs.select_related("responsible", "closed_by").first()
+    runs = maintenance.runs.select_related("responsible", "closed_by")
+    run = get_object_or_404(runs, pk=run_id) if run_id is not None else runs.first()
     participants = (
         MaintenanceRunDevice.objects.filter(run=run)
         .select_related("target__device", "target__device__location", "finalized_by")
@@ -77,6 +91,24 @@ def maintenance_detail(request, pk):
         {
             "maintenance": maintenance,
             "run": run,
+            "display_name": run.configuration.get("name", maintenance.name)
+            if run_id
+            else maintenance.name,
+            "display_description": run.configuration.get("description", "")
+            if run_id
+            else maintenance.description,
+            "historical": run_id is not None,
+            "can_create_next": maintenance.is_recurring
+            and maintenance.is_active
+            and run is not None
+            and not maintenance.runs.filter(
+                state__in=[
+                    MaintenanceRun.State.PENDING,
+                    MaintenanceRun.State.ASSIGNED,
+                    MaintenanceRun.State.RUNNING,
+                ]
+            ).exists()
+            and request.user.has_perm("maintenance.create_next_run"),
             "can_take": run is not None
             and run.state == MaintenanceRun.State.PENDING
             and request.user.has_perm("maintenance.take_maintenance"),
@@ -96,14 +128,21 @@ def maintenance_detail(request, pk):
 @require_safe
 def maintenance_history(request, pk):
     maintenance = get_object_or_404(Maintenance, pk=pk)
+    selected_run = None
+    events = maintenance.events.select_related("actor")
+    run_id = request.GET.get("run", "")
+    if run_id:
+        if not run_id.isdecimal() or len(run_id) > 19:
+            raise Http404
+        selected_run = get_object_or_404(maintenance.runs, pk=run_id)
+        events = events.filter(run=selected_run)
     return render(
         request,
         "maintenance/history.html",
         {
             "maintenance": maintenance,
-            "events": Paginator(maintenance.events.select_related("actor"), 20).get_page(
-                request.GET.get("page")
-            ),
+            "events": Paginator(events, 20).get_page(request.GET.get("page")),
+            "selected_run": selected_run,
         },
     )
 

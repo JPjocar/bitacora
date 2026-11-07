@@ -83,3 +83,14 @@ POST exige CSRF y versión vigente. Campos de actor/estado inyectados no se usan
 Los datos de configuración copiada siguen protegidos; save solo admite columnas operativas
 explícitas. Quien tiene shell/SQL continúa en la frontera de confianza documentada.
 La reversión de completados/cierres queda bloqueada hasta diseñar un flujo correctivo.
+
+Recurrencia: create_next_run recarga al actor y exige permiso específico. Inscripciones,
+estado activo de equipos/plan, tipo periódico, tareas aplicables y motivo anticipado se
+revalidan en servidor bajo bloqueos. Claves de equipos no pertenecientes al mantenimiento
+se rechazan. Versión y predecesor evitan duplicación por reenvío o carrera; el índice de
+una ejecución abierta impide también selecciones simultáneas disjuntas. La transacción
+incluye todas las copias y el evento, sin cambios parciales al fallar auditoría.
+
+El detalle y los eventos por ciclo se acotan al mantenimiento de la URL. Docente recibe
+403 incluso por URL directa/HTMX. Consultar vencimientos/historial no crea trabajo. El
+smoke con escritura requiere --confirm-demo y servidor local, usando cuentas sintéticas.

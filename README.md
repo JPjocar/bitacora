@@ -2,7 +2,7 @@
 
 Monolito modular para gestión de equipos y mantenimiento de laboratorios. Esta entrega
 implementa **usuarios, roles, ubicaciones, dispositivos, movimientos, QR, etiquetas,
-escáner, configuración y ejecución de mantenimientos preventivos**.
+escáner, configuración, ejecución y recurrencia de mantenimientos preventivos**.
 Piloto académico con datos sintéticos; no representa un despliegue institucional autorizado.
 
 ## Estado inicial y alcance
@@ -23,12 +23,12 @@ servicios, permisos ni dependencias. El prompt permanece sin modificaciones.
 - Traslados físicos con origen obtenido en servidor, destino activo, motivo, fecha efectiva,
   historial protegido y actualización atómica de ubicación. No equivalen a reparación.
 
-El quinto incremento habilita toma exclusiva por técnico, inicio/reanudación, tareas y
-notas, liberación con historial, omisión, completado por equipo, cierre total/parcial y
-cancelación autorizada. Incluye permisos por responsable, intervención administrativa
-con motivo, fechas reales, vencimiento calculado por equipo y concurrencia. La base
-previa pasó 197 pruebas; la suite final pasó **257 pruebas Django y 21 JavaScript**.
-Evidencia y límites en `docs/PRUEBAS.md`. No hay dependencias nuevas.
+El sexto incremento incorpora vencimientos vigentes por equipo, propuesta de equipos
+vencidos/próximos, creación manual de ciclos con tareas limpias e historial de cada
+ejecución. Conserva fechas/resultados originales y protege contra aperturas simultáneas.
+La base previa pasó 257 pruebas; la suite final pasó **305 pruebas Django y 21 JavaScript**.
+Evidencia y límites en `docs/PRUEBAS.md`.
+No hay dependencias ni tablas nuevas.
 
 ## Entorno verificado
 
@@ -123,6 +123,11 @@ y vuelva a ejecutar `sync_roles`. Conserva equipos, tareas y fechas de las ejecu
 previas. Los técnicos reciben permisos de toma/ejecución; administradores, intervención
 justificada y fecha anterior autorizada. Reinicie el servidor tras actualizar.
 
+Para recurrencia aplique `maintenance/0003_recurring_runs`, ejecute `sync_roles` y reinicie.
+Técnicos y administradores reciben `create_next_run`. Se habilita una sola ejecución
+abierta por mantenimiento; debe cerrarla o cancelarla antes de abrir la siguiente.
+Los vencimientos se derivan al consultar; no hay cron ni apertura automática.
+
 ## Actualizar desde una entrega anterior
 
 ```powershell
@@ -178,6 +183,8 @@ Con el servidor y los datos demo disponibles:
 .\.venv\Scripts\python.exe scripts/smoke_http.py --qr --maintenance
 # Flujo operativo HTTP; crea y conserva un preventivo SINTÉTICO con cierre parcial:
 .\.venv\Scripts\python.exe scripts/smoke_execution_http.py --confirm-demo
+# Dos ciclos periódicos, calendario e historial; conserva datos sintéticos:
+.\.venv\Scripts\python.exe scripts/smoke_execution_http.py --confirm-demo --recurrence
 ```
 
 Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislado:
@@ -194,7 +201,7 @@ Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislad
 
 Pendientes: inspección visual real en escritorio/móvil, despliegue HTTPS, limitación
 de intentos de login en el proxy y prueba de restauración de backups. No se implementaron
-ciclos siguientes, incidencias, notificaciones ni reportes. El cierre o fecha real de un
-equipo completado no se revierte en este MVP. La siguiente fase es recurrencia y apertura
-manual de ciclos. Los traslados conservan los resultados preventivos.
+incidencias, notificaciones ni reportes. El cierre o fecha real de un equipo completado
+no se revierte en este MVP. La siguiente fase es notificaciones internas. Los traslados
+conservan los resultados preventivos. Los ciclos siguientes se crean manualmente.
 Quedan pendientes cámara física, lectura móvil y una impresión real de etiquetas.

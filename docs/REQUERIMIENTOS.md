@@ -11,8 +11,9 @@
 | RF-007 | Escáner cámara/imagen/manual | Validación de origen/objeto, cierre y fallbacks; sin navegación externa | `tests/test_qr.py`, `tests/js/`; cámara y móvil físicos pendientes |
 | RF-008 | Único/periódico con 1 o N equipos | Permisos, fechas consistentes, atomicidad, reintentos seguros | Tests de maintenance, vistas y concurrencia |
 | RF-009 | Tareas individuales/generales/por categoría | Cobertura por equipo, orden, opcionalidad y copias independientes | Grupo heterogéneo, formset, edición futura y conservación |
-| RF-010 (parcial) | Primer vencimiento por equipo | Meses calendario, fin de mes, bisiestos, valores inválidos | CalendarTests y creación periódica |
-| RF-011 (parcial) | Primera ejecución con copias | Pendiente, sin finalizar, tareas limpias; editar no modifica copias | Creación/edición y retención |
+| RF-010 | Vencimiento vigente por equipo | Fecha real más reciente + intervalo actual o base + intervalo; omitidos/cancelados no anclan fechas | CalendarTests, test_recurrence.py |
+| RF-011 | Primera y siguientes ejecuciones manuales | Copias independientes, tareas limpias, sin duplicación ni ciclos futuros del único; historial por ejecución | Tests de recurrencia, vistas, concurrencia y migración |
+| RF-020 (parcial) | Situación temporal visible | Vencido/hoy/próximo a 7 días/posterior derivados, filtros sin iniciar trabajo | test_recurrence_views.py; sin notificaciones materializadas |
 | RF-012 | Toma por técnico | Exclusiva, sin inicio implícito, permisos y versión | test_execution.py, test_execution_concurrency.py |
 | RF-013 | Inicio/reanudación | Primer inicio inmutable, eventos RESUMED después de liberar | Dominio y flujo HTTP |
 | RF-014 | Tareas/notas | Solo responsable o admin justificado, ejecución iniciada, auditoría y rectificación con motivo | test_execution.py, test_execution_views.py |
@@ -26,7 +27,7 @@
 | Infraestructura | Django + PostgreSQL y monolito | Migraciones reproducibles, check, lint y tests reales | `docs/PRUEBAS.md` |
 | Concurrencia de esta entrega | Ediciones y último administrador | Dos conexiones no sobrescriben cambios ni eliminan ambos administradores | `tests/test_concurrency.py` |
 
-RF-010 incluye ahora cálculo por fecha real del equipo completado. Pendientes: RF-011
-ciclos siguientes, RF-020 a RF-025 y auditoría de incidencias. La notificación al liberar
-de RF-021 queda pendiente de su módulo; el evento RELEASED ya se conserva. Los filtros
-no constituyen dashboard/reportes RF-022.
+Pendientes: notificaciones de RF-020/RF-021, RF-022 a RF-025 y auditoría de incidencias.
+Los eventos RELEASED y RUN_CREATED están disponibles para futura integración idempotente.
+El historial de esta entrega es preventivo, por mantenimiento/ejecución; no completa el
+historial integrado de incidencias de RF-025 ni constituye dashboard/reportes.

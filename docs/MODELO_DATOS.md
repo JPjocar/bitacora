@@ -27,6 +27,9 @@ erDiagram
     MaintenanceRunDevice |o--o{ MaintenanceTaskResult : tareas_individuales
     MaintenanceTaskTemplate ||--o{ MaintenanceTaskResult : origen
     Maintenance ||--|{ MaintenanceEvent : audita
+    User |o--o{ MaintenanceRun : responsable
+    User |o--o{ MaintenanceRunDevice : finaliza
+    User |o--o{ MaintenanceTaskResult : ultimo_cambio
 ```
 
 `User` extiende AbstractUser desde la primera migración, evitando una sustitución futura
@@ -115,8 +118,28 @@ Fase 6, `maintenance/0001_initial`: siete tablas, con referencias PROTECT.
   UNIQUE con NULLS NOT DISTINCT impide duplicar también las tareas generales.
 - `MaintenanceEvent`: creación/cambios, ejecución opcional, actor y valores antes/después.
 
-`maint_run_initial_only`, `maint_participant_initial_only` y `maint_task_initial_only`
-impiden crear trabajo realizado fuera de la fase disponible. Las copias rechazan
-update/bulk_update/delete y save posterior. Fase 7 deberá ampliar restricciones y permitir
-solo servicios operativos validados; no retirar protecciones sin pruebas. No hay campos
-de inicio/fin/responsable ni fechas reales ficticias. La primera ejecución no está asignada.
+En fase 6, `maint_run_initial_only`, `maint_participant_initial_only` y
+`maint_task_initial_only` restringían las copias a su estado inicial.
+
+Fase 7, `maintenance/0002_execution_workflow`, sin tablas nuevas:
+
+- Run añade seis estados, responsable nullable, primer inicio, cierre/cancelación,
+  actor de cierre, motivo de cancelación, notas y versión. CHECK exige asignación en
+  ASIGNADO/EN_EJECUCION, NULL en pendiente, inicio en ejecución y datos de cierre coherentes.
+  Se conserva número 1: la apertura de ciclos siguientes pertenece a fase 8.
+- RunDevice añade fecha real civil, actor/timestamp de finalización, resumen, motivo de
+  omisión, notas y próximo vencimiento calculado al completar. CHECK distingue Sin finalizar,
+  Completado y Omitido; omitidos nunca tienen fecha real ni next_due_date.
+- TaskResult añade observación opcional y último actor/timestamp de cambio. Marcar exige
+  actor/fecha. Los valores previos permanecen en MaintenanceEvent.
+- MaintenanceEvent sigue inmutable: TAKEN, STARTED, RESUMED, RELEASED, PROGRESS,
+  DEVICE_COMPLETED, DEVICE_OMITTED, COMPLETED, PARTIALLY_COMPLETED y CANCELLED.
+
+Las copias siguen rechazando update/bulk_update/delete y save sin campos explícitos.
+Los servicios solo guardan columnas de operación admitidas por cada modelo; identidad,
+equipos, tareas, due_date y configuración copiada permanecen protegidos. Django Admin
+es readonly. Los permisos nuevos pertenecen a MaintenanceRun y se aprovisionan con sync_roles.
+
+next_due_date es una copia del cálculo al completar con el intervalo entonces vigente.
+No se reescribe al editar la definición. Fase 8 debe derivar la fecha vigente desde la
+última fecha real individual y configuración actual, conservando estos valores históricos.

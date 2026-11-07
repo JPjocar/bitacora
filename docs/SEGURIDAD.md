@@ -72,5 +72,14 @@ Preventivos: permisos en vistas y servicios, recarga del actor para descartar pe
 obsoletos. Estado, actor y copias se generan en servidor. Formsets con tamaño limitado;
 el dominio revalida equipos, categorías, tareas y fechas. Agregar filas también exige
 CSRF. La clave de envío deduplica, no autoriza. Bloqueos y versión protegen ediciones;
-creación/inscripciones/copias/auditoría son atómicas. No hay endpoints operativos ni
-acceso Django Admin para marcar tareas o modificar ejecuciones directamente.
+creación/inscripciones/copias/auditoría son atómicas. Django Admin continúa readonly.
+
+Ejecución: permiso de toma para técnicos; operación del responsable o permiso administrativo
+explícito con motivo. Fecha anterior requiere permiso separado y justificación. Formularios
+deshabilitan la fecha del técnico y el dominio vuelve a validar toda fecha. IDs de equipos
+se acotan a la ejecución; IDs de tareas deben corresponder exactamente al contexto.
+No se permite progreso antes del inicio, después de cierre o sobre equipo finalizado.
+POST exige CSRF y versión vigente. Campos de actor/estado inyectados no se usan.
+Los datos de configuración copiada siguen protegidos; save solo admite columnas operativas
+explícitas. Quien tiene shell/SQL continúa en la frontera de confianza documentada.
+La reversión de completados/cierres queda bloqueada hasta diseñar un flujo correctivo.

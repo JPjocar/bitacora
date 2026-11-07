@@ -2,7 +2,7 @@
   <h2 id="history-title" class="h4">Historial de cambios</h2>
   {% for event in events %}
   <article class="border rounded bg-white p-3 mb-2">
-    <div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ event.action }}</strong><time datetime="{{ event.created_at|date:'c' }}">{{ event.created_at|date:'d/m/Y H:i' }}</time></div>
+    <div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ event.action|event_action }}</strong><time datetime="{{ event.created_at|date:'c' }}">{{ event.created_at|date:'d/m/Y H:i' }}</time></div>
     <p class="small text-secondary mb-1">Por {{ event.actor.username }} · Hora de Lima</p>
     {% if event.changes %}<details><summary>Ver cambios</summary><dl class="mt-2 mb-0 small">
       {% for field, values in event.changes.items %}<dt>{{ field|field_label }}</dt><dd>{{ values.antes|event_value }} → {{ values.después|event_value }}</dd>{% endfor %}

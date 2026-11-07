@@ -92,9 +92,8 @@ Marque obligatoria/opcional, indique orden y use Agregar otra tarea si necesita 
 Agregar filas no guarda; para quitar una tarea marque Eliminar y después guarde. Límites:
 200 equipos y 50 tareas. No se usa una pantalla separada para grupos.
 
-Al guardar verá la primera ejecución pendiente con equipos, fechas y tareas. Todavía no
-hay acciones para tomar, iniciar, avanzar o cerrar. El técnico puede consultar esta pantalla
-e historial; el docente no tiene acceso al módulo.
+Al guardar verá la primera ejecución pendiente con equipos, fechas y tareas. El técnico
+puede tomarla y trabajar desde esa pantalla. El docente no tiene acceso al módulo.
 
 **Editar configuración:** explique el motivo. La ejecución conserva equipos, fechas y
 tareas originales, aunque siga pendiente. En periódicos, cambiar base/intervalo configura
@@ -105,3 +104,33 @@ usuario editó antes, recargue y revise antes de guardar nuevamente.
 Desde la ficha de equipo, Ver mantenimientos filtra por su código. Trasladar un equipo
 con preventivo pendiente muestra advertencia y pide confirmación: no completa, omite
 ni cambia el vencimiento preventivo.
+
+**Ejecutar (técnico):** abra un mantenimiento pendiente y confirme Tomar mantenimiento.
+Queda Asignado, todavía sin inicio. Pulse Iniciar mantenimiento cuando empiece físicamente.
+En Registrar avance marque las tareas realizadas y guarde; las observaciones por tarea y
+notas del equipo son opcionales. En grupos, registre aparte las tareas generales. Otro
+técnico puede consultar, pero no guardar avances del responsable actual.
+
+**Liberar y continuar:** Liberar mantenimiento pide qué se hizo y por qué se libera. Se
+conservan checks, notas y primer inicio. Queda disponible sin responsable. Quien lo tome
+debe pulsar Reanudar mantenimiento antes de continuar. Cada liberación y reanudación se
+consulta en Historial de cambios; no hay liberación por computadora.
+
+**Completar equipo:** compruebe sus tareas obligatorias, confirme la verificación final
+y escriba un resumen breve. Se registra hoy en Lima, de forma independiente para cada
+equipo. Una fecha anterior solo la registra una cuenta autorizada, con motivo. El sistema
+no admite fechas futuras ni modificar el resultado una vez completado.
+
+**Omitir de esta ejecución:** cuando el equipo no será atendido en ese trabajo, indique
+motivo. Permanece en historia y conserva vencimiento; no cuenta como mantenido. El traslado
+físico no sustituye esta acción ni altera sus tareas.
+
+**Cerrar mantenimiento:** primero complete u omita cada equipo y termine las tareas generales
+obligatorias. Todos completados producen cierre total; completados y omitidos, parcial.
+Todos omitidos no permiten parcial: use Cancelar mantenimiento, con motivo. Cancelar no
+se permite si ya hay equipos completos. El cierre general registra fecha/hora propia.
+
+**Intervención administrativa:** el administrador puede actuar con motivo sobre una
+ejecución de otro responsable, incluso liberar al responsable desactivado. No toma como
+técnico. Los cambios quedan a nombre del actor real. No hay reversión de completados o
+cierres ni creación de ciclos siguientes en esta fase.

@@ -2,7 +2,7 @@
 
 Monolito modular para gestión de equipos y mantenimiento de laboratorios. Esta entrega
 implementa **usuarios, roles, ubicaciones, dispositivos, movimientos, QR, etiquetas,
-escáner y configuración de mantenimientos preventivos**.
+escáner, configuración y ejecución de mantenimientos preventivos**.
 Piloto académico con datos sintéticos; no representa un despliegue institucional autorizado.
 
 ## Estado inicial y alcance
@@ -23,12 +23,12 @@ servicios, permisos ni dependencias. El prompt permanece sin modificaciones.
 - Traslados físicos con origen obtenido en servidor, destino activo, motivo, fecha efectiva,
   historial protegido y actualización atómica de ubicación. No equivalen a reparación.
 
-El cuarto incremento incorpora `apps/maintenance`: configuración única/periódica,
-inscripciones, tareas por equipo/categoría o generales, calendario, primera ejecución
-pendiente con copias independientes y auditoría. Administradores configuran y técnicos
-consultan. No incluye toma, inicio, avance ni cierre. La base previa pasó 145 pruebas;
-la suite final tiene **197 pruebas Django y 21 JavaScript aprobadas**. Evidencia y límites
-en `docs/PRUEBAS.md`. No se añadieron dependencias.
+El quinto incremento habilita toma exclusiva por técnico, inicio/reanudación, tareas y
+notas, liberación con historial, omisión, completado por equipo, cierre total/parcial y
+cancelación autorizada. Incluye permisos por responsable, intervención administrativa
+con motivo, fechas reales, vencimiento calculado por equipo y concurrencia. La base
+previa pasó 197 pruebas; la suite final pasó **257 pruebas Django y 21 JavaScript**.
+Evidencia y límites en `docs/PRUEBAS.md`. No hay dependencias nuevas.
 
 ## Entorno verificado
 
@@ -118,6 +118,11 @@ conserva registros previos. Las ejecuciones quedan pendientes, sin trabajo acred
 La migración nueva es `maintenance/0001_initial`; ejecute migrate y sync_roles y reinicie
 el servidor para cargar la app y las rutas nuevas.
 
+Para actualizar a ejecución preventiva aplique también `maintenance/0002_execution_workflow`
+y vuelva a ejecutar `sync_roles`. Conserva equipos, tareas y fechas de las ejecuciones
+previas. Los técnicos reciben permisos de toma/ejecución; administradores, intervención
+justificada y fecha anterior autorizada. Reinicie el servidor tras actualizar.
+
 ## Actualizar desde una entrega anterior
 
 ```powershell
@@ -171,6 +176,8 @@ Con el servidor y los datos demo disponibles:
 .\.venv\Scripts\python.exe scripts/smoke_http.py --qr
 # Con seed_maintenance_demo también ejecutado:
 .\.venv\Scripts\python.exe scripts/smoke_http.py --qr --maintenance
+# Flujo operativo HTTP; crea y conserva un preventivo SINTÉTICO con cierre parcial:
+.\.venv\Scripts\python.exe scripts/smoke_execution_http.py --confirm-demo
 ```
 
 Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislado:
@@ -187,7 +194,7 @@ Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislad
 
 Pendientes: inspección visual real en escritorio/móvil, despliegue HTTPS, limitación
 de intentos de login en el proxy y prueba de restauración de backups. No se implementaron
-ejecución/avances/cierre de preventivos, ciclos siguientes, incidencias, notificaciones
-ni reportes. Los traslados avisan si hay preventivo pendiente, piden confirmación y
-conservan tareas/vencimientos. La siguiente fase es ejecución y avances preventivos.
+ciclos siguientes, incidencias, notificaciones ni reportes. El cierre o fecha real de un
+equipo completado no se revierte en este MVP. La siguiente fase es recurrencia y apertura
+manual de ciclos. Los traslados conservan los resultados preventivos.
 Quedan pendientes cámara física, lectura móvil y una impresión real de etiquetas.

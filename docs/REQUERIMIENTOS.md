@@ -13,11 +13,20 @@
 | RF-009 | Tareas individuales/generales/por categoría | Cobertura por equipo, orden, opcionalidad y copias independientes | Grupo heterogéneo, formset, edición futura y conservación |
 | RF-010 (parcial) | Primer vencimiento por equipo | Meses calendario, fin de mes, bisiestos, valores inválidos | CalendarTests y creación periódica |
 | RF-011 (parcial) | Primera ejecución con copias | Pendiente, sin finalizar, tareas limpias; editar no modifica copias | Creación/edición y retención |
+| RF-012 | Toma por técnico | Exclusiva, sin inicio implícito, permisos y versión | test_execution.py, test_execution_concurrency.py |
+| RF-013 | Inicio/reanudación | Primer inicio inmutable, eventos RESUMED después de liberar | Dominio y flujo HTTP |
+| RF-014 | Tareas/notas | Solo responsable o admin justificado, ejecución iniciada, auditoría y rectificación con motivo | test_execution.py, test_execution_views.py |
+| RF-015 | Liberación | Quita asignación, conserva primer inicio/checks/notas y registra cada liberación | Tests de dominio/concurrencia y HTTP |
+| RF-016 | Omisión | Motivo y conservación de fila/vencimiento sin ejecución real | Dominio, vistas, carrera contra completado |
+| RF-017 | Completar equipo | Tareas obligatorias, verificación, evidencia y fecha real autorizada | Dominio y vistas |
+| RF-018 | Cierre total/parcial | Sin pendientes, tareas generales cumplidas, cancelación sin invalidar trabajo válido | Dominio, vistas y carrera contra rectificación |
+| RF-019 (ejecución) | Eventos operativos | Actor/fecha, cambios previos, atomicidad e inmutabilidad | Tests de ejecución/rollback |
 | RF-019 (preventivos parcial) | Auditoría de configuración | Actor/fecha/cambios, inmutabilidad y rollback | test_maintenance.py |
 | RF-019 (parcial) | Auditoría de usuarios, ubicaciones, categorías y equipos | Actor/fecha y cambios atómicos, eventos no editables y relaciones PROTECT | Pruebas de rollback, retención y eventos |
 | Infraestructura | Django + PostgreSQL y monolito | Migraciones reproducibles, check, lint y tests reales | `docs/PRUEBAS.md` |
 | Concurrencia de esta entrega | Ediciones y último administrador | Dos conexiones no sobrescriben cambios ni eliminan ambos administradores | `tests/test_concurrency.py` |
 
-Pendientes: RF-010 desde la fecha real de cada cierre, RF-011 ciclos siguientes,
-RF-012 a RF-018, RF-020 a RF-025 y auditoría operativa/incidencias. Los filtros de esta
-entrega no constituyen el módulo de dashboard/reportes RF-022.
+RF-010 incluye ahora cálculo por fecha real del equipo completado. Pendientes: RF-011
+ciclos siguientes, RF-020 a RF-025 y auditoría de incidencias. La notificación al liberar
+de RF-021 queda pendiente de su módulo; el evento RELEASED ya se conserva. Los filtros
+no constituyen dashboard/reportes RF-022.

@@ -142,8 +142,8 @@ def main():
             if username != "demo_docente":
                 maintenance_path = re.search(r'href="(/mantenimientos/[0-9]+/)"', listing)[1]
                 status, detail, _ = request(maintenance_path)
-                assert status == 200 and "Pendiente de atención" in detail
-                assert "Sin finalizar" in detail and "Revisar conexiones" in detail
+                assert status == 200 and "Trabajo preventivo" in detail
+                assert "Tareas realizadas:" in detail
                 assert request(maintenance_path + "historial/")[0] == 200
                 assert request(maintenance_path + "editar/")[0] == expected_users
                 status, fragment, _ = request(

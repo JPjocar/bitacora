@@ -269,7 +269,7 @@ class MaintenanceViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
-    def test_no_operational_action_or_delete_endpoint_exists(self):
+    def test_legacy_action_paths_delete_and_next_cycle_remain_unavailable(self):
         self.client.force_login(self.admin)
         for action in ("tomar", "iniciar", "liberar", "completar", "siguiente"):
             self.assertEqual(

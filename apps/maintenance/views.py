@@ -2,15 +2,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_safe
 from django.views.decorators.vary import vary_on_headers
 
 from apps.core.forms import add_validation_errors
 
+from .execution import can_control
 from .forms import MaintenanceForm, TaskFormSet
-from .models import Maintenance, MaintenanceRunDevice
+from .models import Maintenance, MaintenanceRun, MaintenanceRunDevice
 from .services import MAX_TASKS, save_maintenance, template_data
 
 
@@ -22,7 +23,8 @@ def maintenance_list(request):
     query = request.GET.get("q", "").strip()[:120]
     kind = request.GET.get("kind", "")
     active = request.GET.get("active", "")
-    records = Maintenance.objects.all()
+    state = request.GET.get("state", "")
+    records = Maintenance.objects.prefetch_related("runs__responsible")
     if query:
         records = records.filter(
             Q(name__icontains=query)
@@ -33,6 +35,8 @@ def maintenance_list(request):
         records = records.filter(is_recurring=kind == "recurring")
     if active in ("true", "false"):
         records = records.filter(is_active=active == "true")
+    if state in MaintenanceRun.State.values:
+        records = records.filter(runs__state=state)
     template = (
         "maintenance/_list.html"
         if request.htmx and not request.htmx.history_restore_request
@@ -46,6 +50,8 @@ def maintenance_list(request):
             "q": query,
             "kind": kind,
             "active": active,
+            "state": state,
+            "states": MaintenanceRun.State.choices,
         },
     )
 
@@ -55,11 +61,15 @@ def maintenance_list(request):
 @require_safe
 def maintenance_detail(request, pk):
     maintenance = get_object_or_404(Maintenance, pk=pk)
-    run = maintenance.runs.first()
+    run = maintenance.runs.select_related("responsible", "closed_by").first()
     participants = (
         MaintenanceRunDevice.objects.filter(run=run)
-        .select_related("target__device", "target__device__location")
+        .select_related("target__device", "target__device__location", "finalized_by")
         .prefetch_related("tasks")
+        .annotate(
+            task_count=Count("tasks"), done_count=Count("tasks", filter=Q(tasks__completed=True))
+        )
+        .order_by("due_date", "pk")
     )
     return render(
         request,
@@ -67,6 +77,10 @@ def maintenance_detail(request, pk):
         {
             "maintenance": maintenance,
             "run": run,
+            "can_take": run is not None
+            and run.state == MaintenanceRun.State.PENDING
+            and request.user.has_perm("maintenance.take_maintenance"),
+            "can_control": run is not None and can_control(request.user, run),
             "participants": Paginator(participants, 20).get_page(request.GET.get("page")),
             "group_tasks": run.tasks.filter(participant__isnull=True) if run else [],
             "templates": maintenance.task_templates.filter(is_active=True).select_related(

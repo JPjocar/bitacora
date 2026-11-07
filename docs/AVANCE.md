@@ -13,19 +13,23 @@
 | Etiquetas | Individuales/selección, deduplicación, A4; prueba física pendiente |
 | Escáner | Cámara en modal, imagen local y código manual; pruebas JS simuladas, cámara real pendiente |
 | Configuración preventiva | Único/periódico, equipos, tareas, fechas, edición/desactivación y auditoría |
-| Primera ejecución | Pendiente, sin asignación ni inicio, copias de equipos/fechas/tareas conservadas |
-| Ejecución y recurrencia operativas | Toma, inicio, avances, omisión, liberación, cierre y siguientes ciclos pendientes |
-| Concurrencia | Once casos PostgreSQL: incluye reenvío de creación y edición preventiva concurrente |
+| Ejecución preventiva | Seis estados, toma, inicio/reanudación, avances/notas, liberación, omisión, completado y cierre/cancelación |
+| Fechas reales | Por equipo, registro anterior administrativo con motivo, cierre general independiente |
+| Recurrencia | Próxima fecha calculada al completar equipo; siguientes ciclos pendientes |
+| Concurrencia | Dieciocho casos PostgreSQL: toma, inicio, avance/liberación, omisión/completado, cierre/rectificación y configuración/fecha |
 | Visual | Templates responsive implementados; revisión en navegador pendiente por falta de navegador conectado |
 | Despliegue | Configuración y check de seguridad; no se publicó ni validó HTTPS real |
 | CI | Workflow incluido; ejecución en GitHub pendiente |
 | Otros módulos | No implementados |
 
-Cuarto incremento: **197 pruebas Django aprobadas** (145 previas + 52 nuevas) y
-**21 pruebas JavaScript**. Migración `maintenance/0001_initial` aplicada: siete modelos,
-sin alterar migraciones previas. Roles sincronizados; admin configura, técnico consulta,
-docente sin acceso. HTTP real verificado para los tres roles. Sin dependencias nuevas.
-Demo preventiva explícita e idempotente, con un único y un periódico pendientes.
+Quinto incremento: migración `maintenance/0002_execution_workflow` aplicada sobre las
+siete tablas existentes, sin reescribir migraciones previas. Roles sincronizados: técnico
+ejecuta su trabajo; admin interviene con motivo; docente sin acceso. HTTP real incluye
+liberación/reanudación y cierre parcial de un registro sintético conservado. Sin nuevas
+dependencias. Resultados efectivos de regresión y migración en PRUEBAS.md.
+
+**257 pruebas Django aprobadas** (197 previas + 60 nuevas) y **21 pruebas JavaScript**.
+Incluye dieciocho casos concurrentes PostgreSQL y conservación de datos de fase 6 al migrar.
 
 Las pruebas y resultados efectivos se registran en PRUEBAS.md. No se presenta revisión
 visual simulada ni se afirma validación en el instituto.
@@ -33,8 +37,10 @@ visual simulada ni se afirma validación en el instituto.
 Para continuar: leer prompt, README, este archivo y reglas; ejecutar las pruebas
 existentes en PostgreSQL antes de modificar. No reemplazar el usuario personalizado,
 eliminar migraciones aplicadas ni escribir directamente en datos de otro módulo.
-Siguiente fase: ejecución y avances preventivos. Al habilitarla, ampliar las restricciones
-de estado inicial y el manager de copias únicamente mediante servicios validados, con
-pruebas de toma/inicio/liberación/cierre. Actualizar el selector de aviso de traslados para
-los estados nuevos. No implementar recurrencia futura o notificaciones sin encargo.
+Siguiente fase: recurrencia y apertura manual de ciclos. Ampliar la restricción actual
+de número 1, impedir participantes duplicados en ciclos abiertos y crear tareas limpias.
+Usar fecha real de cada equipo completado y conservar vencimientos de omitidos. La copia
+next_due_date registra el cálculo al completar: si cambia luego el intervalo, la fase de
+recurrencia debe derivar fechas futuras con la configuración vigente sin reescribir historia.
+No hay reversión de equipos completados, ciclos siguientes ni notificaciones todavía.
 La revisión visual, cámara física, impresión y despliegue HTTPS siguen pendientes.

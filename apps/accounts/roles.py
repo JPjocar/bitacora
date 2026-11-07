@@ -9,6 +9,8 @@ ROLE_PERMISSIONS = {
         "maintenance.add_maintenance",
         "maintenance.change_maintenance",
         "maintenance.view_maintenance",
+        "maintenance.override_maintenance",
+        "maintenance.backdate_maintenance",
         "accounts.view_user",
         "accounts.add_user",
         "accounts.change_user",
@@ -29,6 +31,8 @@ ROLE_PERMISSIONS = {
         "assets.add_movement",
     },
     TECHNICIAN: {
+        "maintenance.take_maintenance",
+        "maintenance.execute_maintenance",
         "maintenance.view_maintenance",
         "assets.print_device_label",
         "locations.view_location",

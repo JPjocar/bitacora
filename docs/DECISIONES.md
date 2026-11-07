@@ -58,7 +58,7 @@
 26. Configuración modificable con motivo/versionado; ninguna edición reescribe ejecuciones
     creadas, incluso pendientes. Plantillas antiguas inactivas e inscripciones conservadas.
     No cambia tipo ni fecha prevista del único. No hay reprogramación/cancelación implícita.
-27. Administrador configura, técnico consulta, docente sin acceso. Nuevas inscripciones de
+27. Administrador configura, técnico consulta y ejecuta desde fase 7, docente sin acceso. Nuevas inscripciones de
     activos no retirados; fuera de servicio permitido, inscritos inactivados se conservan.
     Cada equipo exige al menos una tarea individual aplicable, no necesariamente obligatoria.
 28. Límites de piloto: 200 equipos y 50 tareas por configuración. Formset con alta de filas
@@ -66,7 +66,23 @@
 29. UUID de envío y firma de contenido para reintentos; UNIQUE de BD para carreras entre
     selecciones distintas. No es permiso ni identidad pública del mantenimiento.
 30. Integración de traslado mediante selector de lectura; confirmar aviso de preventivo
-    pendiente no cambia su resultado. Fase 7 debe incluir los nuevos estados en ese selector.
+    pendiente no cambia su resultado. Incluye pendiente, asignado y en ejecución desde fase 7.
+31. Fase 7 amplía las siete tablas existentes: sin entidad nueva para tareas/notas/eventos.
+    ConfiguraciónSnapshot conserva su guardia: save solo admite columnas operativas explícitas.
+32. Todas las operaciones bloquean mantenimiento → ejecución y validan versión global.
+    Un conflicto entre dos formularios se rechaza para evitar pérdida silenciosa de notas/checks.
+33. Tomar solo mediante permiso de técnico. Operar otro responsable exige permiso de
+    administración y motivo. Fecha anterior tiene permiso separado, con actor real auditado.
+34. Verificación y resumen breve obligatorios al completar; notas y observaciones por
+    tarea opcionales. Tareas se guardan por equipo/contexto, sin nota por cada clic.
+35. Cálculo siguiente por equipo usa intervalo vigente al completar, serializado contra
+    edición administrativa. Es copia histórica; fase 8 resolverá calendarios y ciclos futuros.
+36. Registro anterior autorizado admite fecha efectiva anterior al inicio en la aplicación
+    para registro extemporáneo; nunca futura. Fecha registrada y primer inicio quedan intactos.
+37. Se bloquea reversión de completado/omisión/cierre; no se implementa una corrección
+    retrospectiva sin el flujo y pruebas necesarios. Cancelar no invalida equipos completos.
+38. No se incorpora aún módulo de notificaciones. RELEASED conserva cada liberación para
+    futura integración idempotente; tampoco se generan ciclos siguientes automáticamente.
 
 Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 

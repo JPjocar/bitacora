@@ -4,6 +4,22 @@ register = template.Library()
 
 
 @register.filter
+def event_action(value):
+    return {
+        "TAKEN": "Mantenimiento tomado",
+        "STARTED": "Trabajo iniciado",
+        "RESUMED": "Trabajo reanudado",
+        "RELEASED": "Responsable liberado",
+        "PROGRESS": "Avance registrado",
+        "DEVICE_COMPLETED": "Equipo completado",
+        "DEVICE_OMITTED": "Equipo omitido",
+        "COMPLETED": "Mantenimiento completado",
+        "PARTIALLY_COMPLETED": "Mantenimiento completado parcialmente",
+        "CANCELLED": "Mantenimiento cancelado",
+    }.get(value, value)
+
+
+@register.filter
 def field_label(value):
     return {
         "username": "Usuario",
@@ -34,7 +50,18 @@ def field_label(value):
         "interval_value": "Intervalo",
         "interval_unit": "Unidad",
         "devices": "Equipos inscritos (ID)",
-        "tasks": "Configuración de tareas",
+        "tasks": "Tareas",
+        "state": "Estado de ejecución",
+        "responsible_id": "Responsable (ID)",
+        "started_at": "Primer inicio real",
+        "completed_at": "Cierre general",
+        "cancelled_at": "Cancelación",
+        "execution_version": "Versión de ejecución",
+        "notes": "Notas técnicas",
+        "participant_id": "Equipo de la ejecución (ID)",
+        "device_executed_on": "Fecha real de finalización del equipo",
+        "completion_summary": "Resumen y verificación",
+        "next_due_date": "Próximo vencimiento calculado",
     }.get(value, value)
 
 
@@ -52,6 +79,10 @@ def permission_label(permission):
     return {
         "accounts.add_user": "Crear usuarios",
         "maintenance.add_maintenance": "Configurar mantenimientos preventivos",
+        "maintenance.take_maintenance": "Tomar mantenimiento como técnico",
+        "maintenance.execute_maintenance": "Ejecutar el mantenimiento del que es responsable",
+        "maintenance.override_maintenance": "Intervenir sobre otro responsable con motivo",
+        "maintenance.backdate_maintenance": "Registrar fecha anterior con justificación",
         "maintenance.change_maintenance": "Editar y desactivar configuraciones preventivas",
         "maintenance.view_maintenance": "Consultar mantenimientos preventivos e historial",
         "accounts.change_user": "Editar y desactivar usuarios; restablecer contraseñas",

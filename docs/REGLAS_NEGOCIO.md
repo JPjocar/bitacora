@@ -19,6 +19,9 @@
 | Imprimir etiquetas individuales o por selección | Sí | Sí | No |
 | Configurar/editar/desactivar mantenimientos preventivos | Sí | No | No |
 | Consultar mantenimientos, primera ejecución y auditoría | Sí | Sí | No |
+| Tomar como responsable | No | Sí | No |
+| Iniciar/reanudar, avanzar, liberar, omitir, completar y cerrar | Con motivo administrativo | Solo su ejecución | No |
+| Registrar fecha real anterior | Con motivo | No, salvo permiso explícito | No |
 | Eliminar físicamente registros o modificar eventos | No | No | No |
 
 Las comprobaciones se basan en permisos Django, no solo en nombres de grupos o botones.
@@ -115,7 +118,7 @@ Configuración preventiva (fase 6):
   calendario. Valores iniciales en Lima. Fechas pasadas/futuras nunca acreditan trabajo.
 - Primer vencimiento por equipo = base + intervalo. En meses se limita el día al último
   del mes de destino. El único usa la fecha prevista. Se guarda una copia por participante.
-  No se calculan aún vencimientos desde cierres reales.
+  Al completar se conserva además el siguiente vencimiento calculado desde su fecha real.
 - Nuevas inscripciones: equipos activos no retirados; fuera de servicio está permitido.
   Inscritos que después se inactivan se conservan. Quitar una inscripción futura no borra
   al participante existente. Reactivar reutiliza la inscripción.
@@ -131,5 +134,39 @@ Configuración preventiva (fase 6):
   rechaza. Ediciones simultáneas no sobrescriben cambios ni duplican historial.
 - Docente sin acceso por URL/HTMX; Django Admin solo lectura.
 
-Pendientes: tomar, iniciar/reanudar, avanzar, omitir, liberar, completar, cancelar y crear
-otra ejecución. No hay cierre ni recurrencia automática en esta entrega.
+Ejecución preventiva (fase 7):
+
+- PENDIENTE_ATENCION sin responsable; Tomar por técnico pasa a ASIGNADO sin inicio.
+  Iniciar pasa a EN_EJECUCION y fija started_at una vez. Liberar desde asignado/en ejecución
+  exige trabajo realizado/motivo, vuelve a pendiente y quita solo asignación. Retomar exige
+  Iniciar/Reanudar; registra RESUMED y conserva el primer inicio.
+- Avance, notas, omisión y completado solo en EN_EJECUCION. Técnico responsable o permiso
+  administrativo con motivo; autor y fechas se generan en servidor. Cualquier cambio
+  aumenta versión global de ejecución, evitando sobrescribir formularios antiguos.
+- Check/observación guardan último actor/fecha y un evento antes/después. Notas opcionales
+  generales/por equipo, sin exigir una por cada tarea. Desmarcar una tarea realizada exige
+  motivo; equipo ya completado/omitido no permite rectificación ni cambio de resultado.
+- Completar equipo exige tareas individuales obligatorias, verificación final y resumen
+  de hasta 300 caracteres. La fecha del técnico es hoy en Lima; fecha anterior exige permiso
+  específico y motivo, sin fechas futuras. Se admite registro extemporáneo autorizado aun
+  si la fecha efectiva antecede al registro/inicio en la aplicación. La fecha registrada
+  automáticamente permanece actual y auditable.
+- Próximo vencimiento calculado = fecha real del equipo + intervalo vigente al completar.
+  Se almacena en el participante, conservando su due_date original. Es una copia histórica
+  del cálculo, no la apertura de un siguiente ciclo. Único no obtiene próxima fecha.
+- Omitir conserva tareas/notas, motivo, actor, fecha y fila; no registra fecha real ni
+  próxima fecha y no altera due_date. Puede trasladarse antes/después sin cambiar resultado.
+- Cerrar solo en ejecución: todos completados => COMPLETADO; al menos un completado y
+  resto omitidos => COMPLETADO_PARCIALMENTE. En ambos, tareas generales obligatorias
+  cumplidas, sin SIN_FINALIZAR. Todos omitidos no admite parcial: permite cancelar.
+- Cancelar exige motivo y ciclo abierto; técnico solo el suyo, administrador también
+  pendientes sin responsable. Prohibido si hay equipos completados. Conserva checks y
+  notas de trabajo incompleto. No genera preventivos válidos ni altera fechas.
+- Cierre general guarda timestamp/actor independientes de la fecha civil de cada equipo.
+  No se permite revertir completados o cierres; una corrección requiere diseñar un flujo
+  administrativo posterior. Sin reprogramación, cronómetro ni inicio por computadora.
+- Avisos de traslado incluyen pendiente/asignado/en ejecución con equipo sin finalizar.
+  Configuración inactiva no cancela ni bloquea terminar el trabajo ya creado.
+
+Pendientes: crear otra ejecución y notificaciones. El evento de liberación queda registrado
+para futura integración; no se emiten avisos internos en esta fase.

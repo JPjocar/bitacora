@@ -1,4 +1,63 @@
-# Verificación del cuarto incremento: configuración preventiva (fase 6)
+# Verificación del quinto incremento: ejecución preventiva (fase 7)
+
+**6 de noviembre de 2026, America/Lima.** Prompt completo releído e inspección de modelos,
+migraciones, servicios, permisos y dependencias antes de modificar. Base previa: **197
+pruebas OK en 62,304 s**. Regresión completa: **257 pruebas OK en 126,210 s**, PostgreSQL
+real; además **21 pruebas JavaScript OK**. Sin SQLite ni dependencias nuevas.
+
+| Comprobación | Resultado |
+| --- | --- |
+| `test --noinput` | 257 OK: 197 previas + 60 nuevas; dieciocho casos concurrentes totales |
+| `test tests.test_execution_concurrency tests.test_execution_migration --noinput` | 8 OK en 31,742 s |
+| `migrate`, `sync_roles` | maintenance/0002_execution_workflow aplicada y permisos sincronizados |
+| `check`, `makemigrations --check --dry-run` | Sin problemas ni cambios pendientes |
+| Ruff check/format | Sin errores; 116 archivos Python con formato correcto |
+| `pip check` | Sin incompatibilidades |
+| `collectstatic --noinput` | 0 copiados, 181 sin cambios |
+| `check --deploy --fail-level WARNING` | Sin problemas con DEBUG=False y origen HTTPS de ejemplo |
+| `node --test tests/js/*.test.cjs` | 21 OK |
+| `smoke_http.py --qr --maintenance --base-url http://127.0.0.1:8004` | Correcto para tres roles |
+| `smoke_execution_http.py --confirm-demo --base-url http://127.0.0.1:8004` | Flujo operativo correcto; cierre parcial sintético conservado en /mantenimientos/3/ |
+
+Nuevas pruebas:
+
+- `test_execution.py`: 34 casos. Toma sin inicio, inicio único, liberación/reanudación
+  conservando datos, responsable activo, intervención administrativa, tareas/notas,
+  rectificación con motivo, independencia entre equipos, opcionales, verificación/resumen,
+  fechas autorizadas, vencimientos por equipo, omisión, cierre total/parcial, todos
+  omitidos, cancelación, rechazo tras cierre, rollback, versiones y restricciones DB.
+  El caso maestro se reforzó al final y volvió a pasar: base 01/10/2026, vencimiento
+  01/12, completados 25 y 28/11 → 25 y 28/01/2027; omitido conserva 01/12.
+- `test_execution_views.py`: 18 casos. Permisos/URL, GET sin escritura, POST/PRG,
+  actor/estado/fecha inyectados, flujo completo, versiones, errores y entradas conservadas,
+  IDOR de tareas/equipos, reanudación, filtros HTMX, eventos en español, XSS, privacidad,
+  CSRF, métodos y reenvío sin duplicar historia.
+- `test_execution_concurrency.py`: 7 casos con conexiones PostgreSQL distintas, barrera
+  y lock_timeout: dos tomas, dos inicios, liberar/avanzar, completar/omitir, cerrar/rectificar
+  tarea general, cambiar intervalo/completar y trasladar/avanzar.
+- `test_execution_migration.py`: datos creados con esquema 0001 migrados a 0002 en BD
+  temporal; configuración, equipo, tarea y fecha conservados, valores operativos iniciales
+  correctos y toma posterior válida. Restaura esquema al terminar.
+
+El smoke operativo crea por formulario/CSRF un preventivo sintético de dos equipos y
+verifica toma/inicio/avance, liberación, retoma/reanudación, completado, omisión, avance
+general, cierre parcial e historial; conserva notas anteriores a liberar y rechaza toma
+administrativa/docente. Requiere servidor local y --confirm-demo. El registro se conserva.
+
+Incidentes corregidos: fixture run ocultaba unittest.TestCase.run; la anotación de progreso
+retiraba el orden implícito (ahora due_date/PK explícitos). Lint/formato corregidos. El
+PostgreSQL local dejó de responder durante la continuación: se reinició sin borrar datos;
+las verificaciones finales se ejecutaron después. Logs en `.local/tests-execution-*.txt`.
+
+No hubo navegador conectado: Browser devolvió «No browser is available» y lista vacía.
+Pendiente revisión visual escritorio/móvil de formularios, errores, checklists, notas,
+detalle grupal, foco/teclado y estados tras liberar/reanudar. HTTP no demuestra DOM ni
+interacción Bootstrap. HTTPS real, CI remoto, backups y hardware QR siguen pendientes.
+
+Límites: no se revierte equipo completado/omitido ni cierre; no se abren ciclos siguientes
+ni se emiten notificaciones. RELEASED conserva cada liberación para futura integración.
+
+## Registro del cuarto incremento: configuración preventiva (fase 6)
 
 **6 de noviembre de 2026, America/Lima.** Prompt completo releído y estado/modelos/
 migraciones/servicios/permisos revisados. PostgreSQL local estaba detenido: primer intento

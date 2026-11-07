@@ -1,4 +1,4 @@
-from .models import MaintenanceRunDevice
+from .models import MaintenanceRun, MaintenanceRunDevice
 
 
 def has_pending_work(device_id):
@@ -6,5 +6,9 @@ def has_pending_work(device_id):
     return MaintenanceRunDevice.objects.filter(
         target__device_id=device_id,
         result="SIN_FINALIZAR",
-        run__state="PENDIENTE_ATENCION",
+        run__state__in=[
+            MaintenanceRun.State.PENDING,
+            MaintenanceRun.State.ASSIGNED,
+            MaintenanceRun.State.RUNNING,
+        ],
     ).exists()

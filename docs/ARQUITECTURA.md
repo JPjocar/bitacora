@@ -64,3 +64,16 @@ Clave UUID de envío y firma del contenido evitan altas duplicadas; UNIQUE resue
 la carrera entre selecciones distintas. La clave no autoriza acceso. Editar configuración
 no cambia ejecuciones existentes. El formset Django limita tareas, permite ordenar/quitar
 y agregar filas por POST sin guardar, incluso sin JavaScript. HTMX solo actualiza filtros.
+
+`maintenance.execution` concentra las operaciones de trabajo. Orden de bloqueo:
+mantenimiento → ejecución → participante/tareas. Primero se comprueban versión y actor
+recargado; toda escritura y evento se confirman juntos. El bloqueo del mantenimiento
+serializa cambios de intervalo contra cálculo por fecha real. El de ejecución impide
+doble toma/cierre y pérdida de avances. Los joins del cierre solo bloquean participantes,
+sin bloquear equipos/ubicaciones ajenos a la operación.
+
+`execution_forms` y `execution_views` proporcionan páginas HTML de confirmación/avance
+con POST y PRG. Cada formulario lleva versión; no se confían actor, estado ni fechas
+automáticas al cliente. La vista compartida de mantenimiento presenta estado/responsable,
+progreso y acciones autorizadas, conservando un único concepto de mantenimiento.
+No se añadió API, notificador, reloj de trabajo ni generador de ciclos.

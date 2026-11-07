@@ -134,3 +134,20 @@ las dos secciones nuevas de CSV/impresión comparten la validación y protecció
 Subquery cuenta reportes válidos por equipo sin consultas por fila. No agrega tablas,
 predicción ni relojes de trabajo. Se reutilizan los flujos QR/código existentes para
 llegar a la ficha y reportar desde ella, sin otro lector o API.
+
+Fase 11: scripts/serve_pilot ejecuta el mismo WSGI con Waitress 3.0.2 en loopback, detrás
+del proxy TLS Nginx parametrizado en deploy. El proxy sirve estáticos y limita login por
+IP; no se añadió una capa de negocio ni un limitador Django en memoria. La confianza de
+X-Forwarded-Proto se configura en Waitress solo para el proxy local; otras cabeceras se limpian.
+requirements-pilot separa esa dependencia del desarrollo. El arranque valida check_pilot
+antes de servir, sin aplicar migraciones o sincronizar roles automáticamente.
+
+core.pilot_backup contiene infraestructura de respaldo, no lógica de módulos: pg_dump
+y manifiesto comparten snapshot, media se archiva aparte, recuperación solo en una BD nueva
+aleatoria. Comandos usan herramientas PG 18 y no exponen contraseñas en argv/logs. La CI
+incluye verificación de recuperación sintética; ejecución remota pendiente.
+
+El middleware mantiene no-store incluso para anónimos y sesiones vencidas, conserva
+cabeceras al convertir HX-Redirect y añade CSP/Permissions-Policy. Vary cubre ambas
+cabeceras de representación HTMX. Dashboard atiende restauración con documento completo.
+No hubo cambios de modelos, reglas operativas ni migraciones en esta fase.

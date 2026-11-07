@@ -1,4 +1,85 @@
-# Verificación del octavo incremento: incidencias y atención correctiva (fase 12)
+# Verificación del noveno incremento: QA, seguridad y preparación piloto (fase 11)
+
+**7 de noviembre de 2026, America/Lima.** Maestro releído completo e inspección previa.
+Clúster local estaba detenido; se inició el clúster aislado, sin tocar el servicio de 5432.
+Base: **415 pruebas OK en 227,000 s**. Primera regresión: **428 OK en 240,581 s**.
+Tras corregir Pillow a 13.0.0: **428 pruebas OK en 225,334 s**, PostgreSQL
+18 real, con las 33 pruebas concurrentes previas. **21 JavaScript OK**. Sin migraciones nuevas.
+
+| Comprobación | Resultado observado |
+| --- | --- |
+| Suite Django | 428 OK: 415 previas + 13 nuevas |
+| Nuevas focalizadas | Seguridad/backup 12 OK en 3,067 s; HTML 1 OK en 3,186 s |
+| Backup final tras guardia de junctions Windows | 7 OK en 0,152 s y nueva restauración de 28 tablas/1 archivo |
+| Ruff / formato / pip check | Correctos; 178 archivos Python con formato correcto |
+| pip-audit 2.10.1 aislado | Sin avisos conocidos en requirements-pilot/requirements-dev consultados; no modifica la aplicación |
+| OSV frontend | Sin avisos para Bootstrap 5.3.8, htmx.org 2.0.11 y html5-qrcode 2.3.8 en la consulta del día |
+| Migraciones | Sin cambios pendientes; no se añadieron modelos ni migraciones |
+| collectstatic | 0 copiados, 182 sin cambios |
+| check_pilot --allow-demo con .local/pilot.env | Deploy check, roles, migraciones, estáticos, administrador y PG runtime restringido correctos |
+| Nginx 1.31.8 -t | Sintaxis y certificado correctos después de ajustar map_hash_bucket_size=64 |
+| smoke_pilot_http por HTTPS | Tres roles, cookies Secure/HttpOnly, CSRF, headers, host, estáticos, sesión vencida y restauración; 308 canónico y 429 con IP falsificada |
+| Backup/restauración real | 28 tablas idénticas, restricciones/secuencias y un archivo media sintético; fuente intacta y BD temporal eliminada |
+| Avisos como runtime | 4 nuevos y después 0 |
+| Cuatro smokes HTTP en 8008 | Regresión de módulos previos, QR decodificado, dos ciclos y los tres cierres correctivos correctos |
+| Flujos de escritura HTTPS en 8443 | Preventivo de dos ciclos y tres cierres correctivos, DEBUG=False y PG runtime sin privilegios administrativos |
+| Tras actualizar Pillow | 428 OK, QR HTTP/HTTPS con lector independiente y auditoría repetida sin avisos |
+| CI | Extensión del workflow para clientes PG 18, dependencia piloto, estáticos y recuperación; remoto no ejecutado |
+
+`test_pilot_security.py` (5): reproduce restauración HTMX incorrecta y no-store perdido
+en sesión vencida, verifica corrección y Vary, CSP/Permissions-Policy, cookies en modo
+seguro y rechazo de next externo al login. Antes del cambio se observaron un fallo y
+dos errores de cabeceras; tras las correcciones los cinco casos pasaron.
+
+`test_pilot_backup.py` (7): rechaza sobrescritura/directorio dentro de media, detecta
+dump alterado antes de restaurar, recupera binario anidado, impide escape ZIP, preflight
+rechaza DEBUG=True y renderer rechaza inyección/puertos repetidos. Se corrigió el fixture
+de ruta Windows que ZipFile normalizaba a ruta segura antes de guardarlo.
+
+`test_pilot_html.py` (1): IDs únicos, labels de controles, idioma, viewport y salto al
+contenido en diez rutas. Es estructura HTML, no una prueba de contraste/teclado/viewport real.
+
+Prueba operativa: `backup_pilot .local/backups/pilot-2026-11-07 --pg-bin ...` y
+`verify_pilot_backup` recuperaron el snapshot completo en una base temporal nueva. El
+manifiesto no contiene filas/contraseñas, solo hashes/conteos; dump y media son privados.
+Se conservaron snapshots de la fase previa y el archivo sintético media como evidencia local.
+
+HTTPS real local: Waitress 3.0.2 en 8081 y Nginx 1.31.8 en 8088/8443, solo loopback.
+CA de prueba explícita, sin verify=False. Los clientes iniciales no enviaban Origin/Referer
+de HTTPS: CSRF los rechazó correctamente; se corrigieron los smokes para representar
+un navegador, manteniendo CSRF activo. La configuración inicial Nginx requirió ampliar
+map_hash_bucket_size a 64 antes de pasar -t. No se relajaron permisos para las pruebas.
+Smoke de login incorrecto confirmó 429 aun variando X-Forwarded-For; no bloqueo por cuenta.
+
+HTTP conservó mantenimiento /5/ con dos ciclos e incidencias /4/, /5/, /6/. HTTPS con
+runtime restringido conservó mantenimiento /6/ y sus dos ciclos e incidencias /7/, /8/, /9/.
+Todos son datos ficticios. Verificados toma/inicio/avances/liberación/reanudación, parcial,
+omisión, siguiente ciclo limpio y cierres solucionada/no reparable/inválida-duplicada.
+
+Logs ignorados: tests-baseline-pilot.txt, tests-pilot-findings.txt, tests-pilot-focused.txt,
+tests-pilot-full.txt, tests-pilot-html.txt, tests-pilot-https.txt, server-pilot-wsgi.txt,
+tests-pilot-full-pillow13.txt, tests-pilot-https-pillow13.txt, tests-pilot-backup-final.txt y
+logs del proxy bajo .local. Credenciales, entorno, certificados, binarios y backup no se
+versionan. Referencias/arranque/parada/recuperación en PILOTO.md.
+
+Auditoría adicional: pip-audit 2.10.1 instalado en .local/audit-venv, aislado del producto,
+con JSON en audit-pilot-python.json/audit-dev-python.json; consulta OSV por nombres/versiones
+npm del frontend en audit-frontend.json. Solo se enviaron identificadores de paquetes
+públicos. La auditoría completa detectó 39 avisos de su informe para Pillow 12.3.0 (no
+se consideran necesariamente 39 fallos independientes). Upstream confirmó 13.0.0 como
+versión corregida; se actualizó el pin y el entorno y se repitieron auditoría/regresión/QR.
+Se conservan informes before-pillow en .local. Cobertura final: 12 paquetes del piloto y
+13 de desarrollo, sin omitidos ni avisos conocidos. Con --disable-pip se pasa explícitamente
+requirements.txt además de sus includes para no omitir la base.
+Sin avisos conocidos en las consultas finales no equivale a ausencia de vulnerabilidades
+ni cubre el sistema operativo o un pentest. Se recomienda repetir antes de cada despliegue.
+
+Browser devolvió «No browser is available» y lista vacía. Pendientes: aceptación visual
+responsive/teclado/CSP, cámara y etiqueta física, certificado/dominio institucional, ACL,
+servicio/tareas reales, copia externa y recuperación cronometrada. La prueba local HTTPS
+autofirmada y la restauración temporal no prueban un despliegue institucional ni el RTO.
+
+## Registro del octavo incremento: incidencias y atención correctiva (fase 12)
 
 **6 de noviembre de 2026, America/Lima.** Prompt completo releído y revisión de modelos,
 migraciones, servicios, permisos y dependencias previa a programar. Base: **353 pruebas

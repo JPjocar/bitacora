@@ -214,3 +214,8 @@ INC_RELEASED, INC_CLOSED, y amplía el CHECK a exactamente una fuente: evento pr
 inscripción/vencimiento o evento de incidencia. Filas anteriores quedan con FK nueva NULL;
 UNIQUE(receptor,event_key) conserva idempotencia. Claves correctivas con prefijo propio.
 No se cambia mantenimiento, calendario, usuario ni dispositivo. El panel sigue sin tablas.
+
+Fase 11: sin modelos ni migraciones nuevos. Backup/restore utilizan snapshots y una
+base temporal externa al esquema de negocio; no añaden tablas de control ni modifican
+la fuente. `check_pilot` solo consulta. MEDIA_ROOT se define explícitamente para respaldar
+el directorio correcto. Las cuentas PostgreSQL de runtime son infraestructura, no roles web.

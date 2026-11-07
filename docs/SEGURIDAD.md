@@ -14,31 +14,33 @@ eludir estas barreras: no es una bitácora criptográfica ni una certificación 
 Configuración: secretos solo por entorno, `.env`/BD local/credenciales excluidos de Git,
 DEBUG falso por defecto, HTTPS y cookies Secure cuando DEBUG=False, HSTS, nosniff,
 X-Frame-Options DENY y zona America/Lima. Configure hosts y orígenes CSRF del dominio real.
-No se confía automáticamente en `X-Forwarded-Proto`; un proxy debe configurarse y verificarse
-antes de habilitar una cabecera de proxy confiable.
+No se confía globalmente en `X-Forwarded-Proto`. En el piloto verificado, Waitress escucha
+en loopback y confía solo en esa cabecera desde 127.0.0.1; Nginx la sobrescribe y elimina
+cabeceras no admitidas. No se habilita SECURE_PROXY_SSL_HEADER para cualquier origen.
 
 No hay autorización para puesta en producción. Antes de un piloto en red:
 
-1. Configurar servidor WSGI/ASGI de producción y proxy HTTPS. `runserver` es solo desarrollo.
+1. Adaptar el WSGI/proxy ya comprobados al host autorizado. `runserver` sigue siendo solo desarrollo.
 2. Crear usuario PostgreSQL con privilegios mínimos; no utilizar el superusuario del clúster local.
-3. Configurar limitación de intentos de login en el proxy (Django Auth no la incorpora).
+3. Revisar el límite del proxy comprobado (5 POST/min/IP, ráfaga 10, 429) para usuarios/NAT reales.
    No se afirma resistencia a fuerza bruta sin ese control. Evitar credenciales en logs.
 4. Generar secretos nuevos, usar DEBUG=False, servir staticfiles tras collectstatic, verificar
    certificado/cookies/cabeceras y ejecutar check --deploy en ese entorno.
 5. Cambiar contraseñas demo o desactivar esas cuentas y revisar acceso del personal autorizado.
 6. Definir política institucional de retención de datos y auditoría; no hay certificación legal.
 
-Backups de PostgreSQL (procedimiento propuesto, restauración todavía no ejecutada):
+Backup/restauración comprobados localmente en fase 11 (cuenta de mantenimiento y clientes PG 18):
 
 ```text
-pg_dump --format=custom --file=bitacora.dump --dbname=bitacora
-createdb bitacora_restore
-pg_restore --exit-on-error --no-owner --dbname=bitacora_restore bitacora.dump
+python scripts/manage_local.py backup_pilot .local/backups/nuevo --pg-bin "C:\Program Files\PostgreSQL\18\bin"
+python scripts/manage_local.py verify_pilot_backup .local/backups/nuevo --pg-bin "C:\Program Files\PostgreSQL\18\bin"
 ```
 
 Ejecutar con variables PG y credenciales del entorno correcto. Proteger el dump como datos
 privados. Verificar usuarios, ubicaciones y eventos restaurados en una BD separada antes de
-considerar válido el respaldo. Este incremento no maneja archivos media.
+considerar válido el respaldo. Fase 11 también respalda/restaura media, aunque el MVP no
+tiene cargas de archivos. Use únicamente copias propias/custodiadas; un dump restaura DDL
+y no debe ejecutarse como contenido de origen desconocido.
 
 Las herramientas de consola y SQL son acceso de confianza: no usar `QuerySet.update`,
 ediciones directas de grupos o `save()` aislados para operaciones de negocio. Invocar
@@ -137,3 +139,36 @@ estado físico automáticamente. Tests verifican seis carreras reales y rollback
 Panel restringe datos/reportes correctivos por permiso completo de incidencias, incluso
 para usuarios que sí tengan permisos del panel previo. Se conservan BOM, neutralización
 de fórmulas, límite de filas, validación de filtros y no-store de las exportaciones.
+
+Fase 11: CSP del origen bloquea scripts externos/eval, objetos y framing; permite imágenes
+QR data/blob, workers y cámara del origen. Estilos inline se conservan por Bootstrap.
+Permissions-Policy limita cámara a self y deshabilita micrófono/geolocalización. Pendiente
+verificar cámara/Bootstrap bajo esa política en un navegador real; no se presume certificación.
+
+No-store se aplica también a anónimos/login/sesiones vencidas. La respuesta HX-Redirect
+conserva cookies/cabeceras originales. Vary incluye HX-Request y HX-History-Restore-Request;
+restaurar el dashboard retorna documento completo. Pruebas reprodujeron los fallos previos
+y comprobaron sus correcciones. Cookies Secure/HttpOnly, CSRF y permisos se verificaron por HTTPS.
+
+Proxy conserva host canónico al redirigir, valida host de HTTPS y limita POST web/admin
+usando IP de conexión, sin confiar en X-Forwarded-For aportado por cliente. Se observó 429
+con IP falsificada. No se creó bloqueo de cuentas ni limitador Django en memoria.
+Access log omite query/body/cookies. La cuenta PG runtime no es superusuario ni crea
+roles/bases; preflight comprueba esto y la preparación de la aplicación sin escribir.
+
+Backup consistente mediante snapshot compartido con pg_dump y manifiesto de integridad;
+restauración solo en BD nueva con nombre generado y prefijo protegido, eliminada al terminar.
+No acepta un destino existente ni usa restauración destructiva en la fuente. ZIP no puede
+escapar de su carpeta nueva ni copiar symlinks. Se verificaron filas/constraints/secuencias
+y media, sin volcar datos en logs. Backup/secretos requieren ACL/copia cifrada y permisos
+separados de runtime. SQL de backup exige operadores autorizados; no es una ruta web.
+
+La preparación local no instala servicios ni publica dominios. PILOTO.md distingue lo
+probado de HTTPS institucional, ACL, tareas, revisión física y recuperación operativa pendientes.
+
+Auditoría de dependencias del 7 de noviembre de 2026: pip-audit 2.10.1 aislado contra los
+requirements fijados detectó avisos en Pillow 12.3.0; se actualizó a 13.0.0 tras confirmar
+la corrección con el proyecto. La repetición completa (base explícita y extras) no devolvió
+avisos para los 12 paquetes de piloto/13 de desarrollo, sin omitidos. OSV tampoco los devolvió
+para Bootstrap/HTMX/html5-qrcode. No se usó --fix automático. Es una consulta de catálogos,
+no un pentest/certificación ni garantía futura; repetirla antes de cada despliegue.

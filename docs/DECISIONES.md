@@ -143,6 +143,32 @@
 61. No se actualiza automáticamente estado físico ni recurrencia preventiva. Cambiar estado
     continúa en assets.save_device y exige motivo. Traslado no cierra trabajo correctivo.
 
+62. Fase 11: Waitress 3.0.2 en requirements-pilot (un paquete, cero dependencias nuevas
+    transitivas) para WSGI Windows/Linux. No se sustituye el monolito ni se publica runserver.
+63. Nginx con TLS, estáticos y límite de POST login real por IP (5/min, ráfaga 10). El proxy
+    local limpia/sobrescribe cabeceras; Waitress solo confía en proto de 127.0.0.1. Sin
+    confianza global Django ni bloqueo de cuentas. Windows Nginx solo validado para piloto local.
+64. Preflight obligatorio, roles/migraciones/estáticos/administrador/origen correctos y PG
+    runtime sin superusuario/CREATEDB/CREATEROLE. Migración y backup usan otra cuenta.
+65. Un solo archivo de entorno explícito por proceso, sin valores impresos ni secretos
+    en argumentos. --allow-demo documenta la excepción de demostración controlada. No
+    se instalan servicios/tareas ni se abre una interfaz externa automáticamente.
+66. Dos fallos reproducidos antes del arreglo: dashboard devolvía fragmento al restaurar
+    historial HTMX y sesión vencida perdía no-store. Se conservan respuesta/cookies/cabeceras;
+    no-store abarca login/anónimos y Vary incluye ambas cabeceras de HTMX.
+67. CSP solo scripts locales, sin eval; estilos inline por Bootstrap y cámara/img/blob
+    permitidos para QR. La revisión real de cámara/Bootstrap/CSP continúa como aceptación manual.
+68. Backup custom de PostgreSQL y hashes en el mismo snapshot, media aparte con verificación.
+    Restaurar solo en una BD aleatoria nueva, comprobar filas/constraints/secuencias y borrarla;
+    nunca aceptar nombre de base fuente o sobrescribir. No tablas extra ni paquetes de backup.
+69. Prueba estructural HTML valida IDs/labels en diez rutas; no se presenta como revisión
+    responsive o de teclado. Sin navegador conectado, la aceptación manual queda en PILOTO.md.
+
+70. Auditoría aislada detectó avisos para Pillow 12.3.0; se actualiza a 13.0.0, versión
+    corregida según upstream, y se repite regresión/QR/auditoría. Con --disable-pip se
+    pasa requirements.txt explícitamente junto a los archivos que lo incluyen, comprobando
+    cobertura de 12 paquetes del piloto y 13 de desarrollo sin omitidos. No se ocultan avisos.
+
 Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 
 - [Django 5.2: versiones](https://docs.djangoproject.com/en/5.2/releases/), [autenticación](https://docs.djangoproject.com/en/5.2/topics/auth/default/).
@@ -164,3 +190,9 @@ Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 
 Las versiones realmente instaladas están fijadas en requirements, sin asumir que sean
 las últimas disponibles en futuras fechas. Los cambios futuros deben revisar las fuentes.
+
+Para la infraestructura piloto también se consultaron [Waitress](https://docs.pylonsproject.org/projects/waitress/en/latest/arguments.html),
+[Nginx limit_req](https://nginx.org/en/docs/http/ngx_http_limit_req_module.html),
+[Nginx Windows](https://nginx.org/en/docs/windows.html),
+[pg_dump](https://www.postgresql.org/docs/18/app-pgdump.html) y
+[pg_restore](https://www.postgresql.org/docs/18/app-pgrestore.html). Detalle en PILOTO.md.

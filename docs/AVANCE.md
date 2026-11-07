@@ -1,4 +1,4 @@
-# Avance al 6 de noviembre de 2026 (Lima)
+# Avance al 7 de noviembre de 2026 (Lima)
 
 | Área | Estado |
 | --- | --- |
@@ -23,9 +23,38 @@
 | Ficha integrada | Auditoría física, incidencias y preventivos paginados; docente solo ve sus reportes |
 | Concurrencia | Treinta y tres casos PostgreSQL; seis nuevos de reporte, toma, notas, liberación y cierre |
 | Visual | Templates responsive implementados; revisión en navegador pendiente por falta de navegador conectado |
-| Despliegue | Configuración y check de seguridad; no se publicó ni validó HTTPS real |
-| CI | Workflow incluido; ejecución en GitHub pendiente |
+| Piloto local | Waitress/DEBUG=False con cuenta PG restringida y Nginx HTTPS en loopback; tres roles y bloqueo 429 verificados |
+| Backup/restauración | 28 tablas y un archivo media restaurados/verificados en BD temporal; fuente conservada |
+| Despliegue institucional | No publicado; dominio, certificado, ACL, servicios/tareas y aceptación pendientes |
+| CI | Ampliado con cliente PostgreSQL 18 y recuperación; ejecución en GitHub pendiente |
 | Otros módulos | No implementados |
+
+Noveno incremento (fase 11): 415 pruebas de base OK y **428 Django + 21 JavaScript OK**
+al terminar; 33 carreras PostgreSQL conservadas. Dos fallos reproducidos/corregidos:
+restauración HTMX del dashboard y caché de sesión vencida. CSP/Permissions-Policy añadidas,
+sin bloquear la cámara del origen. Comprobación estructural HTML en diez rutas.
+
+Nuevos comandos `check_pilot`, `backup_pilot`, `verify_pilot_backup`; módulo de backup
+en core, servidores/configuración en scripts/deploy y dependencia separada requirements-pilot.
+Sin modelos ni migraciones nuevos. MEDIA_ROOT explícito para no copiar el proyecto como media.
+Pillow actualizado de 12.3.0 a 13.0.0 tras detectar avisos: auditoría final de 12 paquetes
+del piloto/13 de desarrollo sin omitidos ni avisos conocidos; frontend sin avisos en OSV.
+Backup/restore real: 28 tablas iguales, secuencias/restricciones y un archivo sintético,
+BD temporal eliminada. Preflight runtime sin privilegios administrativos correcto;
+avisos con cuenta runtime 4 nuevos y luego 0. HTTPS y tres roles verificados, 429 resiste
+cabeceras de IP falsificadas. Procedimiento y límites en PILOTO.md.
+
+Archivos: middleware core, vista dashboard, settings, tres comandos de gestión y
+pilot_backup.py; manage_local.py con --env-file; scripts configure_proxy/serve_pilot/
+smoke_pilot_http; soporte HTTPS en smoke_execution_http; templates/env/SQL de deploy;
+tres archivos test_pilot_*.py; workflow CI, requirements-pilot y documentación.
+
+Preparación local verificable entregada. Pendientes que requieren entorno/personas:
+navegador responsive/teclado/CSP/cámara, etiquetas físicas, dominio/certificado autorizado,
+ACL, recuperación cronometrada, servicio y tareas del equipo final y CI remoto. No se
+afirma aceptación institucional. No se instaló servicio ni se publicó fuera de loopback.
+
+## Registro del octavo incremento
 
 Octavo incremento (fase 12, solicitada por el usuario): `incidents/0001_initial` y
 `notifications/0002_incident_notifications` aplicadas, dos tablas nuevas y una FK nullable
@@ -45,7 +74,7 @@ y seis plantillas nuevas en `templates/incidents/`. Cinco archivos nuevos de pru
 `tests/incident_helpers.py`, actualización de `test_notifications.py`, smoke HTTP nuevo
 y ajuste del smoke de dashboard. README y nueve documentos de docs actualizados.
 
-**415 pruebas Django aprobadas** (353 previas + 62 nuevas) y **21 pruebas JavaScript**.
+En ese incremento: **415 pruebas Django aprobadas** (353 previas + 62 nuevas) y **21 JavaScript**.
 Incluye 33 casos concurrentes PostgreSQL y conservación de historial al migrar.
 
 Las pruebas y resultados efectivos se registran en PRUEBAS.md. No se presenta revisión
@@ -54,8 +83,8 @@ visual simulada ni se afirma validación en el instituto.
 Para continuar: leer prompt, README, este archivo y reglas; ejecutar las pruebas
 existentes en PostgreSQL antes de modificar. No reemplazar el usuario personalizado,
 eliminar migraciones aplicadas ni escribir directamente en datos de otro módulo.
-Siguiente incremento recomendado: QA visual responsive, accesibilidad y preparación del
-piloto bajo nuevo encargo; no se ejecutó un despliegue. Mantener integración explícita
+Continuidad: completar la aceptación visual/física en el entorno autorizado; no se
+ejecutó un despliegue institucional. Mantener integración explícita
 de avisos y claves idempotentes. La fecha vigente preventiva se deriva de la
 fecha real más reciente por equipo más el intervalo actual; next_due_date y due_date
 de ciclos previos son copias históricas que no se reescriben. Mantener el índice de una

@@ -186,9 +186,9 @@ del recurso para ver el estado actual. La lectura se conserva si vuelve la misma
 **Programación piloto Windows (pendiente de activar en el equipo que lo alojará):**
 en Programador de tareas cree una tarea con repetición cada hora e inicio diario.
 Programa: ruta absoluta `C:\Users\jpjoc\Desktop\bitacora\.venv\Scripts\python.exe`.
-Argumentos: `scripts/manage_local.py generate_notifications`.
+Argumentos: `scripts/manage_local.py --env-file .local/pilot.env generate_notifications`.
 Iniciar en: `C:\Users\jpjoc\Desktop\bitacora`. Use una cuenta autorizada para leer el
-`.env` y conectar a la base, sin poner credenciales en argumentos. Configure no iniciar
+archivo de entorno del piloto y conectar como runtime, sin secretos en argumentos. Configure no iniciar
 otra instancia si sigue en ejecución y revise resultado 0; un fallo de fechas devuelve
 código no cero e identifica el mantenimiento. La base y el equipo deben estar encendidos.
 No se instaló una tarea del sistema durante esta entrega. El despliegue real debe usar
@@ -253,3 +253,20 @@ El panel añade tablas/reportes **Incidencias** y **Equipos con incidencias recu
 El estado de incidencia solo filtra ese módulo. El período filtra cierres manteniendo
 abiertos visibles; para recurrencia cuenta fechas de reporte: al menos dos por equipo,
 excluyendo inválidos/duplicados. Es una consulta histórica, sin diagnóstico ni predicción.
+
+## Preparación final y recuperación
+
+La fase 11 incorpora comprobación previa, servidor WSGI, proxy HTTPS con límite de login
+y herramientas de backup/restauración. Use la [guía operativa del piloto](PILOTO.md).
+`check_pilot` rechaza DEBUG=True, roles/migraciones/estáticos incompletos y una cuenta
+PostgreSQL administrativa. `--allow-demo` es solo para la demostración sintética.
+
+Las respuestas privadas, login y sesiones vencidas no se almacenan en caché. Si al
+acceder recibe 429, espere unos minutos: el proxy limita intentos de login por IP; no se
+perdió su cuenta. La cámara requiere permisos/HTTPS y ahora una política de origen
+explícita, aún pendiente de comprobación en navegador/móvil real.
+
+Antes de una demostración guarde un backup nuevo y ejecute verify_pilot_backup. La
+verificación restaura en una base temporal propia y no cambia la fuente. Se comprobó
+recuperación real de 28 tablas y un archivo sintético; no sustituye la copia externa,
+custodia de secretos o medición de recuperación en el equipo final.

@@ -37,4 +37,14 @@ RF-001 a RF-025 tienen implementación y evidencia funcional local según alcanc
 fila; ello no equivale a validación institucional ni despliegue. El dashboard incorpora
 pendientes/en atención/cerradas y equipos con al menos dos reportes válidos en período,
 sin productividad individual. Continúan pendientes revisión visual/física, CI remoto,
-HTTPS, restauración de backups y activación de tarea horaria. Cierres sin reversión en MVP.
+HTTPS institucional y activación de tarea horaria. HTTPS local con control de login y
+restauración de backup ya verificados en fase 11; ver PILOTO.md. Cierres sin reversión en MVP.
+
+| Preparación fase 11 | Criterio | Evidencia |
+| --- | --- | --- |
+| QA integral | Regresión PostgreSQL/JS, flujos completos HTTP y HTTPS con tres roles | 428 Django + 21 JS, smokes y PRUEBAS.md |
+| Seguridad de respuesta | CSP, cámara del origen, no-store y restauración HTMX | test_pilot_security.py, smoke HTTPS |
+| HTML estructural | IDs únicos, etiquetas/idioma/viewport en diez rutas | test_pilot_html.py; visual pendiente |
+| Operación | WSGI, TLS, login 429, PG runtime restringido, preflight readonly | check_pilot, configure_proxy, serve_pilot, smoke_pilot_http |
+| Recuperación | Snapshot, backup/media e integridad; restauración temporal sin tocar fuente | 28 tablas/1 archivo y test_pilot_backup.py |
+| Aceptación final | Navegador/móvil, cámara, impresión, host autorizado y operación institucional | Procedimiento en PILOTO.md, pendiente de ejecución real |

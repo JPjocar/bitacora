@@ -24,17 +24,18 @@ servicios, permisos ni dependencias. El prompt permanece sin modificaciones.
 - Traslados físicos con origen obtenido en servidor, destino activo, motivo, fecha efectiva,
   historial protegido y actualización atómica de ubicación. No equivalen a reparación.
 
-El octavo incremento incorpora reporte desde la ficha del equipo tras buscar por QR/código,
-toma exclusiva, notas técnicas, liberación y cierre diferenciado. Incluye avisos al
-personal y al reportante, historial por equipo e indicadores/reportes de incidencias.
-La base previa pasó 353 pruebas; la suite actual pasó **415 Django y 21 JavaScript**.
-Dos tablas nuevas (`Incident`, `IncidentEvent`) y extensión de Notification, sin paquetes
-adicionales. Evidencia y límites en `docs/PRUEBAS.md`.
+El noveno incremento prepara el piloto: regresión de **428 pruebas Django y 21 JavaScript**,
+corrección de restauración HTMX/caché de sesiones vencidas, cabeceras de protección,
+WSGI con Waitress, proxy HTTPS con límite de login y backup/restauración verificados.
+La auditoría detectó avisos en Pillow 12.3.0 y se actualizó a 13.0.0, con nueva regresión.
+Sin cambios de modelos ni migraciones nuevas. Evidencia en `docs/PRUEBAS.md` y procedimiento
+completo en [docs/PILOTO.md](docs/PILOTO.md). La revisión visual/física e instalación institucional
+siguen pendientes; no se presenta esta preparación local como un despliegue oficial.
 
 ## Entorno verificado
 
 Python 3.12.13; Django 5.2.19; PostgreSQL 18; psycopg 3.3.8; django-htmx 1.29.0;
-Bootstrap 5.3.8; HTMX 2.0.11; qrcode 8.2; Pillow 12.3.0; html5-qrcode 2.3.8;
+Bootstrap 5.3.8; HTMX 2.0.11; qrcode 8.2; Pillow 13.0.0; html5-qrcode 2.3.8;
 Ruff 0.17.4 y zxing-cpp 3.1.1 (solo pruebas). Dependencias completas fijadas en
 `requirements.txt` y `requirements-dev.txt`. No se usa SQLite.
 
@@ -193,6 +194,18 @@ Con el servidor y los datos demo disponibles:
 .\.venv\Scripts\python.exe scripts/smoke_incidents_http.py --confirm-demo
 ```
 
+Para el piloto con DEBUG=False use `requirements-pilot.txt`, una cuenta PostgreSQL de
+ejecución restringida y el proxy revisado; no publique runserver. Configuración y pasos:
+[guía de piloto](docs/PILOTO.md). Los comandos de operación aceptan un entorno explícito:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/manage_local.py --env-file .local/pilot.env check_pilot --allow-demo
+.\.venv\Scripts\python.exe scripts/serve_pilot.py --env-file .local/pilot.env --allow-demo
+# Backup con la cuenta de mantenimiento, nunca sobrescribe la base fuente:
+.\.venv\Scripts\python.exe scripts/manage_local.py backup_pilot .local/backups/nuevo --pg-bin 'C:\Program Files\PostgreSQL\18\bin'
+.\.venv\Scripts\python.exe scripts/manage_local.py verify_pilot_backup .local/backups/nuevo --pg-bin 'C:\Program Files\PostgreSQL\18\bin'
+```
+
 Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislado:
 
 ```powershell
@@ -204,12 +217,14 @@ Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislad
 - [Arquitectura](docs/ARQUITECTURA.md), [modelo de datos](docs/MODELO_DATOS.md), [decisiones](docs/DECISIONES.md).
 - [Reglas](docs/REGLAS_NEGOCIO.md), [requisitos](docs/REQUERIMIENTOS.md), [manual](docs/MANUAL.md).
 - [Pruebas](docs/PRUEBAS.md), [seguridad](docs/SEGURIDAD.md), [avance](docs/AVANCE.md).
+- [Preparación, operación y recuperación del piloto](docs/PILOTO.md).
 
-Pendientes: inspección visual real en escritorio/móvil, despliegue HTTPS, limitación
-de intentos de login en el proxy y prueba de restauración de backups.
+Pendientes: inspección visual real en escritorio/móvil y pruebas físicas, dominio/certificado
+institucional, ACL y despliegue autorizado, arranque/tareas y CI remoto. HTTPS local, límite
+de login y restauración de backup sí fueron comprobados; ver límites en PILOTO.md.
 Active la tarea periódica de avisos según `docs/MANUAL.md`; sin ella los
 avisos de fecha no se actualizan. El cierre o fecha real de un equipo completado
-no se revierte en este MVP; tampoco se reabren incidencias cerradas. El siguiente incremento
-recomendado es QA visual y preparación del piloto, bajo nuevo encargo. Los traslados
+no se revierte en este MVP; tampoco se reabren incidencias cerradas. El siguiente paso
+recomendado es aceptación visual/física y operación en el equipo autorizado. Los traslados
 conservan los resultados preventivos. Los ciclos siguientes se crean manualmente.
 Quedan pendientes cámara física, lectura móvil y una impresión real de etiquetas.

@@ -6,6 +6,10 @@ TECHNICIAN = "Técnico"
 TEACHER = "Docente"
 ROLE_PERMISSIONS = {
     ADMINISTRATOR: {
+        "incidents.add_incident",
+        "incidents.view_incident",
+        "incidents.override_incident",
+        "incidents.close_unrepairable_incident",
         "notifications.view_notification",
         "maintenance.create_next_run",
         "maintenance.add_maintenance",
@@ -33,6 +37,10 @@ ROLE_PERMISSIONS = {
         "assets.add_movement",
     },
     TECHNICIAN: {
+        "incidents.add_incident",
+        "incidents.view_incident",
+        "incidents.take_incident",
+        "incidents.attend_incident",
         "notifications.view_notification",
         "maintenance.create_next_run",
         "maintenance.take_maintenance",
@@ -46,7 +54,12 @@ ROLE_PERMISSIONS = {
         "assets.view_movement",
         "assets.add_movement",
     },
-    TEACHER: {"assets.view_device_limited"},
+    TEACHER: {
+        "assets.view_device_limited",
+        "incidents.add_incident",
+        "incidents.view_own_incident",
+        "notifications.view_notification",
+    },
 }
 
 

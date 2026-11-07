@@ -1,0 +1,29 @@
+{% extends 'base.html' %}{% load labels %}
+{% block title %}Incidencia #{{ incident.pk }} · Bitacora{% endblock %}
+{% block content %}
+<nav aria-label="Ruta de navegación"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'incidents:list' %}">Incidencias</a></li><li class="breadcrumb-item active" aria-current="page">#{{ incident.pk }}</li></ol></nav>
+<h1>Incidencia #{{ incident.pk }}</h1><p class="h5">{{ incident.device.code }} · {{ incident.device.name }}</p>
+<p><span class="badge text-bg-secondary">{{ incident.get_state_display }}</span>{% if incident.outcome %} <strong>{{ incident.get_outcome_display }}</strong>{% endif %}</p>
+<div class="d-flex flex-wrap gap-2 my-3">
+{% if device_visible %}<a class="btn btn-outline-secondary" href="{% url 'assets:detail' incident.device.public_id %}">Ficha e historial del equipo</a>{% endif %}
+{% if incident.state != 'CERRADA' %}
+  {% if incident.state == 'PENDIENTE_ATENCION' and perms.incidents.take_incident %}<a class="btn btn-primary" href="{% url 'incidents:action' incident.pk 'tomar' %}">Tomar incidencia</a>{% endif %}
+  {% if can_control %}
+    {% if incident.state == 'EN_ATENCION' %}<a class="btn btn-primary" href="{% url 'incidents:action' incident.pk 'nota' %}">Registrar nota técnica</a><a class="btn btn-outline-primary" href="{% url 'incidents:action' incident.pk 'liberar' %}">Liberar incidencia</a>{% endif %}
+    <a class="btn btn-outline-primary" href="{% url 'incidents:action' incident.pk 'cerrar' %}">{% if incident.state == 'PENDIENTE_ATENCION' %}Descartar reporte inválido{% else %}Cerrar incidencia{% endif %}</a>
+  {% endif %}
+{% endif %}
+{% if full_access and device_visible and perms.assets.update_device_operation %}<a class="btn btn-outline-secondary" href="{% url 'assets:operation' incident.device.public_id %}">Actualizar estado del equipo</a>{% endif %}
+</div>
+<div class="card card-body"><dl class="row mb-0">
+<dt class="col-sm-4">Síntomas reportados</dt><dd class="col-sm-8 preserve-lines">{{ incident.symptoms }}</dd>
+<dt class="col-sm-4">Reportado</dt><dd class="col-sm-8">{{ incident.created_at|date:'d/m/Y H:i' }} · Lima{% if full_access %} · {{ incident.reporter.username }}{% endif %}</dd>
+<dt class="col-sm-4">Responsable</dt><dd class="col-sm-8">{{ incident.responsible.username|default:'Sin asignar' }}</dd>
+{% if incident.closed_at %}<dt class="col-sm-4">Cierre</dt><dd class="col-sm-8">{{ incident.closed_at|date:'d/m/Y H:i' }} · {{ incident.get_outcome_display }}</dd><dt class="col-sm-4">Resumen del cierre</dt><dd class="col-sm-8 preserve-lines">{{ incident.closure_summary }}</dd>{% endif %}
+</dl></div>
+<p class="small text-secondary mt-3">La atención correctiva se registra aquí. Sus resultados no completan preventivos ni cambian sus vencimientos.</p>
+<section class="mt-4"><h2 class="h4">Historial de la incidencia</h2>
+{% for event in events %}<article class="border rounded p-3 mb-2"><h3 class="h6">{{ event.action|event_action }}</h3><p class="small text-secondary mb-1">{{ event.created_at|date:'d/m/Y H:i' }} · Lima{% if full_access %} · {{ event.actor.username }}{% endif %}</p>
+{% if full_access %}{% if event.changes %}<dl class="mb-0 small">{% for field, values in event.changes.items %}<dt>{{ field|field_label }}</dt><dd class="preserve-lines">{{ values.antes|event_value }} → {{ values.después|event_value }}</dd>{% endfor %}</dl>{% endif %}{% endif %}</article>{% empty %}<p>No hay eventos.</p>{% endfor %}
+{% include 'components/pagination.html' with page_obj=events %}</section>
+{% endblock %}

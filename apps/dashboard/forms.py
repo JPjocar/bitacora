@@ -2,6 +2,7 @@ from django import forms
 
 from apps.assets.models import Category, Device
 from apps.core.forms import BootstrapFormMixin
+from apps.incidents.models import Incident
 from apps.locations.models import Location
 from apps.maintenance.models import MaintenanceRun
 
@@ -11,6 +12,8 @@ SECTIONS = [
     ("unconfigured", "Sin preventivo periódico"),
     ("omissions", "Omisiones pendientes"),
     ("devices", "Inventario"),
+    ("incidents", "Incidencias"),
+    ("recurrent_incidents", "Equipos con incidencias recurrentes"),
 ]
 
 
@@ -44,6 +47,21 @@ class DashboardFilters(BootstrapFormMixin, forms.Form):
         label="Hasta", required=False, widget=forms.DateInput(attrs={"type": "date"})
     )
     section = forms.ChoiceField(label="Tabla / reporte", choices=SECTIONS, required=False)
+    incident_state = forms.ChoiceField(
+        label="Estado de incidencia",
+        choices=[("", "Todos")] + list(Incident.State.choices),
+        required=False,
+    )
+
+    def __init__(self, *args, include_incidents=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not include_incidents:
+            self.fields.pop("incident_state")
+            self.fields["section"].choices = [
+                choice
+                for choice in SECTIONS
+                if choice[0] not in {"incidents", "recurrent_incidents"}
+            ]
 
     def clean(self):
         data = super().clean()

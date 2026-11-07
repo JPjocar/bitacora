@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "apps.maintenance",
     "apps.notifications",
     "apps.dashboard",
+    "apps.incidents",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

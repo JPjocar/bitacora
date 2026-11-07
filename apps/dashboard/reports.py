@@ -14,6 +14,17 @@ def report_columns(section):
         "unconfigured": ["Código", "Equipo", "Tipo", "Ubicación", "Estado"],
         "devices": ["Código", "Equipo", "Tipo", "Ubicación", "Estado"],
         "omissions": ["Código", "Equipo", "Preventivo", "Último ciclo omitido", "Fecha de omisión"],
+        "incidents": [
+            "Reporte",
+            "Código",
+            "Equipo",
+            "Síntomas",
+            "Estado",
+            "Resultado",
+            "Reporte (Lima)",
+            "Cierre (Lima)",
+        ],
+        "recurrent_incidents": ["Código", "Equipo", "Ubicación", "Reportes válidos en período"],
     }[section]
 
 
@@ -22,6 +33,19 @@ def _timestamp(value):
 
 
 def report_values(section, row):
+    if section == "incidents":
+        return [
+            row.pk,
+            row.device.code,
+            row.device.name,
+            row.symptoms,
+            row.get_state_display(),
+            row.get_outcome_display(),
+            _timestamp(row.created_at),
+            _timestamp(row.closed_at),
+        ]
+    if section == "recurrent_incidents":
+        return [row.code, row.name, row.location.name, row.incident_count]
     if section == "deadlines":
         return [
             row.target.device.code,

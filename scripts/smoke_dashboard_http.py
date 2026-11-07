@@ -34,15 +34,15 @@ def main():
         client.login(username, credentials[username])
         expected = 403 if username == "demo_docente" else 200
         for path in (
-            "/avisos/",
-            "/avisos/contador/",
             "/panel/",
             "/panel/exportar/",
             "/panel/imprimir/",
         ):
             assert client.request(path)[0] == expected, (username, path)
+        for path in ("/avisos/", "/avisos/contador/"):
+            assert client.request(path)[0] == 200, (username, path)
         if expected == 403:
-            assert "notification-counter" not in client.request("/")[1]
+            assert "notification-counter" in client.request("/")[1]
             continue
         for section in ("deadlines", "runs", "unconfigured", "omissions", "devices"):
             status, html, _ = client.request("/panel/?section=" + section)
@@ -64,9 +64,11 @@ def main():
             assert client.request(own_read_path, {"csrfmiddlewaretoken": token})[0] == 404
         own_read_path = path
         status, _, url = client.request(path, {"csrfmiddlewaretoken": token})
-        assert status == 200 and "/mantenimientos/" in url
+        assert status == 200 and urlsplit(url).path.startswith(
+            ("/mantenimientos/", "/incidencias/")
+        )
         print(f"HTTP correcto: {username}; panel, cinco reportes, avisos, lectura propia y CSRF.")
-    print("HTTP correcto: docente sin acceso a avisos, panel ni reportes.")
+    print("HTTP correcto: docente con bandeja propia, sin acceso a panel ni reportes.")
 
 
 if __name__ == "__main__":

@@ -19,11 +19,12 @@ def _access(actor):
 @login_required
 @require_safe
 def panel(request):
-    _access(request.user)
-    form = DashboardFilters(request.GET)
+    actor = _access(request.user)
+    include_incidents = actor.has_perm("incidents.view_incident")
+    form = DashboardFilters(request.GET, include_incidents=include_incidents)
     context = {"form": form}
     if form.is_valid():
-        context.update(dashboard_data(form.cleaned_data))
+        context.update(dashboard_data(form.cleaned_data, include_incidents=include_incidents))
         context["page_obj"] = Paginator(context.pop("rows"), 20).get_page(request.GET.get("page"))
         context["section_label"] = dict(SECTIONS)[context["section"]]
     template = "dashboard/results.html" if request.htmx else "dashboard/panel.html"
@@ -33,11 +34,12 @@ def panel(request):
 @login_required
 @require_safe
 def report(request, output):
-    _access(request.user)
-    form = DashboardFilters(request.GET)
+    actor = _access(request.user)
+    include_incidents = actor.has_perm("incidents.view_incident")
+    form = DashboardFilters(request.GET, include_incidents=include_incidents)
     if not form.is_valid():
         return render(request, "dashboard/panel.html", {"form": form}, status=400)
-    data = dashboard_data(form.cleaned_data)
+    data = dashboard_data(form.cleaned_data, include_incidents=include_incidents)
     if output == "csv" and data["invalid_targets"]:
         return HttpResponseBadRequest(
             "Hay fechas preventivas inválidas. Revise las advertencias del panel antes de exportar."

@@ -69,7 +69,22 @@ def device_detail(request, public_id):
         events = Paginator(device.events.select_related("actor"), 20).get_page(
             request.GET.get("page")
         )
-    return render(request, "assets/device_detail.html", {"device": device, "events": events})
+    context = {"device": device, "events": events}
+    if request.user.has_perm("incidents.view_incident") or request.user.has_perm(
+        "incidents.view_own_incident"
+    ):
+        from apps.incidents.selectors import visible_incidents
+
+        context["incident_history"] = Paginator(
+            visible_incidents(request.user).filter(device=device), 10
+        ).get_page(request.GET.get("incident_page"))
+    if request.user.has_perm("maintenance.view_maintenance"):
+        from apps.maintenance.selectors import device_preventive_history
+
+        context["preventive_history"] = Paginator(
+            device_preventive_history(device.pk), 10
+        ).get_page(request.GET.get("preventive_page"))
+    return render(request, "assets/device_detail.html", context)
 
 
 @login_required

@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Incidencias · Bitacora{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between gap-2 mb-3"><h1>Incidencias</h1>{% if perms.incidents.add_incident %}<a class="btn btn-primary align-self-start" href="{% url 'assets:scanner' %}">Buscar equipo por QR o código para reportar</a>{% endif %}</div>
+{% if not perms.incidents.view_incident %}<p class="text-secondary">Aquí puede seguir únicamente sus propios reportes.</p>{% endif %}
+<form method="get" class="card card-body mb-4" hx-get="{% url 'incidents:list' %}" hx-target="#incident-results" hx-swap="outerHTML" hx-push-url="true"><div class="row g-3">{% for field in form %}<div class="col-md-4"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}</div><div class="mt-3"><button class="btn btn-primary">Filtrar</button> <a class="btn btn-outline-secondary" href="{% url 'incidents:list' %}">Limpiar</a></div></form>
+{% include 'incidents/results.html' %}
+{% endblock %}

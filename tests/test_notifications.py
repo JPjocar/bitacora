@@ -246,10 +246,12 @@ class NotificationTests(TestCase):
         other.refresh_from_db()
         self.assertIsNone(other.read_at)
 
-    def test_teacher_revoked_and_inactive_users_are_denied(self):
+    def test_teacher_can_receive_incident_notices_but_revoked_and_inactive_users_are_denied(self):
         for url in [reverse("notifications:inbox"), reverse("notifications:counter")]:
             self.client.force_login(self.teacher)
-            self.assertEqual(self.client.get(url).status_code, 403)
+            self.assertEqual(self.client.get(url).status_code, 200)
+        self.teacher.groups.clear()
+        self.assertEqual(self.client.get(reverse("notifications:inbox")).status_code, 403)
         self.technician.is_active = False
         self.technician.save(update_fields=["is_active"])
         with self.assertRaises(PermissionDenied):

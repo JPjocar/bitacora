@@ -7,6 +7,11 @@ register = template.Library()
 def event_action(value):
     return {
         "TAKEN": "Mantenimiento tomado",
+        "INC_CREATED": "Incidencia reportada",
+        "INC_TAKEN": "Incidencia tomada",
+        "INC_RELEASED": "Incidencia liberada",
+        "INC_NOTE": "Nota técnica registrada",
+        "INC_CLOSED": "Incidencia cerrada",
         "STARTED": "Trabajo iniciado",
         "RESUMED": "Trabajo reanudado",
         "RELEASED": "Responsable liberado",
@@ -24,6 +29,11 @@ def event_action(value):
 def field_label(value):
     return {
         "username": "Usuario",
+        "symptoms": "Síntomas",
+        "note": "Nota técnica interna",
+        "summary": "Resumen",
+        "outcome": "Resultado de cierre",
+        "incident_version": "Versión de la incidencia",
         "first_name": "Nombres",
         "last_name": "Apellidos",
         "email": "Correo",
@@ -82,6 +92,13 @@ def permission_label(permission):
     return {
         "accounts.add_user": "Crear usuarios",
         "notifications.view_notification": "Consultar y marcar sus notificaciones internas",
+        "incidents.add_incident": "Reportar incidencias desde un equipo",
+        "incidents.view_incident": "Consultar todas las incidencias e historial técnico",
+        "incidents.view_own_incident": "Consultar y seguir sus propias incidencias",
+        "incidents.take_incident": "Tomar incidencias como técnico",
+        "incidents.attend_incident": "Atender las incidencias de las que es responsable",
+        "incidents.override_incident": "Intervenir en incidencias con motivo administrativo",
+        "incidents.close_unrepairable_incident": "Cerrar como no reparable con justificación",
         "maintenance.add_maintenance": "Configurar mantenimientos preventivos",
         "maintenance.create_next_run": "Crear manualmente la siguiente ejecución preventiva",
         "maintenance.take_maintenance": "Tomar mantenimiento como técnico",

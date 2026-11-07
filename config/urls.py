@@ -11,6 +11,7 @@ urlpatterns = [
     path("mantenimientos/", include("apps.maintenance.urls")),
     path("avisos/", include("apps.notifications.urls")),
     path("panel/", include("apps.dashboard.urls")),
+    path("incidencias/", include("apps.incidents.urls")),
     path("admin/", admin.site.urls),
 ]
 handler403 = "apps.core.views.forbidden"

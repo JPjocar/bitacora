@@ -1,0 +1,7 @@
+<section id="incident-results" aria-live="polite" aria-label="Resultados de incidencias">
+{% if form.errors %}<div class="alert alert-danger" role="alert">Revise los filtros. {{ form.errors }}</div>{% endif %}
+<p class="small text-secondary">{{ page_obj.paginator.count }} reportes</p>
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Reporte</th><th>Equipo</th><th>Estado</th><th>Resultado</th><th>Fecha</th></tr></thead><tbody>
+{% for incident in page_obj %}<tr><td><a href="{% url 'incidents:detail' incident.pk %}">#{{ incident.pk }} · {{ incident.symptoms|truncatechars:85 }}</a></td><td>{{ incident.device.code }} · {{ incident.device.name }}</td><td>{{ incident.get_state_display }}</td><td>{{ incident.get_outcome_display|default:'—' }}</td><td>{{ incident.created_at|date:'d/m/Y H:i' }}</td></tr>{% empty %}<tr><td colspan="5">No hay incidencias para esta selección.</td></tr>{% endfor %}
+</tbody></table></div>{% include 'components/pagination.html' %}
+</section>

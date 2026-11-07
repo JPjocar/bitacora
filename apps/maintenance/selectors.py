@@ -118,3 +118,12 @@ def has_pending_work(device_id):
         result="SIN_FINALIZAR",
         run__state__in=OPEN_STATES,
     ).exists()
+
+
+def device_preventive_history(device_id):
+    """Read-only history for the authorized device sheet, across all definitions/cycles."""
+    return (
+        MaintenanceRunDevice.objects.filter(target__device_id=device_id)
+        .select_related("run__maintenance")
+        .order_by("-run__created_at", "-run__number", "-pk")
+    )

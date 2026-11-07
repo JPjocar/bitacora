@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Reportar incidencia · Bitacora{% endblock %}
+{% block content %}
+<nav aria-label="Ruta de navegación"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'assets:detail' device.public_id %}">{{ device.code }}</a></li><li class="breadcrumb-item active" aria-current="page">Reportar incidencia</li></ol></nav>
+<h1>Reportar incidencia</h1><p>{{ device.code }} · {{ device.name }} · {{ device.location.name }}</p>
+<p class="text-secondary">El reporte quedará pendiente y avisará a técnicos y administradores. Registrar una falla no cambia automáticamente el estado del equipo.</p>
+<form method="post" class="card card-body form-panel" novalidate>{% csrf_token %}{% include 'components/form_fields.html' %}<div><button class="btn btn-primary">Registrar incidencia</button> <a class="btn btn-outline-secondary" href="{% url 'assets:detail' device.public_id %}">Volver</a></div></form>
+{% endblock %}

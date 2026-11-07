@@ -5,14 +5,13 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST, require_safe
 
 from .models import Notification
-from .services import mark_read, require_access
+from .services import accessible_notices, mark_read
 
 
 @login_required
 @require_safe
 def inbox(request):
-    actor = require_access(request.user)
-    notices = Notification.objects.filter(recipient=actor).select_related("event", "target")
+    notices = accessible_notices(request.user).select_related("event", "target", "incident_event")
     state = request.GET.get("state", "unread")
     if state == "unread":
         notices = notices.filter(read_at=None, resolved_at=None)
@@ -35,8 +34,7 @@ def inbox(request):
 @login_required
 @require_safe
 def counter(request):
-    actor = require_access(request.user)
-    count = Notification.objects.filter(recipient=actor, read_at=None, resolved_at=None).count()
+    count = accessible_notices(request.user).filter(read_at=None, resolved_at=None).count()
     return render(request, "notifications/counter.html", {"unread_count": count})
 
 

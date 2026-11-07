@@ -1,6 +1,7 @@
 """Explicit transactional integration; no signals, external delivery or GET writes."""
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -15,14 +16,23 @@ from .models import Notification
 
 def require_access(actor):
     actor = require_permission(actor, "notifications.view_notification")
-    return require_permission(actor, "maintenance.view_maintenance")
+    if not any(
+        actor.has_perm(permission)
+        for permission in [
+            "maintenance.view_maintenance",
+            "incidents.view_incident",
+            "incidents.view_own_incident",
+        ]
+    ):
+        raise PermissionDenied
+    return actor
 
 
-def recipients():
+def recipients(permission="maintenance.view_maintenance"):
     users = get_user_model().objects.filter(
         is_active=True, groups__name__in=[ADMINISTRATOR, TECHNICIAN]
     )
-    for app, code in [("maintenance", "view_maintenance"), ("notifications", "view_notification")]:
+    for app, code in [permission.split("."), ("notifications", "view_notification")]:
         users = users.filter(
             Q(is_superuser=True)
             | Q(user_permissions__content_type__app_label=app, user_permissions__codename=code)
@@ -31,6 +41,65 @@ def recipients():
             )
         )
     return list(users.distinct().order_by("pk"))
+
+
+def accessible_notices(actor):
+    actor = require_access(actor)
+    sources = Q(pk__in=[])
+    if actor.has_perm("maintenance.view_maintenance"):
+        sources |= Q(incident_event=None)
+    if actor.has_perm("incidents.view_incident"):
+        sources |= Q(incident_event__isnull=False)
+    elif actor.has_perm("incidents.view_own_incident"):
+        sources |= Q(incident_event__incident__reporter_id=actor.pk)
+    return Notification.objects.filter(sources, recipient=actor)
+
+
+def handle_incident_event(event):
+    """Explicit call from the incident service while its parent lock is held."""
+    from apps.incidents.models import Incident
+
+    incident = event.incident
+    if event.action in {"INC_CREATED", "INC_RELEASED", "INC_TAKEN", "INC_CLOSED"}:
+        Notification.objects.filter(
+            incident_event__incident=incident,
+            kind__in=["INC_NEW", "INC_RELEASED"],
+            resolved_at=None,
+        ).update(resolved_at=timezone.now())
+    if event.action in {"INC_CREATED", "INC_RELEASED"} and incident.state == Incident.State.PENDING:
+        kind = "INC_RELEASED" if event.action == "INC_RELEASED" else "INC_NEW"
+        return _deliver(
+            recipients("incidents.view_incident"),
+            f"incident-event:{event.pk}",
+            kind=kind,
+            incident_event=event,
+            title=Notification.Kind(kind).label,
+            description=(
+                f"{incident.device.code} · Incidencia #{incident.pk}. Disponible para tomar."
+            ),
+        )
+    if event.action == "INC_CLOSED":
+        reporter = get_user_model().objects.get(pk=incident.reporter_id)
+        if (
+            reporter.is_active
+            and reporter.has_perm("notifications.view_notification")
+            and (
+                reporter.has_perm("incidents.view_incident")
+                or reporter.has_perm("incidents.view_own_incident")
+            )
+        ):
+            return _deliver(
+                [reporter],
+                f"incident-event:{event.pk}",
+                kind="INC_CLOSED",
+                incident_event=event,
+                title="Incidencia cerrada",
+                description=(
+                    f"{incident.device.code} · Incidencia #{incident.pk}: "
+                    f"{incident.get_outcome_display()}."
+                ),
+            )
+    return 0
 
 
 def _deliver(users, key, **values):
@@ -126,11 +195,10 @@ def generate_for_maintenance(maintenance_id, *, today=None):
 
 @transaction.atomic
 def mark_read(*, actor, notice_id=None):
-    actor = require_access(actor)
-    notices = Notification.objects.filter(recipient=actor)
+    notices = accessible_notices(actor)
     if notice_id is not None:
         # Ownership is mandatory even for administrators.
-        notice = notices.select_related("event", "target").get(pk=notice_id)
+        notice = notices.select_related("event", "target", "incident_event").get(pk=notice_id)
         notices.filter(pk=notice_id, read_at=None).update(read_at=timezone.now())
         return notice
     notices.filter(read_at=None, resolved_at=None).update(read_at=timezone.now())

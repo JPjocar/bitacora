@@ -27,12 +27,13 @@
         {% if perms.assets.view_device or perms.assets.view_device_limited %}<li class="nav-item"><a class="nav-link" href="{% url 'assets:list' %}">Dispositivos</a></li><li class="nav-item"><a class="nav-link" href="{% url 'assets:scanner' %}">Escanear QR</a></li>{% endif %}
         {% if perms.assets.view_movement %}<li class="nav-item"><a class="nav-link" href="{% url 'assets:movements' %}">Movimientos</a></li>{% endif %}
         {% if perms.maintenance.view_maintenance %}<li class="nav-item"><a class="nav-link" href="{% url 'maintenance:list' %}">Mantenimientos</a></li>{% endif %}
+        {% if perms.incidents.view_incident or perms.incidents.view_own_incident %}<li class="nav-item"><a class="nav-link" href="{% url 'incidents:list' %}">Incidencias</a></li>{% endif %}
         {% if perms.locations.view_location %}<li class="nav-item"><a class="nav-link" href="{% url 'locations:list' %}">Ubicaciones</a></li>{% endif %}
         {% if perms.accounts.view_user %}<li class="nav-item"><a class="nav-link" href="{% url 'accounts:list' %}">Usuarios</a></li>{% endif %}
         {% if perms.auth.view_group %}<li class="nav-item"><a class="nav-link" href="{% url 'accounts:roles' %}">Roles</a></li>{% endif %}
       </ul>
       <a class="nav-link me-3 py-2" href="{% url 'accounts:profile' %}">{{ user.username }}</a>
-      {% if perms.notifications.view_notification and perms.maintenance.view_maintenance %}<span id="notification-counter" hx-get="{% url 'notifications:counter' %}" hx-trigger="load" hx-swap="outerHTML"><a class="nav-link me-3" href="{% url 'notifications:inbox' %}">Avisos</a></span>{% endif %}
+      {% if perms.notifications.view_notification %}<span id="notification-counter" hx-get="{% url 'notifications:counter' %}" hx-trigger="load" hx-swap="outerHTML"><a class="nav-link me-3" href="{% url 'notifications:inbox' %}">Avisos</a></span>{% endif %}
       <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn btn-outline-secondary btn-sm" type="submit">Salir</button></form>
     </div>
     {% endif %}

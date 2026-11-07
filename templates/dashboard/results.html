@@ -12,6 +12,7 @@
 </div>
 <h2 class="h5">Ejecuciones</h2>
 <div class="d-flex flex-wrap gap-3 mb-4">{% for item in run_counts %}<span>{{ item.label }}: <strong>{{ item.count }}</strong></span>{% endfor %}</div>
+{% if incident_counts %}<h2 class="h5">Incidencias</h2><div class="d-flex flex-wrap gap-3 mb-2">{% for item in incident_counts %}<span>{{ item.label }}: <strong>{{ item.count }}</strong></span>{% endfor %}<span>Equipos con incidencias recurrentes: <strong>{{ repeated_incident_count }}</strong></span></div><p class="small text-secondary mb-4">El período filtra cierres; los reportes abiertos permanecen visibles. Recurrentes: equipos con al menos dos reportes en el período, excluyendo inválidos/duplicados. No equivale a predecir fallas.</p>{% endif %}
 <details class="mb-4"><summary>Distribución del inventario</summary><div class="row mt-2">
 <div class="col-md-4"><h3 class="h6">Por tipo</h3><ul>{% for group in by_kind %}<li>{{ group.category__kind }}: {{ group.total }}</li>{% empty %}<li>Sin equipos</li>{% endfor %}</ul></div>
 <div class="col-md-4"><h3 class="h6">Por ubicación</h3><ul>{% for group in by_location %}<li>{{ group.location__name }}: {{ group.total }}</li>{% empty %}<li>Sin equipos</li>{% endfor %}</ul></div>
@@ -21,13 +22,17 @@
 <div class="d-flex flex-wrap justify-content-between gap-2 mb-3"><h2 class="h4">{{ section_label }}</h2><div><a class="btn btn-outline-primary btn-sm" href="{% url 'dashboard:csv' %}{% querystring %}">Exportar CSV</a> <a class="btn btn-outline-secondary btn-sm" href="{% url 'dashboard:print' %}{% querystring %}">Versión imprimible</a></div></div>
 <p class="small text-secondary">{{ page_obj.paginator.count }} registros. Sin preventivo y vencimientos consideran equipos activos que continúan bajo control operativo.</p>
 <div class="table-responsive"><table class="table align-middle"><thead><tr>
-{% if section == 'runs' %}<th>Preventivo</th><th>Ciclo</th><th>Estado</th><th>Creación</th><th>Cierre</th>
+{% if section == 'incidents' %}<th>Incidencia</th><th>Equipo</th><th>Estado</th><th>Resultado</th><th>Reporte</th>
+{% elif section == 'recurrent_incidents' %}<th>Equipo</th><th>Ubicación</th><th>Reportes válidos en período</th>
+{% elif section == 'runs' %}<th>Preventivo</th><th>Ciclo</th><th>Estado</th><th>Creación</th><th>Cierre</th>
 {% elif section == 'deadlines' %}<th>Equipo</th><th>Preventivo</th><th>Vencimiento</th><th>Situación</th>
 {% elif section == 'omissions' %}<th>Equipo</th><th>Preventivo</th><th>Ciclo omitido</th><th>Fecha de omisión</th>
 {% else %}<th>Equipo</th><th>Tipo</th><th>Ubicación</th><th>Estado</th>{% endif %}
 </tr></thead><tbody>
 {% for row in page_obj %}<tr>
-{% if section == 'runs' %}<td><a href="{% url 'maintenance:run_detail' row.maintenance_id row.pk %}">{{ row.maintenance.name }}</a></td><td>{{ row.number }}</td><td>{{ row.get_state_display }}</td><td>{{ row.created_at|date:'d/m/Y H:i' }}</td><td>{{ row.completed_at|default:row.cancelled_at|date:'d/m/Y H:i'|default:'—' }}</td>
+{% if section == 'incidents' %}<td><a href="{% url 'incidents:detail' row.pk %}">#{{ row.pk }} · {{ row.symptoms|truncatechars:80 }}</a></td><td>{{ row.device.code }} · {{ row.device.name }}</td><td>{{ row.get_state_display }}</td><td>{{ row.get_outcome_display|default:'—' }}</td><td>{{ row.created_at|date:'d/m/Y H:i' }}</td>
+{% elif section == 'recurrent_incidents' %}<td><a href="{% url 'assets:detail' row.public_id %}">{{ row.code }} · {{ row.name }}</a></td><td>{{ row.location.name }}</td><td>{{ row.incident_count }}</td>
+{% elif section == 'runs' %}<td><a href="{% url 'maintenance:run_detail' row.maintenance_id row.pk %}">{{ row.maintenance.name }}</a></td><td>{{ row.number }}</td><td>{{ row.get_state_display }}</td><td>{{ row.created_at|date:'d/m/Y H:i' }}</td><td>{{ row.completed_at|default:row.cancelled_at|date:'d/m/Y H:i'|default:'—' }}</td>
 {% elif section == 'deadlines' %}<td>{{ row.target.device.code }} · {{ row.target.device.name }}</td><td><a href="{% url 'maintenance:due_dates' row.target.maintenance_id %}">{{ row.target.maintenance.name }}</a></td><td>{{ row.due_date|date:'d/m/Y' }}</td><td>{{ row.timing_label }}</td>
 {% elif section == 'omissions' %}<td>{{ row.device.code }} · {{ row.device.name }}</td><td><a href="{% url 'maintenance:executions' row.maintenance_id %}">{{ row.maintenance.name }}</a></td><td>{{ row.omitted_cycle }}</td><td>{{ row.omitted_at|date:'d/m/Y H:i' }}</td>
 {% else %}<td><a href="{% url 'assets:detail' row.public_id %}">{{ row.code }} · {{ row.name }}</a></td><td>{{ row.category.get_kind_display }}</td><td>{{ row.location.name }}</td><td>{{ row.get_status_display }}{% if not row.is_active %} · Archivado{% endif %}</td>{% endif %}

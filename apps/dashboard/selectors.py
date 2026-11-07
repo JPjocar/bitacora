@@ -38,7 +38,7 @@ def _in_period(day, filters):
     )
 
 
-def dashboard_data(filters, *, today=None):
+def dashboard_data(filters, *, today=None, include_incidents=False):
     today = today or timezone.localdate()
     devices = device_scope(filters)
     matching = devices.order_by().values("pk")
@@ -116,7 +116,15 @@ def dashboard_data(filters, *, today=None):
         "omissions": omissions,
         "devices": devices.order_by("code"),
     }
+    incident_data = {}
+    if include_incidents:
+        from apps.incidents.selectors import dashboard_incidents
+
+        incident_data = dashboard_incidents(devices, filters)
+        datasets["incidents"] = incident_data.pop("incident_rows")
+        datasets["recurrent_incidents"] = incident_data.pop("repeated_rows")
     return {
+        **incident_data,
         "inventory_count": devices.count(),
         "unconfigured_count": unconfigured.count(),
         "overdue_count": sum(row.timing == "overdue" for row in deadlines),

@@ -25,10 +25,16 @@ class Notification(RetainedModel):
         SOON = "SOON", "Preventivo próximo"
         TODAY = "TODAY", "Preventivo para hoy"
         OVERDUE = "OVERDUE", "Preventivo vencido"
+        INCIDENT_NEW = "INC_NEW", "Nueva incidencia"
+        INCIDENT_RELEASED = "INC_RELEASED", "Incidencia liberada"
+        INCIDENT_CLOSED = "INC_CLOSED", "Incidencia cerrada"
 
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     kind = models.CharField(max_length=12, choices=Kind.choices)
     event = models.ForeignKey("maintenance.MaintenanceEvent", null=True, on_delete=models.PROTECT)
+    incident_event = models.ForeignKey(
+        "incidents.IncidentEvent", null=True, on_delete=models.PROTECT
+    )
     target = models.ForeignKey("maintenance.MaintenanceTarget", null=True, on_delete=models.PROTECT)
     due_on = models.DateField(null=True)
     event_key = models.CharField(max_length=160)
@@ -53,12 +59,21 @@ class Notification(RetainedModel):
                         event__isnull=False,
                         target__isnull=True,
                         due_on__isnull=True,
+                        incident_event__isnull=True,
                     )
                     | models.Q(
                         kind__in=["SOON", "TODAY", "OVERDUE"],
                         event__isnull=True,
                         target__isnull=False,
                         due_on__isnull=False,
+                        incident_event__isnull=True,
+                    )
+                    | models.Q(
+                        kind__in=["INC_NEW", "INC_RELEASED", "INC_CLOSED"],
+                        incident_event__isnull=False,
+                        event__isnull=True,
+                        target__isnull=True,
+                        due_on__isnull=True,
                     )
                 ),
                 name="notice_source_matches_kind",
@@ -76,6 +91,8 @@ class Notification(RetainedModel):
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
+        if self.incident_event_id:
+            return reverse("incidents:detail", args=[self.incident_event.incident_id])
         if self.event_id:
             return reverse(
                 "maintenance:run_detail", args=[self.event.maintenance_id, self.event.run_id]

@@ -76,7 +76,7 @@ sin bloquear equipos/ubicaciones ajenos a la operación.
 con POST y PRG. Cada formulario lleva versión; no se confían actor, estado ni fechas
 automáticas al cliente. La vista compartida de mantenimiento presenta estado/responsable,
 progreso y acciones autorizadas, conservando un único concepto de mantenimiento.
-No se añadió API, notificador ni reloj de trabajo.
+No se añadió API ni reloj de trabajo. El notificador explícito llegó en fase 9.
 
 `maintenance.recurrence.create_next_run` bloquea mantenimiento → predecesor → equipos
 por PK → categorías, compatible con ejecución y configuración. Exige cierre previo,
@@ -94,3 +94,19 @@ Historial paginado y URL por ejecución con parent scope. El listado principal u
 Subquery para estado/responsable del último ciclo, sin cargar todas las ejecuciones.
 Las fechas vigentes y las copias históricas se muestran separadamente. Solo GET para
 consultas y POST/CSRF para apertura; no cron ni trabajo generado por alcanzar una fecha.
+
+`notifications` conserva avisos y estado de lectura. Los servicios de configuración,
+ejecución y recurrencia llaman `handle_maintenance_event` dentro de su transacción.
+Sin señales de negocio ni colas externas: si falla la entrega interna, la operación
+se revierte junto con el evento. El comando `generate_notifications` bloquea cada
+mantenimiento antes de reconciliar fechas y disponibilidad; el orden coincide con
+los servicios operativos. Restricción única y get_or_create hacen segura la repetición.
+El índice receptor/vigencia/lectura/fecha sirve al contador HTMX cada 30 segundos.
+
+`dashboard` no tiene modelos: usa consultas de lectura con Exists para contar ciclos
+sin multiplicar por participantes y Subquery para historial por inscripción. Comparte
+`schedule_row`/`outstanding_targets` con notificaciones y `add_interval` con recurrencia.
+La evaluación temporal se hace en memoria con una consulta para todas las inscripciones,
+sin consultar por cada equipo. Las listas se paginan a 20; exportación limitada a 10 000.
+No se agregan gráficos, dependencias ni una API. HTML convencional funciona sin HTMX.
+CSV e impresión reutilizan el mismo filtro y proyección del panel y exigen los mismos permisos.

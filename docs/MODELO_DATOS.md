@@ -155,3 +155,26 @@ copia las tareas actuales y registra RUN_CREATED con actor, equipos, fechas y mo
 No modifica el predecesor ni incrementa la versión de configuración por una apertura.
 El calendario usa subconsultas por inscripción para última fecha real, ejecución fuente
 y presencia en un ciclo abierto. TargetSchedule es presentación en memoria, no tabla.
+
+## Fase 9: Notification
+
+Única tabla adicional, migración `notifications/0001_initial`, dependiente de
+`maintenance/0003_recurring_runs` y del usuario personalizado. No altera tablas existentes.
+
+```mermaid
+erDiagram
+    User ||--o{ Notification : recibe
+    MaintenanceEvent o|--o{ Notification : origina_disponibilidad
+    MaintenanceTarget o|--o{ Notification : origina_fecha
+```
+
+Cada aviso tiene exactamente una fuente: evento para AVAILABLE/RELEASED o inscripción
+con due_on para SOON/TODAY/OVERDUE (CHECK). Receptor obligatorio, texto breve,
+created_at, read_at y resolved_at separados. No se duplica mantenimiento/ejecución/URL:
+se derivan desde la fuente protegida por FK PROTECT. Contenido/destinatario inmutables
+en las vías de escritura de la aplicación, sin borrado físico ni edición en Admin.
+
+UNIQUE(recipient,event_key) e índice compuesto para contar no leídos vigentes. Clave
+`event:<pk>` o `due:<target>:<fecha ISO>:<tipo>`. Cada liberación es otro evento;
+el mismo vencimiento/tipo solo avisa una vez a cada receptor. El comando puede resolver
+o reactivar sin cambiar el texto histórico o la lectura. `dashboard` no crea tablas.

@@ -17,19 +17,32 @@
 | Fechas reales | Por equipo, registro anterior administrativo con motivo, cierre general independiente |
 | Recurrencia | Calendario vigente por equipo, propuestas a 7 días, apertura manual de ciclos y tareas limpias |
 | Historial de ejecuciones | Lista paginada, detalle por ciclo con copias originales y eventos filtrados |
-| Concurrencia | Veintitrés casos PostgreSQL, incluidas apertura duplicada/configuración/cierre/desactivación |
+| Notificaciones | Disponibilidad/liberación inmediata, fechas por comando, idempotencia, bandeja propia y contador HTMX 30 s |
+| Dashboard/reportes | Inventario, vencimientos, ejecuciones, sin periódico y omisiones; filtros, CSV y HTML imprimible |
+| Concurrencia | Veintisiete casos PostgreSQL; incluye comando/operación/lectura de avisos simultáneos |
 | Visual | Templates responsive implementados; revisión en navegador pendiente por falta de navegador conectado |
 | Despliegue | Configuración y check de seguridad; no se publicó ni validó HTTPS real |
 | CI | Workflow incluido; ejecución en GitHub pendiente |
 | Otros módulos | No implementados |
 
-Sexto incremento: `maintenance/0003_recurring_runs` aplicada sobre siete tablas existentes,
-sin columnas ni dependencias nuevas. Roles sincronizados: admin y técnico crean ciclos,
-docente sin acceso. El smoke HTTP conserva un periódico sintético con dos ejecuciones,
-primera parcial y segunda pendiente con tareas limpias. Resultados en PRUEBAS.md.
+Séptimo incremento (fases 9–10): `notifications/0001_initial` aplicada, una tabla nueva,
+sin dependencias adicionales. Roles sincronizados: admin y técnico reciben avisos y
+consultan panel/reportes; docente sin acceso. Se conservaron exactamente los datos
+preventivos anteriores (comparación de hashes del volcado antes/después de migrar).
+Comando ejecutado dos veces: 10 nuevos, luego 0. HTTP en 8006 correcto con los tres roles.
 
-**305 pruebas Django aprobadas** (257 previas + 48 nuevas) y **21 pruebas JavaScript**.
-Incluye 23 casos concurrentes PostgreSQL y conservación de historial al aplicar 0003.
+Archivos de este incremento: `apps/notifications/` (modelo, servicios, vistas, rutas,
+Admin, comando y migración); `apps/dashboard/` (filtros, consultas, vistas y reportes);
+integración en `maintenance/services.py`, `execution.py`, `recurrence.py` y `selectors.py`;
+permisos en `accounts/roles.py` y etiquetas en `core/templatetags/labels.py`; registro en
+`config/settings.py` y `urls.py`; navegación en `templates/base.html`, plantillas en
+`templates/notifications/` y `templates/dashboard/`, estilo `static/css/reports.css`;
+cuatro archivos nuevos `tests/test_notification*.py`/`test_dashboard.py` y
+`scripts/smoke_dashboard_http.py`. README y los nueve documentos de docs actualizados.
+
+**353 pruebas Django aprobadas** (305 previas + 48 nuevas) y **21 pruebas JavaScript**.
+Incluye 27 casos concurrentes PostgreSQL y conservación de historial al aplicar migraciones.
+Última corrección de formato de fechas de reportes validada con las 22 pruebas del dashboard.
 
 Las pruebas y resultados efectivos se registran en PRUEBAS.md. No se presenta revisión
 visual simulada ni se afirma validación en el instituto.
@@ -37,11 +50,11 @@ visual simulada ni se afirma validación en el instituto.
 Para continuar: leer prompt, README, este archivo y reglas; ejecutar las pruebas
 existentes en PostgreSQL antes de modificar. No reemplazar el usuario personalizado,
 eliminar migraciones aplicadas ni escribir directamente en datos de otro módulo.
-Siguiente fase: notificaciones internas. Reutilizar los eventos auditados y el selector
-de vencimientos, con clave idempotente por receptor/evento. No implementar dashboard,
-incidencias o automatización de apertura sin encargo. La fecha vigente se deriva de la
+Siguiente fase: incidencias, solo bajo encargo; todavía no se implementó. Mantener la
+integración explícita de avisos y sus claves idempotentes. La fecha vigente se deriva de la
 fecha real más reciente por equipo más el intervalo actual; next_due_date y due_date
 de ciclos previos son copias históricas que no se reescriben. Mantener el índice de una
 ejecución abierta y las guardias de versión/predecesor al integrar otros módulos.
-La reversión de completados y cierres sigue bloqueada; no hay notificaciones todavía.
+La reversión de completados y cierres sigue bloqueada. La tarea horaria de avisos debe
+activarse en el equipo piloto según MANUAL.md; sin ella no se reconcilian fechas.
 La revisión visual, cámara física, impresión y despliegue HTTPS siguen pendientes.

@@ -81,8 +81,8 @@
     para registro extemporáneo; nunca futura. Fecha registrada y primer inicio quedan intactos.
 37. Se bloquea reversión de completado/omisión/cierre; no se implementa una corrección
     retrospectiva sin el flujo y pruebas necesarios. Cancelar no invalida equipos completos.
-38. No se incorpora aún módulo de notificaciones. RELEASED conserva cada liberación para
-    futura integración idempotente; tampoco se generan ciclos siguientes automáticamente.
+38. RELEASED conserva cada liberación y desde fase 9 produce avisos idempotentes.
+    Los ciclos siguientes continúan siendo manuales.
 39. Fase 8 reutiliza siete modelos: no tabla calendario, agenda ni jornada. Fecha vigente
     derivada; due_date/next_due_date de participantes conservan sus valores históricos.
 40. Calendario anclado a la fecha efectiva más reciente, no al último registro creado.
@@ -100,6 +100,23 @@
     tareas sin marcar y notas vacías. Nueva categoría sin cobertura requiere corregir plantilla.
 45. Historial por número, detalle con copias y auditoría filtrada por ciclo. Listado principal
     refleja solo el estado más reciente. Calendario consultado con una query, sin N+1.
+
+46. Fases 9–10: una tabla Notification; exactamente una fuente evento/inscripción.
+    No se duplican URL ni padre. Historial retenido y lectura/vigencia independientes.
+47. Integración explícita en transacciones de negocio, sin señales, Celery o Redis.
+    UNIQUE(receptor,clave) y bloqueo del mantenimiento serializan comando y operaciones.
+48. Avisos de fecha por fase de 7 días/hoy/vencido; no ruido diario del mismo vencido.
+    Comando periódico materializa y reconcilia; GET permanece libre de escrituras.
+    Se omite el aviso opcional al responsable por trabajo iniciado pendiente.
+49. Panel sin tablas ni métricas laborales. Exists evita contar N veces el ciclo grupal;
+    Subquery comparte ancla real por equipo con recurrencia. Omisión pendiente se decide
+    por orden del ciclo, hasta un completado posterior, incluso si otro ciclo está abierto.
+50. CSV UTF-8 BOM/`;`, fórmulas neutralizadas y límite de 10 000 sin truncado. Fechas de
+    reportes con hora local y offset. HTML imprimible, sin bibliotecas de Excel/PDF.
+    Tablas y cifras operativas bastan; no se añade Chart.js sin un gráfico necesario.
+51. Únicos no completados/cancelados también muestran y notifican fecha. No generan nuevos
+    ciclos automáticos. Desactivar configuración/inscripción/equipo o retirar equipo quita
+    la obligación de las proyecciones vigentes, conservando resultados y avisos históricos.
 
 Fuentes oficiales consultadas para las versiones y APIs utilizadas:
 

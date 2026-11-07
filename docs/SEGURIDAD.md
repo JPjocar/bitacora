@@ -94,3 +94,19 @@ incluye todas las copias y el evento, sin cambios parciales al fallar auditoría
 El detalle y los eventos por ciclo se acotan al mantenimiento de la URL. Docente recibe
 403 incluso por URL directa/HTMX. Consultar vencimientos/historial no crea trabajo. El
 smoke con escritura requiere --confirm-demo y servidor local, usando cuentas sintéticas.
+
+Notificaciones: requiere usuario activo con permisos de avisos y preventivos. Todas las
+consultas y escrituras se acotan al receptor autenticado, incluido el administrador;
+la lectura ajena responde 404. Sin URLs de retorno controladas por cliente: se derivan
+de las FK. Lectura individual/masiva por POST con CSRF. GET no marca ni genera avisos.
+Contenido escapado en plantillas; no se copian motivos privados ni notas al resumen.
+El destinatario se selecciona por grupo, permisos y actividad al generar cada aviso.
+
+Panel/CSV/impresión exigen assets.view_device y maintenance.view_maintenance mediante
+recarga de usuario; docente recibe 403 por URL directa. Respuestas privadas no-store,
+incluidos fragmentos y descargas. Validación estricta de filtros antes de consultar o
+exportar; valores inválidos no provocan una descarga de todos los datos. CSV neutraliza
+prefijos de fórmulas, incluso con espacio/control inicial, y limita filas. El HTML se
+escapa y no confía en el valor de nombres/códigos como marcado. No hay escrituras de
+estado operativo desde el panel. Activación del programador y permisos del .env son
+responsabilidad del piloto, con el procedimiento en MANUAL.md.

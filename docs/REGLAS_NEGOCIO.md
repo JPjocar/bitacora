@@ -197,5 +197,33 @@ Recurrencia e historial (fase 8):
 - Historial paginado con detalle propio por ejecución, copias originales y eventos acotados.
   El listado principal filtra el estado de la ejecución más reciente, no el de ciclos previos.
 
-Pendientes: notificaciones internas. Las fechas y eventos ya pueden consultarse; no se
-materializan avisos ni se abre trabajo por cron, fecha, escaneo o traslado.
+## Notificaciones y panel (fases 9–10)
+
+- Solo avisos internos, sin correo ni mensajería. Destinatarios activos en los grupos
+  Administrador/Técnico con ambos permisos de notificaciones y consulta preventiva.
+- Alta inicial, RUN_CREATED y cada RELEASED generan avisos explícitos y atómicos.
+  Cada nueva liberación tiene su propio evento y vuelve a avisar. Tomar/cerrar/cancelar
+  resuelve la disponibilidad previa; no borra avisos ni modifica su lectura.
+- UNIQUE(receptor, clave) impide duplicados. Fecha: inscripción + vencimiento + fase
+  (próximo/hoy/vencido); el mismo vencido no genera otro aviso todos los días.
+  La ventana próxima comprende los 7 días siguientes; el día exacto tiene tipo propio.
+- `generate_notifications` calcula fechas vigentes y resuelve las anteriores. Considera
+  inscripciones/configuraciones/equipos activos no retirados. Únicos completados o
+  cancelados ya no deben avisar. Cancelar un ciclo periódico no reinicia su obligación.
+  Los avisos de fecha pueden quedar desactualizados hasta la siguiente ejecución del comando.
+- Abrir un aviso marca leído mediante POST/CSRF y redirige al recurso interno derivado.
+  Cada persona solo accede a su bandeja, incluso si es administradora. GET nunca escribe.
+  Resolver no equivale a leer; reactivar la misma clave conserva la lectura anterior.
+- El panel requiere consulta completa de dispositivos y preventivos. Conteos de equipos
+  son físicos; vencimientos y omisiones son por inscripción equipo–preventivo.
+  Una ejecución grupal cuenta una sola vez, independientemente de sus participantes.
+- Sin preventivo periódico: equipo activo no retirado sin inscripción activa en un
+  periódico activo. Un preventivo único no sustituye esa configuración.
+- Una omisión sigue pendiente hasta que un ciclo posterior complete ese equipo.
+  Se usa el orden de ciclos para esa deuda; la recurrencia mantiene el ancla por fecha real.
+- Fechas filtran vencimientos, omisiones y cierres en Lima. El trabajo abierto permanece
+  visible; no se interpretan períodos tomados como horas trabajadas. El estado de ejecución
+  filtra ciclos y obligaciones con una participación en ese estado; no filtra el inventario.
+- CSV UTF-8 con BOM y separador `;`, neutralización de fórmulas; máximo 10 000 filas,
+  sin truncado silencioso. Configuraciones inválidas se advierten y bloquean CSV.
+  Impresión HTML con filtros visibles. No se abre trabajo por cron, fecha, escaneo o traslado.

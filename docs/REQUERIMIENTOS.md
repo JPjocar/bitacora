@@ -13,7 +13,9 @@
 | RF-009 | Tareas individuales/generales/por categoría | Cobertura por equipo, orden, opcionalidad y copias independientes | Grupo heterogéneo, formset, edición futura y conservación |
 | RF-010 | Vencimiento vigente por equipo | Fecha real más reciente + intervalo actual o base + intervalo; omitidos/cancelados no anclan fechas | CalendarTests, test_recurrence.py |
 | RF-011 | Primera y siguientes ejecuciones manuales | Copias independientes, tareas limpias, sin duplicación ni ciclos futuros del único; historial por ejecución | Tests de recurrencia, vistas, concurrencia y migración |
-| RF-020 (parcial) | Situación temporal visible | Vencido/hoy/próximo a 7 días/posterior derivados, filtros sin iniciar trabajo | test_recurrence_views.py; sin notificaciones materializadas |
+| RF-020 | Situación temporal y avisos por equipo | Fechas vigentes, ventana de 7 días, hoy/vencido; comando idempotente sin crear ciclos | test_recurrence_views.py, test_notifications.py |
+| RF-021 (preventivos) | Avisos internos y lectura | Destinatarios autorizados, disponibilidad/liberación, bandeja propia y contador cada 30 s | test_notifications.py, test_notification_concurrency.py |
+| RF-022 | Dashboard y reportes básicos | Conteos operativos, filtros, tablas paginadas, CSV seguro y HTML imprimible | test_dashboard.py, smoke_dashboard_http.py |
 | RF-012 | Toma por técnico | Exclusiva, sin inicio implícito, permisos y versión | test_execution.py, test_execution_concurrency.py |
 | RF-013 | Inicio/reanudación | Primer inicio inmutable, eventos RESUMED después de liberar | Dominio y flujo HTTP |
 | RF-014 | Tareas/notas | Solo responsable o admin justificado, ejecución iniciada, auditoría y rectificación con motivo | test_execution.py, test_execution_views.py |
@@ -27,7 +29,8 @@
 | Infraestructura | Django + PostgreSQL y monolito | Migraciones reproducibles, check, lint y tests reales | `docs/PRUEBAS.md` |
 | Concurrencia de esta entrega | Ediciones y último administrador | Dos conexiones no sobrescriben cambios ni eliminan ambos administradores | `tests/test_concurrency.py` |
 
-Pendientes: notificaciones de RF-020/RF-021, RF-022 a RF-025 y auditoría de incidencias.
-Los eventos RELEASED y RUN_CREATED están disponibles para futura integración idempotente.
+Pendientes: RF-023 a RF-025, auditoría y avisos de incidencias de RF-021.
+RELEASED y RUN_CREATED generan avisos dentro de sus transacciones desde fases 9–10.
 El historial de esta entrega es preventivo, por mantenimiento/ejecución; no completa el
-historial integrado de incidencias de RF-025 ni constituye dashboard/reportes.
+historial integrado de incidencias de RF-025. El dashboard no presenta indicadores de
+incidencias ni evaluaciones de productividad individual.

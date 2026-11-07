@@ -158,3 +158,53 @@ para ver sus datos originales, tareas, notas y resultados. Eventos de esta ejecu
 la auditoría para ese ciclo. Volver a la ejecución más reciente no modifica el historial.
 Las fechas congeladas del trabajo pueden diferir de los vencimientos vigentes si después
 cambió la configuración; ambos datos tienen una finalidad distinta.
+
+## Avisos internos y panel
+
+Administrador y técnico encuentran **Avisos** y **Panel** en la navegación. El docente
+no tiene acceso a estas pantallas ni a las exportaciones. El contador consulta solo sus
+avisos vigentes sin leer cada 30 segundos; no hay correo, SMS ni notificaciones fuera de la app.
+La bandeja ofrece sin leer/vigentes, leídas, resueltas y todas, con 20 filas por página.
+**Ver mantenimiento y marcar leída** abre el ciclo o calendario original mediante POST;
+la simple consulta no marca leído. **Marcar vigentes como leídas** solo afecta su cuenta.
+
+Cada alta, nuevo ciclo y liberación avisa inmediatamente a técnicos/administradores
+activos autorizados. Tomar el trabajo resuelve el aviso de disponibilidad anterior.
+Las fechas se materializan con el siguiente comando, desde la raíz del repositorio:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/manage_local.py generate_notifications
+```
+
+Es seguro repetirlo: no duplica evento/receptor ni genera un vencido nuevo cada día.
+Actualiza avisos próximos a 7 días, para hoy y vencidos, y resuelve fechas que ya no
+corresponden. Recalcula desde la fecha real individual y configuración vigente. Si
+no se ejecuta, **no aparecen nuevos avisos de fecha ni se retiran los obsoletos**;
+los de disponibilidad/liberación siguen siendo inmediatos. Consulte el calendario
+del recurso para ver el estado actual. La lectura se conserva si vuelve la misma clave.
+
+**Programación piloto Windows (pendiente de activar en el equipo que lo alojará):**
+en Programador de tareas cree una tarea con repetición cada hora e inicio diario.
+Programa: ruta absoluta `C:\Users\jpjoc\Desktop\bitacora\.venv\Scripts\python.exe`.
+Argumentos: `scripts/manage_local.py generate_notifications`.
+Iniciar en: `C:\Users\jpjoc\Desktop\bitacora`. Use una cuenta autorizada para leer el
+`.env` y conectar a la base, sin poner credenciales en argumentos. Configure no iniciar
+otra instancia si sigue en ejecución y revise resultado 0; un fallo de fechas devuelve
+código no cero e identifica el mantenimiento. La base y el equipo deben estar encendidos.
+No se instaló una tarea del sistema durante esta entrega. El despliegue real debe usar
+sus propias rutas/configuración; no copie la cuenta ni credenciales demo.
+
+En **Panel**, seleccione ubicación, tipo, estado del equipo, activos/archivados,
+estado de ejecución, período o código/nombre. Aplique filtros y elija la tabla:
+vencimientos ordenados, ejecuciones, sin preventivo periódico, omisiones o inventario.
+Inventario cuenta equipos; prevención cuenta pares equipo–preventivo. Un ciclo grupal
+cuenta una vez. El período afecta vencimientos, fecha de omisión y cierre (Lima),
+manteniendo visible el trabajo abierto. El estado de ejecución no restringe inventario.
+Las tablas tienen paginación del servidor y siguen funcionando sin JavaScript.
+
+**Exportar CSV** descarga la tabla filtrada completa hasta 10 000 filas, UTF-8 con BOM
+y separador punto y coma. **Versión imprimible** ofrece los mismos datos y filtros;
+use Imprimir del navegador. Las fechas con hora incluyen el huso de Lima. Si supera el
+límite, reduzca filtros; no se recortan filas. Si hay una fecha preventiva inválida,
+el panel muestra el recurso a revisar y bloquea CSV para evitar exportaciones incompletas.
+No hay estadísticas de incidencias ni de rendimiento individual de técnicos.

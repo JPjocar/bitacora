@@ -1,4 +1,63 @@
-# Verificación del sexto incremento: recurrencia, vencimientos e historial (fase 8)
+# Verificación del séptimo incremento: notificaciones y dashboard (fases 9–10)
+
+**6 de noviembre de 2026, America/Lima.** Prompt de 1 145 líneas releído completo;
+inspección previa de modelos, migraciones, servicios, permisos y dependencias.
+Base: **305 pruebas OK en 161,033 s**. Regresión: **353 pruebas OK en 181,617 s**,
+PostgreSQL 18 real; **21 pruebas JavaScript OK**. Tras ajustar el formato horario de
+exportación a Lima, **22 pruebas de dashboard OK en 5,876 s**. Sin dependencias nuevas.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Suite Django | 353 OK; 48 nuevas, cuatro carreras nuevas y 27 concurrentes totales |
+| Migración | notifications/0001_initial aplicada; hashes del volcado preventivo iguales antes/después |
+| Roles | sync_roles correcto; solo admin/técnico autorizados, docente 403 |
+| generate_notifications dos veces | 10 avisos nuevos y después 0; datos demo preservados |
+| check / makemigrations --check --dry-run | Sin errores ni cambios pendientes |
+| Ruff check / format | Correctos |
+| pip check | Sin incompatibilidades |
+| collectstatic | 1 archivo nuevo, 181 sin cambios |
+| check --deploy --fail-level WARNING | Correcto con DEBUG=False y origen HTTPS de ejemplo |
+| JavaScript | 21 OK, sin cambios en escáner |
+| smoke_dashboard_http.py --confirm-demo --base-url http://127.0.0.1:8006 | Tres roles; bandeja/contador, cinco tablas/reportes, filtros, lectura propia y rechazo de ajena/CSRF |
+| smoke_http.py --qr --maintenance --base-url http://127.0.0.1:8006 | Tres roles y regresión de módulos anteriores correcta |
+
+Pruebas nuevas:
+
+- `test_notifications.py` (21): destinatarios activos/autorizados, deduplicación de
+  grupos/eventos, lectura preservada, cada liberación avisa de nuevo, resolución por toma
+  y cancelación, siguiente ciclo, fases 7 días/hoy/vencido sin duplicar por día, únicos,
+  cambios de intervalo/fecha real/inactivación, comando y backfill de ciclos disponibles,
+  rollback al fallar notificación, constraints/retención, bandeja propia, GET sin mutación,
+  permisos, lectura POST, CSRF, lectura masiva acotada y paginación.
+- `test_dashboard.py` (22): conteos físicos y grupales, equipos sin periódico,
+  activos/retirados, fechas reales independientes, omisión pendiente hasta completar otro
+  ciclo, únicos, ventana temporal, filtros, cierre por fecha local y límite UTC/Lima,
+  estados, validación antes de exportar, cinco tablas e impresión, CSV BOM/filtros,
+  HTMX parcial, fórmulas y XSS, límite de exportación, datos legados inválidos visibles,
+  docente/anonimato, GET sin escrituras y consulta sin N+1 con 22 equipos.
+- `test_notification_concurrency.py` (4): dos conexiones distintas con barrera y
+  lock_timeout; dos comandos, comando contra toma, comando contra liberación y doble
+  lectura. No duplica avisos ni deja disponibilidad vigente después de tomar.
+- `test_notification_migration.py` (1): aplica 0001 sobre datos previos; ejecuciones,
+  participantes, tareas, fechas y eventos idénticos; materialización posterior idempotente.
+
+Se corrigió un fixture de fecha UTC que intentaba poner el cierre antes del inicio;
+la prueba ahora congela el reloj del flujo completo y respeta la restricción existente.
+Los reportes muestran fechas con hora local y offset -05:00. El estado de ejecución
+no restringe inventario; los filtros de período mantienen visible el trabajo abierto.
+
+Logs ignorados: `.local/tests-baseline-dashboard.txt`, `tests-notifications-dashboard.txt`,
+`tests-full-notifications-dashboard.txt`, `tests-dashboard-final.txt`. Los dumps locales
+de conservación no se incluyen en Git, al igual que .env y credenciales demo.
+
+Browser volvió a devolver «No browser is available»; diagnóstico y listado vacío.
+No hubo validación visual/DOM en escritorio o móvil. Pendiente comprobar sustitución
+HTMX, polling efectivo cada 30 s, navegación con teclado y diseño impreso en navegador.
+No se instaló tarea horaria del sistema: procedimiento y comportamiento sin ejecutarla
+en MANUAL.md. No se implementaron incidencias ni el aviso opcional de trabajo iniciado.
+Siguen pendientes despliegue HTTPS, CI remoto, restauración y pruebas físicas previas.
+
+## Registro del sexto incremento: recurrencia, vencimientos e historial (fase 8)
 
 **6 de noviembre de 2026, America/Lima.** Prompt completo releído y revisión de modelos,
 migraciones, servicios, permisos, dependencias y pruebas antes de modificar. Base previa:

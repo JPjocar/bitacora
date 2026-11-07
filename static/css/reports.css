@@ -1,0 +1,7 @@
+@media print {
+  @page { margin: 15mm; }
+  body { font-size: 10pt; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}

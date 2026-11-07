@@ -76,7 +76,7 @@ def create_next_run(
         due_dates={target.pk: schedules[target.pk].due_date for target in targets},
         categories=categories,
     )
-    MaintenanceEvent.objects.create(
+    event = MaintenanceEvent.objects.create(
         maintenance=maintenance,
         run=run,
         actor=actor,
@@ -94,4 +94,7 @@ def create_next_run(
             "reason": {"antes": None, "después": reason},
         },
     )
+    from apps.notifications.services import handle_maintenance_event
+
+    handle_maintenance_event(event)
     return run

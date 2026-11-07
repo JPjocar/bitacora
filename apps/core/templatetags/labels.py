@@ -81,6 +81,7 @@ def event_value(value):
 def permission_label(permission):
     return {
         "accounts.add_user": "Crear usuarios",
+        "notifications.view_notification": "Consultar y marcar sus notificaciones internas",
         "maintenance.add_maintenance": "Configurar mantenimientos preventivos",
         "maintenance.create_next_run": "Crear manualmente la siguiente ejecución preventiva",
         "maintenance.take_maintenance": "Tomar mantenimiento como técnico",

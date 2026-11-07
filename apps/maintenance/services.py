@@ -248,13 +248,16 @@ def save_maintenance(
             due_dates={target.pk: maintenance.initial_due_date for target in targets},
             categories=categories,
         )
-    MaintenanceEvent.objects.create(
+    event = MaintenanceEvent.objects.create(
         maintenance=maintenance,
         run=run,
         actor=actor,
         action="Creación" if not maintenance_id else "Configuración actualizada",
         changes=changes,
     )
+    from apps.notifications.services import handle_maintenance_event
+
+    handle_maintenance_event(event)
     return maintenance
 
 

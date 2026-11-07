@@ -9,6 +9,8 @@ urlpatterns = [
     path("ubicaciones/", include("apps.locations.urls")),
     path("dispositivos/", include("apps.assets.urls")),
     path("mantenimientos/", include("apps.maintenance.urls")),
+    path("avisos/", include("apps.notifications.urls")),
+    path("panel/", include("apps.dashboard.urls")),
     path("admin/", admin.site.urls),
 ]
 handler403 = "apps.core.views.forbidden"

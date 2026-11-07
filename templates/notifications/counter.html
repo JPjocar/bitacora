@@ -1,0 +1,1 @@
+<a id="notification-counter" class="nav-link me-3 py-2" href="{% url 'notifications:inbox' %}" hx-get="{% url 'notifications:counter' %}" hx-trigger="every 30s" hx-swap="outerHTML" aria-label="Notificaciones: {{ unread_count }} sin leer">Avisos <span class="badge text-bg-primary">{{ unread_count }}</span></a>

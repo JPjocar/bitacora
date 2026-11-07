@@ -6,6 +6,7 @@ TECHNICIAN = "Técnico"
 TEACHER = "Docente"
 ROLE_PERMISSIONS = {
     ADMINISTRATOR: {
+        "notifications.view_notification",
         "maintenance.create_next_run",
         "maintenance.add_maintenance",
         "maintenance.change_maintenance",
@@ -32,6 +33,7 @@ ROLE_PERMISSIONS = {
         "assets.add_movement",
     },
     TECHNICIAN: {
+        "notifications.view_notification",
         "maintenance.create_next_run",
         "maintenance.take_maintenance",
         "maintenance.execute_maintenance",

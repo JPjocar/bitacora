@@ -1,0 +1,8 @@
+{% load static %}<!doctype html>
+<html lang="es-PE"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ section_label }} · Bitacora</title><link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}"><link rel="stylesheet" href="{% static 'css/reports.css' %}"></head>
+<body class="container py-4"><a class="d-print-none" href="{% url 'dashboard:panel' %}{% querystring %}">Volver al panel</a>
+<h1 class="h3">Bitacora · {{ section_label }}</h1><p>Fecha de consulta: {{ as_of|date:'d/m/Y' }} · America/Lima. Use Imprimir del navegador.</p>
+<dl class="row small">{% for label, value in applied_filters %}<dt class="col-sm-3">{{ label }}</dt><dd class="col-sm-9">{{ value }}</dd>{% endfor %}</dl>
+{% if invalid_targets %}<p>Advertencia: {{ invalid_targets|length }} inscripciones con fechas inválidas requieren revisión en el panel.</p>{% endif %}
+<table class="table table-sm"><thead><tr>{% for column in columns %}<th>{{ column }}</th>{% endfor %}</tr></thead><tbody>{% for row in values %}<tr>{% for value in row %}<td>{{ value }}</td>{% endfor %}</tr>{% empty %}<tr><td>No hay registros para estos filtros.</td></tr>{% endfor %}</tbody></table>
+</body></html>

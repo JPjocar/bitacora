@@ -74,9 +74,12 @@ def _record(run, actor, action, changes, reason=""):
     changes["execution_version"] = {"antes": old_version, "después": run.version}
     if reason:
         changes["reason"] = {"antes": None, "después": reason}
-    MaintenanceEvent.objects.create(
+    event = MaintenanceEvent.objects.create(
         maintenance=run.maintenance, run=run, actor=actor, action=action, changes=changes
     )
+    from apps.notifications.services import handle_maintenance_event
+
+    handle_maintenance_event(event)
     return run
 
 

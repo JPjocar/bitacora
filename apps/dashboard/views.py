@@ -27,7 +27,8 @@ def panel(request):
         context.update(dashboard_data(form.cleaned_data, include_incidents=include_incidents))
         context["page_obj"] = Paginator(context.pop("rows"), 20).get_page(request.GET.get("page"))
         context["section_label"] = dict(SECTIONS)[context["section"]]
-    template = "dashboard/results.html" if request.htmx else "dashboard/panel.html"
+    partial = request.htmx and not request.htmx.history_restore_request
+    template = "dashboard/results.html" if partial else "dashboard/panel.html"
     return render(request, template, context)
 
 

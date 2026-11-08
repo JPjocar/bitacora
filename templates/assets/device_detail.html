@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load ui %}
 {% block title %}{{ device.code }} · Bitacora{% endblock %}
 {% block content %}
 <nav aria-label="Ruta de navegación"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'assets:list' %}">Dispositivos</a></li><li class="breadcrumb-item active" aria-current="page">{{ device.code }}</li></ol></nav>
@@ -14,13 +15,13 @@
 </div>
 {% if not device.is_active %}<div class="alert alert-secondary">Dispositivo inactivo en el registro. Su identidad e historial se conservan.</div>{% endif %}
 <div class="card card-body"><dl class="row mb-0">
-<dt class="col-sm-4">Ubicación actual</dt><dd class="col-sm-8">{{ device.location.name }}{% if not device.location.is_active %} (ubicación inactiva){% endif %}</dd>
-<dt class="col-sm-4">Estado operativo</dt><dd class="col-sm-8">{{ device.get_status_display }}</dd>
+<dt class="col-sm-4">Ubicación actual</dt><dd class="col-sm-8">{{ device.location.name }}{% if not device.location.is_active %} {% status_badge device.location.is_active 'active' label='Ubicación inactiva' %}{% endif %}</dd>
+<dt class="col-sm-4">Estado operativo</dt><dd class="col-sm-8">{% status_badge device.status %}</dd>
 <dt class="col-sm-4">Marca / modelo</dt><dd class="col-sm-8">{{ device.brand|default:'—' }} / {{ device.model|default:'—' }}</dd>
 {% if perms.assets.view_device %}
+<dt class="col-sm-4">Estado del registro</dt><dd class="col-sm-8">{% status_badge device.is_active 'active' %}</dd>
 <dt class="col-sm-4">Número de serie</dt><dd class="col-sm-8">{{ device.serial_number|default:'No registrado' }}</dd>
 <dt class="col-sm-4">Adquisición</dt><dd class="col-sm-8">{{ device.acquired_on|date:'d/m/Y'|default:'No registrada' }}</dd>
-<dt class="col-sm-4">Puesta en servicio</dt><dd class="col-sm-8">{{ device.commissioned_on|date:'d/m/Y'|default:'No registrada' }}</dd>
 <dt class="col-sm-4">Detalles técnicos</dt><dd class="col-sm-8 preserve-lines">{{ device.technical_details|default:'No registrados' }}</dd>
 <dt class="col-sm-4">Observaciones</dt><dd class="col-sm-8 preserve-lines">{{ device.observations|default:'Sin observaciones' }}</dd>
 <dt class="col-sm-4">Registro</dt><dd class="col-sm-8">{{ device.created_at|date:'d/m/Y H:i' }} · Hora de Lima</dd>

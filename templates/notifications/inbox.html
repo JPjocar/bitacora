@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load ui %}
 {% block title %}Notificaciones · Bitacora{% endblock %}
 {% block content %}
 <h1>Notificaciones</h1>
@@ -13,10 +14,14 @@
 <div class="list-group">
 {% for notice in page_obj %}
 <article class="list-group-item py-3">
-  <h2 class="h5">{{ notice.title }} {% if not notice.read_at %}<span class="badge text-bg-primary">Sin leer</span>{% endif %}</h2>
-  <p>{{ notice.description }}</p>
-  <p class="small text-secondary">{{ notice.created_at|date:'d/m/Y H:i' }}{% if notice.resolved_at %} · Resuelta{% endif %}</p>
-  <form method="post" action="{% url 'notifications:read' notice.pk %}">{% csrf_token %}<button class="btn btn-outline-primary btn-sm">Ver mantenimiento y marcar leída</button></form>
+  <h2 class="h5">{{ notice.title }} {% if not notice.read_at %}{% include 'components/status_badge.html' with label='Sin leer' color='primary' only %}{% endif %}{% if notice.resolved_at %} {% include 'components/status_badge.html' with label='Resuelta' color='secondary' only %}{% endif %}</h2>
+  <p class="fw-semibold mb-1 notice-context">{{ notice.context.equipment }}</p>
+  {% if notice.context.location %}<p class="small text-secondary mb-2">Ubicación actual: {{ notice.context.location }}</p>{% endif %}
+  {% if notice.context.excerpt %}<p class="notice-context mb-2">{{ notice.context.excerpt }}</p>{% endif %}
+  <p class="small text-secondary notice-context">{{ notice.description }}</p>
+  {% if notice.due_on %}<div class="mb-2">{% deadline notice.due_on %}</div>{% endif %}
+  <p class="small text-secondary">{{ notice.created_at|date:'d/m/Y H:i' }}</p>
+  <form method="post" action="{% url 'notifications:read' notice.pk %}">{% csrf_token %}<button class="btn btn-outline-primary btn-sm">{{ notice.context.action }}{% if not notice.read_at %} y marcar leída{% endif %}</button></form>
 </article>
 {% empty %}<p class="p-3">No hay notificaciones en esta selección.</p>{% endfor %}
 </div>

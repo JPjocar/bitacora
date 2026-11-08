@@ -1,9 +1,10 @@
 {% extends 'base.html' %}{% load labels %}
+{% load ui %}
 {% block title %}Incidencia #{{ incident.pk }} · Bitacora{% endblock %}
 {% block content %}
 <nav aria-label="Ruta de navegación"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'incidents:list' %}">Incidencias</a></li><li class="breadcrumb-item active" aria-current="page">#{{ incident.pk }}</li></ol></nav>
 <h1>Incidencia #{{ incident.pk }}</h1><p class="h5">{{ incident.device.code }} · {{ incident.device.name }}</p>
-<p><span class="badge text-bg-secondary">{{ incident.get_state_display }}</span>{% if incident.outcome %} <strong>{{ incident.get_outcome_display }}</strong>{% endif %}</p>
+<p>{% status_badge incident.state %}{% if incident.outcome %} <strong>{% status_badge incident.outcome %}</strong>{% endif %}</p>
 <div class="d-flex flex-wrap gap-2 my-3">
 {% if device_visible %}<a class="btn btn-outline-secondary" href="{% url 'assets:detail' incident.device.public_id %}">Ficha e historial del equipo</a>{% endif %}
 {% if incident.state != 'CERRADA' %}
@@ -18,8 +19,8 @@
 <div class="card card-body"><dl class="row mb-0">
 <dt class="col-sm-4">Síntomas reportados</dt><dd class="col-sm-8 preserve-lines">{{ incident.symptoms }}</dd>
 <dt class="col-sm-4">Reportado</dt><dd class="col-sm-8">{{ incident.created_at|date:'d/m/Y H:i' }} · Lima{% if full_access %} · {{ incident.reporter.username }}{% endif %}</dd>
-<dt class="col-sm-4">Responsable</dt><dd class="col-sm-8">{{ incident.responsible.username|default:'Sin asignar' }}</dd>
-{% if incident.closed_at %}<dt class="col-sm-4">Cierre</dt><dd class="col-sm-8">{{ incident.closed_at|date:'d/m/Y H:i' }} · {{ incident.get_outcome_display }}</dd><dt class="col-sm-4">Resumen del cierre</dt><dd class="col-sm-8 preserve-lines">{{ incident.closure_summary }}</dd>{% endif %}
+<dt class="col-sm-4">Responsable</dt><dd class="col-sm-8">{{ incident.responsible|person_name }}</dd>
+{% if incident.closed_at %}<dt class="col-sm-4">Cierre</dt><dd class="col-sm-8">{{ incident.closed_at|date:'d/m/Y H:i' }} · {% status_badge incident.outcome %}</dd><dt class="col-sm-4">Resumen del cierre</dt><dd class="col-sm-8 preserve-lines">{{ incident.closure_summary }}</dd>{% endif %}
 </dl></div>
 <p class="small text-secondary mt-3">La atención correctiva se registra aquí. Sus resultados no completan preventivos ni cambian sus vencimientos.</p>
 <section class="mt-4"><h2 class="h4">Historial de la incidencia</h2>

@@ -1,4 +1,13 @@
-# Avance al 7 de noviembre de 2026 (Lima)
+# Avance al 8 de noviembre de 2026 (Lima)
+
+Incremento de interfaz posterior al piloto: puesta en servicio retirada de las pantallas
+(datos previos conservados); estados con etiquetas compartidas; navegación agrupada por
+permisos; avisos con contexto y extractos; columna responsable y resumen de vencimientos
+por equipo. No cambia el archivado ni se incorporan dependencias o migraciones.
+Detalle y archivos principales en [INTERFAZ.md](INTERFAZ.md).
+Resultado: **456 Django + 21 JavaScript OK**; 28 pruebas nuevas de interfaz y
+86 focalizadas. Ruff, formato, dependencias, migraciones y preflight piloto correctos.
+HTTP con tres roles verificado; revisión visual en navegador pendiente.
 
 | Área | Estado |
 | --- | --- |

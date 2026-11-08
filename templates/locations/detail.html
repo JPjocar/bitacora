@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load ui %}
 {% block title %}{{ location.name }} · Ubicaciones · Bitacora{% endblock %}
 {% block content %}
 <nav aria-label="Ruta de navegación"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'locations:list' %}">Ubicaciones</a></li><li class="breadcrumb-item active" aria-current="page">{{ location.name }}</li></ol></nav>
 <div class="d-flex flex-wrap justify-content-between gap-3 mb-3"><h1>{{ location.name }}</h1>{% if perms.locations.change_location %}<a class="btn btn-primary align-self-start" href="{% url 'locations:edit' location.pk %}">Editar ubicación</a>{% endif %}</div>
 {% if not location.is_active %}<p class="alert alert-secondary">Ubicación inactiva. Se conserva su información e historial.</p>{% endif %}
-<div class="card card-body"><dl><dt>Código</dt><dd>{{ location.code|default:'No registrado' }}</dd><dt>Tipo</dt><dd>{{ location.get_kind_display }}</dd><dt>Estado</dt><dd>{{ location.is_active|yesno:'Activo,Inactivo' }}</dd><dt>Descripción</dt><dd class="preserve-lines">{{ location.description|default:'Sin descripción' }}</dd></dl><p class="small text-secondary mb-0">Última modificación: {{ location.updated_at|date:'d/m/Y H:i' }} · Hora de Lima</p></div>
+<div class="card card-body"><dl><dt>Código</dt><dd>{{ location.code|default:'No registrado' }}</dd><dt>Tipo</dt><dd>{{ location.get_kind_display }}</dd><dt>Estado</dt><dd>{% status_badge location.is_active 'active' %}</dd><dt>Descripción</dt><dd class="preserve-lines">{{ location.description|default:'Sin descripción' }}</dd></dl><p class="small text-secondary mb-0">Última modificación: {{ location.updated_at|date:'d/m/Y H:i' }} · Hora de Lima</p></div>
 {% if events is not None %}{% include 'components/events.html' %}{% endif %}
 {% endblock %}

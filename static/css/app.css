@@ -18,4 +18,9 @@ th { background: #edf2f5 !important; font-size: .8rem; color: #52616d !important
 :focus-visible { outline: 3px solid #b46535 !important; outline-offset: 3px; }
 .htmx-indicator { opacity: 0; }
 .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity: 1; }
+.status-badge { font-weight: 600; line-height: 1.4; white-space: normal; text-align: start; }
+.navbar .nav-link { white-space: nowrap; }
+.navbar .nav-link.active { font-weight: 700; }
+.notice-context { max-width: 75ch; overflow-wrap: anywhere; }
+@media print { .status-badge { color: #253745 !important; border-color: #52616d !important; } }
 @media (max-width: 575px) { .btn { min-height: 44px; } h1 { overflow-wrap: anywhere; } .table { min-width: 560px; } }

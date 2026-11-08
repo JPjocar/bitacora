@@ -1,0 +1,27 @@
+{% with section=request.resolver_match.namespace %}
+<ul class="navbar-nav me-auto">
+  {% if perms.assets.view_device and perms.maintenance.view_maintenance %}<li class="nav-item"><a class="nav-link{% if section == 'dashboard' %} active{% endif %}" {% if section == 'dashboard' %}aria-current="page"{% endif %} href="{% url 'dashboard:panel' %}">Panel</a></li>{% endif %}
+  {% if perms.assets.view_device or perms.assets.view_device_limited or perms.assets.view_movement or perms.assets.view_category %}
+  <li class="nav-item dropdown">
+    <button class="nav-link dropdown-toggle{% if section == 'assets' %} active{% endif %}" id="equipment-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false">Equipos</button>
+    <ul class="dropdown-menu" aria-labelledby="equipment-menu">
+      {% if perms.assets.view_device or perms.assets.view_device_limited %}<li><a class="dropdown-item" href="{% url 'assets:list' %}">Dispositivos</a></li><li><a class="dropdown-item" href="{% url 'assets:scanner' %}">Escanear QR</a></li>{% endif %}
+      {% if perms.assets.view_movement %}<li><a class="dropdown-item" href="{% url 'assets:movements' %}">Movimientos</a></li>{% endif %}
+      {% if perms.assets.view_category %}<li><a class="dropdown-item" href="{% url 'assets:categories' %}">Categorías</a></li>{% endif %}
+    </ul>
+  </li>
+  {% endif %}
+  {% if perms.maintenance.view_maintenance %}<li class="nav-item"><a class="nav-link{% if section == 'maintenance' %} active{% endif %}" {% if section == 'maintenance' %}aria-current="page"{% endif %} href="{% url 'maintenance:list' %}">Mantenimientos</a></li>{% endif %}
+  {% if perms.incidents.view_incident or perms.incidents.view_own_incident %}<li class="nav-item"><a class="nav-link{% if section == 'incidents' %} active{% endif %}" {% if section == 'incidents' %}aria-current="page"{% endif %} href="{% url 'incidents:list' %}">Incidencias</a></li>{% endif %}
+  {% if perms.locations.view_location or perms.accounts.view_user or perms.auth.view_group %}
+  <li class="nav-item dropdown">
+    <button class="nav-link dropdown-toggle{% if section == 'locations' or section == 'accounts' and request.resolver_match.url_name != 'profile' %} active{% endif %}" id="administration-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false">Administración</button>
+    <ul class="dropdown-menu" aria-labelledby="administration-menu">
+      {% if perms.locations.view_location %}<li><a class="dropdown-item" href="{% url 'locations:list' %}">Ubicaciones</a></li>{% endif %}
+      {% if perms.accounts.view_user %}<li><a class="dropdown-item" href="{% url 'accounts:list' %}">Usuarios</a></li>{% endif %}
+      {% if perms.auth.view_group %}<li><a class="dropdown-item" href="{% url 'accounts:roles' %}">Roles</a></li>{% endif %}
+    </ul>
+  </li>
+  {% endif %}
+</ul>
+{% endwith %}

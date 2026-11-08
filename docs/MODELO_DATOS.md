@@ -75,6 +75,9 @@ no contiene información institucional ni usuario ficticio como actor de configu
 único de 11 caracteres; nombre, categoría y ubicación actual; marca/modelo y serie
 opcionales; estado, observaciones, detalles técnicos libres, adquisición/puesta en
 servicio opcionales, activo, versión, timestamps y creador protegido.
+Desde el ajuste de interfaz del 08/11/2026, `commissioned_on` se conserva únicamente
+por compatibilidad con registros anteriores: no se muestra ni se edita en pantallas.
+No interviene en los vencimientos preventivos. No se eliminan columna ni eventos.
 
 `Movement`: equipo, origen/destino con PROTECT, motivo, observaciones, fecha efectiva,
 fecha registrada, actor y versión resultante del equipo. UNIQUE(equipo, versión)

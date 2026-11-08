@@ -58,7 +58,7 @@ def dashboard_incidents(devices, filters):
     )
     return {
         "incident_counts": [
-            {"label": label, "count": counts.get(state, 0)}
+            {"state": state, "label": label, "count": counts.get(state, 0)}
             for state, label in Incident.State.choices
         ],
         "repeated_incident_count": repeated_devices.count(),

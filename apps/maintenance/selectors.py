@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
 
+from django.core.exceptions import ValidationError
 from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
@@ -127,3 +128,51 @@ def device_preventive_history(device_id):
         .select_related("run__maintenance")
         .order_by("-run__created_at", "-run__number", "-pk")
     )
+
+
+@dataclass
+class MaintenanceSchedule:
+    earliest_due: date | None = None
+    overdue_count: int = 0
+    equipment_count: int = 0
+    calendar_error: bool = False
+
+
+def list_schedules(maintenances, *, today=None):
+    """Batch the current page, keeping unfinished work's original deadlines.
+
+    Unfinished work stays visible even if its device/registration was archived.
+    Other obligations use the live calendar, including omitted devices.
+    Completed or cancelled one-off work has no next deadline.
+    """
+    today = today or timezone.localdate()
+    summaries = {item.pk: MaintenanceSchedule() for item in maintenances}
+    if not summaries:
+        return summaries
+    unfinished = MaintenanceRunDevice.objects.filter(
+        run__maintenance_id__in=summaries,
+        run__state__in=OPEN_STATES,
+        result=MaintenanceRunDevice.Result.UNFINISHED,
+    ).values_list("run__maintenance_id", "target_id", "due_date")
+    open_targets = set()
+
+    def include(maintenance_id, due):
+        summary = summaries[maintenance_id]
+        summary.equipment_count += 1
+        summary.overdue_count += due < today
+        if summary.earliest_due is None or due < summary.earliest_due:
+            summary.earliest_due = due
+
+    for maintenance_id, target_id, due in unfinished:
+        open_targets.add(target_id)
+        include(maintenance_id, due)
+    for target in outstanding_targets().filter(maintenance_id__in=summaries):
+        if target.pk in open_targets:
+            continue
+        try:
+            include(
+                target.maintenance_id, due_for_target(target.maintenance, target.last_completed_on)
+            )
+        except ValidationError:
+            summaries[target.maintenance_id].calendar_error = True
+    return summaries

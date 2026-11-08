@@ -7,7 +7,7 @@ from django.views.decorators.http import require_safe
 from apps.core.permissions import require_permission
 
 from .forms import SECTIONS, DashboardFilters
-from .reports import REPORT_LIMIT, csv_response, report_columns, report_values
+from .reports import REPORT_LIMIT, csv_response, print_cells, report_columns
 from .selectors import dashboard_data
 
 
@@ -54,7 +54,7 @@ def report(request, output):
     data.update(
         {
             "columns": report_columns(data["section"]),
-            "values": [report_values(data["section"], row) for row in rows],
+            "print_rows": [print_cells(data["section"], row) for row in rows],
             "section_label": dict(SECTIONS)[data["section"]],
             "form": form,
         }

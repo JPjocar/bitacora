@@ -46,14 +46,12 @@ class DeviceForm(BootstrapFormMixin, forms.ModelForm):
             "observations",
             "technical_details",
             "acquired_on",
-            "commissioned_on",
             "is_active",
         ]
         widgets = {
             "observations": forms.Textarea(attrs={"rows": 3}),
             "technical_details": forms.Textarea(attrs={"rows": 4}),
             "acquired_on": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
-            "commissioned_on": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
         }
         help_texts = {
             "serial_number": "Opcional; no identifica por sí sola el equipo.",

@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load ui %}
 {% block title %}{{ subject.username }} · Usuarios · Bitacora{% endblock %}
 {% block content %}
 <nav aria-label="Ruta de navegación"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'accounts:list' %}">Usuarios</a></li><li class="breadcrumb-item active" aria-current="page">{{ subject.username }}</li></ol></nav>
 <div class="d-flex flex-wrap justify-content-between gap-3 mb-3"><h1>{{ subject.username }}</h1>{% if perms.accounts.change_user and not subject.is_superuser %}<a class="btn btn-primary align-self-start" href="{% url 'accounts:edit' subject.pk %}">Editar usuario</a>{% endif %}</div>
-<div class="card card-body"><dl class="mb-0"><dt>Nombre</dt><dd>{{ subject.get_full_name|default:'No registrado' }}</dd><dt>Correo</dt><dd>{{ subject.email|default:'No registrado' }}</dd><dt>Rol</dt><dd>{% if subject.is_superuser %}Superusuario técnico{% else %}{{ subject.business_role|default:'Sin rol' }}{% endif %}</dd><dt>Estado</dt><dd>{{ subject.is_active|yesno:'Activo,Inactivo' }}</dd></dl>
+<div class="card card-body"><dl class="mb-0"><dt>Nombre</dt><dd>{{ subject.get_full_name|default:'No registrado' }}</dd><dt>Correo</dt><dd>{{ subject.email|default:'No registrado' }}</dd><dt>Rol</dt><dd>{% if subject.is_superuser %}Superusuario técnico{% else %}{{ subject.business_role|default:'Sin rol' }}{% endif %}</dd><dt>Estado</dt><dd>{% status_badge subject.is_active 'active' %}</dd></dl>
 {% if perms.accounts.change_user and not subject.is_superuser and subject.pk != user.pk %}<div><a href="{% url 'accounts:password_reset' subject.pk %}" class="btn btn-outline-secondary">Restablecer contraseña</a></div>{% endif %}</div>
 {% include 'components/events.html' %}
 {% endblock %}

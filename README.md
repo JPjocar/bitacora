@@ -32,6 +32,11 @@ Sin cambios de modelos ni migraciones nuevas. Evidencia en `docs/PRUEBAS.md` y p
 completo en [docs/PILOTO.md](docs/PILOTO.md). La revisión visual/física e instalación institucional
 siguen pendientes; no se presenta esta preparación local como un despliegue oficial.
 
+El ajuste de interfaz del 08/11/2026 agrupa la navegación, unifica etiquetas de estado,
+añade contexto a avisos y muestra responsable/vencimiento en mantenimientos. Retira
+puesta en servicio de las pantallas conservando valores antiguos. **456 pruebas Django
+y 21 JavaScript OK**, sin migraciones nuevas; [detalle de interfaz](docs/INTERFAZ.md).
+
 ## Entorno verificado
 
 Python 3.12.13; Django 5.2.19; PostgreSQL 18; psycopg 3.3.8; django-htmx 1.29.0;
@@ -218,6 +223,7 @@ Para detener el servidor use Ctrl+C. Para detener únicamente el clúster aislad
 - [Reglas](docs/REGLAS_NEGOCIO.md), [requisitos](docs/REQUERIMIENTOS.md), [manual](docs/MANUAL.md).
 - [Pruebas](docs/PRUEBAS.md), [seguridad](docs/SEGURIDAD.md), [avance](docs/AVANCE.md).
 - [Preparación, operación y recuperación del piloto](docs/PILOTO.md).
+- [Estados, navegación, avisos y vencimientos en la interfaz](docs/INTERFAZ.md).
 
 Pendientes: inspección visual real en escritorio/móvil y pruebas físicas, dominio/certificado
 institucional, ACL y despliegue autorizado, arranque/tareas y CI remoto. HTTPS local, límite

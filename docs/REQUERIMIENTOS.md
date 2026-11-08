@@ -1,5 +1,12 @@
 # Requisitos y trazabilidad
 
+**Ajuste de interfaz solicitado el 08/11/2026:** `tests/test_ui.py` verifica estados con
+etiquetas consistentes (RF-002/003/011/024), navegación según permisos (RF-001), campo
+de puesta en servicio retirado sin pérdida histórica (RF-003), contexto y extractos
+seguros en avisos (RF-020/021/024), responsables y fechas por equipo visibles en la lista
+(RF-010/012/022) y reportes HTML con etiquetas conservando CSV simple (RF-022).
+No modifica reglas de archivado. Resultados en [PRUEBAS.md](PRUEBAS.md).
+
 | RF | Alcance entregado | Criterio de aceptación | Evidencia |
 | --- | --- | --- | --- |
 | RF-001 | Login/logout, perfil, cuentas y roles | Sin permisos no se ejecuta operación; roles reales, sesión y contraseñas protegidas | `tests/test_accounts.py`, `tests/test_security.py` |

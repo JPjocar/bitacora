@@ -13,6 +13,7 @@ from apps.core.forms import add_validation_errors
 from .execution import can_control
 from .forms import MaintenanceForm, TaskFormSet
 from .models import Maintenance, MaintenanceRun, MaintenanceRunDevice
+from .selectors import OPEN_STATES, list_schedules
 from .services import MAX_TASKS, save_maintenance, template_data
 
 
@@ -30,6 +31,8 @@ def maintenance_list(request):
         current_state=Subquery(latest.values("state")[:1]),
         current_number=Subquery(latest.values("number")[:1]),
         current_responsible=Subquery(latest.values("responsible__username")[:1]),
+        responsible_first_name=Subquery(latest.values("responsible__first_name")[:1]),
+        responsible_last_name=Subquery(latest.values("responsible__last_name")[:1]),
     )
     if query:
         records = records.filter(
@@ -44,12 +47,21 @@ def maintenance_list(request):
     if state in MaintenanceRun.State.values:
         records = records.filter(current_state=state)
     page = Paginator(records, 20).get_page(request.GET.get("page"))
+    schedules = list_schedules(page)
     for item in page:
         item.current_state_label = (
             MaintenanceRun.State(item.current_state).label
             if item.current_state
             else "Sin ejecución"
         )
+        item.responsible_name = (
+            " ".join(
+                part for part in (item.responsible_first_name, item.responsible_last_name) if part
+            ).strip()
+            or item.current_responsible
+        )
+        item.work_is_open = item.current_state in OPEN_STATES
+        item.schedule = schedules[item.pk]
     template = (
         "maintenance/_list.html"
         if request.htmx and not request.htmx.history_restore_request

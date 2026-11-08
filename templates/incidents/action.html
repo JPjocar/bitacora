@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
+{% load ui %}
 {% block title %}{{ title }} · Bitacora{% endblock %}
 {% block content %}
-<h1>{{ title }}</h1><p>Incidencia #{{ incident.pk }} · {{ incident.device.code }} · {{ incident.get_state_display }}</p>
+<h1>{{ title }}</h1><p>Incidencia #{{ incident.pk }} · {{ incident.device.code }} · {% status_badge incident.state %}</p>
 {% if action == 'tomar' %}<p>Quedará como responsable y la incidencia pasará a En atención. No se mide tiempo trabajado.</p>{% elif action == 'liberar' %}<p>Explique qué hizo y qué queda pendiente. Se conservarán las notas y se avisará de nuevo a técnicos y administradores.</p>{% elif action == 'cerrar' %}<p class="alert alert-warning">Confirme el resultado. No reparable requiere permiso y justificación; el resumen de cierre será visible para el reportante. El cierre no se revierte en este MVP.</p>{% endif %}
 <form method="post" class="card card-body form-panel" novalidate>{% csrf_token %}{% include 'components/form_fields.html' %}<div>{% if incident.state != 'CERRADA' %}<button class="btn btn-primary">Confirmar</button>{% endif %} <a class="btn btn-outline-secondary" href="{% url 'incidents:detail' incident.pk %}">Volver</a></div></form>
 {% endblock %}

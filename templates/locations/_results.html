@@ -1,7 +1,8 @@
+{% load ui %}
 <section id="results" aria-live="polite" aria-label="Resultados de ubicaciones">
 <p class="small text-secondary">{{ page_obj.paginator.count }} {% if page_obj.paginator.count == 1 %}ubicación{% else %}ubicaciones{% endif %}</p>
 {% if page_obj %}<div class="table-responsive card"><table class="table align-middle mb-0"><caption class="visually-hidden">Ubicaciones registradas</caption><thead><tr><th scope="col">Nombre</th><th scope="col">Código</th><th scope="col">Tipo</th><th scope="col">Estado</th></tr></thead><tbody>
-{% for location in page_obj %}<tr><td><a class="fw-semibold" href="{% url 'locations:detail' location.pk %}">{{ location.name }}</a></td><td class="font-monospace">{{ location.code|default:'—' }}</td><td>{{ location.get_kind_display }}</td><td>{% if location.is_active %}<span class="badge text-bg-success">Activo</span>{% else %}<span class="badge text-bg-secondary">Inactivo</span>{% endif %}</td></tr>{% endfor %}
+{% for location in page_obj %}<tr><td><a class="fw-semibold" href="{% url 'locations:detail' location.pk %}">{{ location.name }}</a></td><td class="font-monospace">{{ location.code|default:'—' }}</td><td>{{ location.get_kind_display }}</td><td>{% status_badge location.is_active 'active' %}</td></tr>{% endfor %}
 </tbody></table></div>{% include 'components/pagination.html' %}
 {% else %}<div class="card card-body text-center py-5"><h2 class="h5">No se encontraron ubicaciones</h2><p class="text-secondary mb-0">Prueba otros filtros o registra un ambiente si tienes permiso.</p></div>{% endif %}
 </section>

@@ -7,6 +7,7 @@ from .models import Category, CategoryEvent, Device, DeviceEvent, Movement
 
 @admin.register(Device)
 class DeviceAdmin(ReadOnlyAdmin):
+    exclude = ("commissioned_on",)
     list_display = ("code", "name", "category", "location", "status", "is_active")
     search_fields = ("code", "name")
 

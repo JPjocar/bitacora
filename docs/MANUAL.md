@@ -1,5 +1,25 @@
 # Manual breve
 
+**Navegación:** pulse la marca **Bitacora** para volver al inicio. **Equipos** contiene
+Dispositivos, Escanear QR, Movimientos y Categorías; **Administración** contiene
+Ubicaciones, Usuarios y Roles. Cada cuenta ve solo sus opciones permitidas.
+Panel, Mantenimientos e Incidencias quedan accesibles según permisos. En móvil use
+**Abrir menú** y pulse el grupo deseado. Dispositivos también ofrece **Escanear QR**.
+
+**Estados:** verde identifica activo/operativo/completado, rojo inactivo/fuera de servicio,
+ámbar pendiente/observaciones y azul trabajo asignado/en curso. Cada etiqueta incluye
+su significado escrito. El estado operativo y el del registro siguen siendo independientes.
+
+**Lista de mantenimientos:** la columna Responsable muestra nombre completo o usuario,
+o **Sin asignar**. Una asignación de trabajo cerrado se identifica como histórica.
+El vencimiento muestra la fecha pendiente más antigua del grupo, cuántos equipos
+quedan por atender y cuántos están vencidos. **Hoy**, **Mañana**, **En N días** y
+**Vencido hace N días** ayudan a priorizar; cada equipo conserva su propio calendario.
+
+**Contexto de avisos:** la bandeja muestra tipo, código, nombre y ubicación actual del
+equipo y, para incidencias, un extracto de síntomas con elipsis. En preventivos grupales
+resume cantidad y tipos. El botón indica si abre incidencia, mantenimiento o vencimiento.
+
 **Todas las cuentas:** ingrese con su usuario y contraseña. En el nombre de usuario del
 menú abra **Mi perfil** para revisar sus datos o cambiar la contraseña usando la actual.
 **Salir** cierra la sesión. Si olvidó la contraseña, solicite restablecimiento al administrador.
@@ -22,7 +42,8 @@ Los cambios aparecen en el historial con actor y hora de Lima.
 
 **Dispositivos (administrador):** entre a Dispositivos → Nuevo dispositivo. Seleccione
 nombre, categoría y ubicación inicial activa. Complete opcionalmente marca/modelo,
-serie, detalles y fechas. El código se genera al guardar y no se puede editar.
+serie, detalles y fecha de adquisición. Ya no se solicita puesta en servicio.
+El código se genera al guardar y no se puede editar.
 En la ficha, Editar permite modificar datos y desactivar/reactivar el registro. Para
 cambiar el estado operativo indique un motivo. Para cambiar ubicación use Registrar traslado.
 En Categorías puede crear, editar o desactivar categorías conservando equipos existentes.

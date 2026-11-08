@@ -1,0 +1,1 @@
+{% if due_date %}{% if show_date %}<time class="d-block mb-1 text-nowrap" datetime="{{ due_date|date:'Y-m-d' }}">{{ due_date|date:'d/m/Y' }}</time>{% endif %}{% include 'components/status_badge.html' %}{% endif %}

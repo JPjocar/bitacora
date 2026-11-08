@@ -1,3 +1,62 @@
+# Verificación del ajuste de interfaz · 8 de noviembre de 2026 (Lima)
+
+Maestro releído completo; revisión previa de modelos, formularios, servicios, permisos,
+selectores, migraciones y plantillas. Repositorio inicialmente limpio. Se inició el clúster
+aislado de PostgreSQL, sin tocar el servicio de 5432 ni regenerar datos demo.
+
+| Comprobación | Resultado observado |
+| --- | --- |
+| Suite Django completa | **456 OK en 266,788 s**, PostgreSQL real; 428 anteriores + 28 nuevas |
+| Regresión focalizada final | **86 OK en 31,249 s**: UI, dashboard, incidencias y recurrencia |
+| JavaScript | **21 OK**, escáner y ciclo de cámara simulados |
+| Ruff y formato | Correctos; 182 archivos Python con formato correcto |
+| Dependencias y Django | `pip check` y `check` correctos |
+| Migraciones | `makemigrations --check --dry-run`: sin cambios |
+| Estáticos | `collectstatic --noinput`: un archivo actualizado, 181 sin cambios |
+| Entorno piloto restringido | `check_pilot --allow-demo` correcto; no altera datos |
+| HTTP con tres cuentas demo | Login/permisos, dispositivos, filtros HTMX, QR decodificado, etiquetas, escáner, preventivos e historial correctos |
+| HTTP de avisos/panel/reportes | Técnico y admin: cinco reportes, apertura propia y CSRF correctos; docente sin acceso al panel |
+| Revisión de cambios | `git diff --check` sin errores de espacios; maestro, modelos y migraciones sin cambios |
+| Navegador visual | No disponible: selección fallida y listado vacío; no se afirma revisión visual |
+
+Las 28 pruebas de `tests/test_ui.py` verifican etiquetas contra opciones reales del
+dominio; activo verde/inactivo rojo; fechas relativas y medianoche Lima; responsables
+y liberaciones; navegación por permisos sin menús vacíos; campo de puesta en servicio
+retirado y POST incapaz de modificar sus valores antiguos; avisos escapados con extractos,
+tipos y ubicación, sin notas privadas; reportes HTML con etiquetas y CSV simple;
+fechas originales de trabajos abiertos, equipos archivados, omitidos, calendarios
+individuales y únicos completados/cancelados. Dos consultas por lote para resúmenes
+y contexto de avisos, sin consultas adicionales por cada fila.
+
+Comandos reproducibles desde la raíz:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/manage_local.py test --noinput --keepdb
+.\.venv\Scripts\python.exe scripts/manage_local.py test tests.test_ui tests.test_dashboard tests.test_incident_views tests.test_recurrence_views --noinput --keepdb
+node --test tests/js/*.test.cjs
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe -m ruff format --check .
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe scripts/manage_local.py check
+.\.venv\Scripts\python.exe scripts/manage_local.py makemigrations --check --dry-run
+.\.venv\Scripts\python.exe scripts/manage_local.py collectstatic --noinput
+.\.venv\Scripts\python.exe scripts/manage_local.py --env-file .local/pilot.env check_pilot --allow-demo
+```
+
+Se usó Node desde la caché del entorno; para el comando abreviado debe estar en PATH.
+HTTP se comprobó en una instancia temporal `127.0.0.1:8011`, cerrada al terminar:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/smoke_http.py --base-url http://127.0.0.1:8011 --assets --qr --maintenance
+.\.venv\Scripts\python.exe scripts/smoke_dashboard_http.py --base-url http://127.0.0.1:8011 --confirm-demo
+```
+
+El segundo comando marca avisos sintéticos como leídos; no se alteraron datos reales.
+Pendiente: revisión visual a 1366/390 px, menús con teclado/táctil, contraste efectivo
+y cámara/impresión físicas. No se repitió el despliegue HTTPS ni la restauración operativa
+anterior: este incremento no cambia su infraestructura ni esquema. Sí se ejecutó toda
+la suite de pruebas existente. Diseño y límites en [INTERFAZ.md](INTERFAZ.md).
+
 # Verificación del noveno incremento: QA, seguridad y preparación piloto (fase 11)
 
 **7 de noviembre de 2026, America/Lima.** Maestro releído completo e inspección previa.

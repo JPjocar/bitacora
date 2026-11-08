@@ -70,8 +70,10 @@ Dispositivos:
   técnicos, observaciones y fechas opcionales. La serie no es universalmente única.
 - Categorías iniciales PC, Laptop, Router, Impresora, Monitor y Otros. Categorías
   inactivas se conservan en equipos existentes, pero no se asignan a nuevos equipos.
-- Fechas de hechos realizados: no futuras; puesta en servicio no anterior a adquisición
-  cuando ambas existen. Los textos largos tienen límites también en los servicios.
+- Adquisición opcional, sin fechas futuras. Desde el 08/11/2026 se retira puesta en
+  servicio de la interfaz por instrucción del usuario. Los valores históricos se conservan
+  con su integridad anterior (no anteriores a adquisición); no calculan preventivos.
+  Los textos largos tienen límites también en los servicios.
 - Técnico solo actualiza estado/observaciones. Cambiar estado exige motivo; no se
   permite cambiar ficha, ubicación, categoría, identidad ni activo desde esa operación.
 - Activo en el registro y estado operativo son conceptos separados. Archivar no altera

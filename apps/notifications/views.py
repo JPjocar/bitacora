@@ -5,13 +5,14 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST, require_safe
 
 from .models import Notification
+from .selectors import describe_context, with_context
 from .services import accessible_notices, mark_read
 
 
 @login_required
 @require_safe
 def inbox(request):
-    notices = accessible_notices(request.user).select_related("event", "target", "incident_event")
+    notices = with_context(accessible_notices(request.user))
     state = request.GET.get("state", "unread")
     if state == "unread":
         notices = notices.filter(read_at=None, resolved_at=None)
@@ -21,11 +22,14 @@ def inbox(request):
         notices = notices.filter(resolved_at__isnull=False)
     else:
         state = "all"
+    page = Paginator(notices, 20).get_page(request.GET.get("page"))
+    for notice in page:
+        notice.context = describe_context(notice)
     return render(
         request,
         "notifications/inbox.html",
         {
-            "page_obj": Paginator(notices, 20).get_page(request.GET.get("page")),
+            "page_obj": page,
             "state": state,
         },
     )

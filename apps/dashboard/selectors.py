@@ -132,7 +132,7 @@ def dashboard_data(filters, *, today=None, include_incidents=False):
         "soon_count": sum(row.timing == "soon" for row in deadlines),
         "omission_count": len(omissions),
         "run_counts": [
-            {"label": label, "count": run_counts.get(state, 0)}
+            {"state": state, "label": label, "count": run_counts.get(state, 0)}
             for state, label in MaintenanceRun.State.choices
         ],
         "by_kind": devices.order_by().values("category__kind").annotate(total=Count("pk")),

@@ -89,6 +89,20 @@ def safe_cell(value):
     return text
 
 
+def print_cells(section, row):
+    """Keep CSV values plain and give the HTML report typed presentation cells."""
+    cells = [{"value": value} for value in report_values(section, row)]
+    if section == "incidents":
+        cells[4]["state"], cells[5]["state"] = row.state, row.outcome
+    elif section == "runs":
+        cells[2]["state"] = row.state
+    elif section in {"devices", "unconfigured"}:
+        cells[4]["state"] = row.status
+    elif section == "deadlines":
+        cells[4]["due_date"] = row.due_date
+    return cells
+
+
 def csv_response(section, rows):
     output = io.StringIO(newline="")
     writer = csv.writer(output, delimiter=";")

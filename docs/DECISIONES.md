@@ -1,5 +1,21 @@
 # Decisiones técnicas
 
+## Ajuste UX/UI autorizado el 08/11/2026
+
+Se centralizan etiquetas y fechas relativas, se agrupa la navegación Bootstrap según
+permisos y se enriquece la bandeja en consultas sin alterar sus eventos históricos.
+Los vencimientos de la lista resumen obligaciones por equipo con dos lecturas por
+página; un trabajo abierto conserva su fecha original. El responsable de una ejecución
+cerrada se identifica como histórico. Los reportes HTML reciben celdas de presentación,
+mientras CSV mantiene valores simples.
+
+La instrucción posterior del usuario retira puesta en servicio de formularios/ficha/admin,
+frente al campo opcional previsto en el maestro. Se conserva la columna nullable y los
+eventos existentes para evitar pérdida de información. No se cambian reglas de archivado,
+permisos, transiciones ni dependencias. Detalle en [INTERFAZ.md](INTERFAZ.md).
+
+## Decisiones de los incrementos anteriores
+
 1. Mantener el monolito Django y PostgreSQL exigidos; proyecto nuevo, sin funcionalidades
    preexistentes que reutilizar o reescribir en la primera entrega. La segunda reutiliza
    accounts, locations y core y agrega assets para dispositivos y movimientos.

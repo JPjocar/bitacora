@@ -1,0 +1,11 @@
+<fieldset id="{{ widget.attrs.id }}" class="mb-4" aria-describedby="{{ widget.attrs.id }}_helptext {{ widget.attrs.id }}_error">
+  <legend class="h4">Equipos inscritos</legend>
+  <p class="form-text" id="{{ widget.attrs.id }}_helptext">Agrega equipos con +. Los más recientes aparecen primero. Máximo {{ widget.limit }}; se guardan al confirmar el mantenimiento.</p>
+  <p class="small text-secondary" id="device-selection-count" role="status" aria-live="polite">{{ widget.devices|length }} / {{ widget.limit }} equipos seleccionados</p>
+  <div class="device-grid" id="device-grid" data-field-name="{{ widget.name }}" data-limit="{{ widget.limit }}">
+    <button id="device-add" type="button" class="card device-add" data-bs-toggle="modal" data-bs-target="#device-picker-modal" aria-label="Agregar equipos al mantenimiento"><span class="device-add-symbol" aria-hidden="true">+</span><span>Agregar equipos</span></button>
+    {% for device in widget.devices %}{% include 'maintenance/device_card.html' with field_name=widget.name %}{% endfor %}
+  </div>
+  <p id="device-selection-status" class="small mt-2 mb-0" role="status" aria-live="polite"></p>
+  <noscript><div class="border rounded p-3 mt-3"><p>Sin JavaScript puedes agregar equipos por código o contenido del QR, uno por uno.</p><label for="device-fallback-code" class="form-label">Código o contenido del QR</label><input id="device-fallback-code" name="device_query" maxlength="2048" class="form-control mb-2" autocomplete="off"><button type="submit" name="action" value="add_device" formnovalidate class="btn btn-outline-primary">Agregar equipo por código</button></div></noscript>
+</fieldset>

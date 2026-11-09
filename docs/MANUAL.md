@@ -106,6 +106,21 @@ Periódico antes de llenar campos; cambiar tipo abre un formulario nuevo. Indiqu
 descripción opcional y equipos. Único pide fecha prevista; Periódico pide fecha base e
 intervalo en días/meses. La fecha base no significa mantenimiento realizado.
 
+**Agregar equipos:** en Equipos inscritos pulse la tarjeta **+**. El modal permite
+buscar por nombre/código/ubicación y filtrar por ubicación, con 20 resultados por página.
+Marque equipos: se agregan a la cuadrícula y se conservan al cambiar de página o filtro.
+**Agregar todos los filtrados** incluye todas las coincidencias. Si el filtro o la unión
+con lo ya seleccionado supera 200, no se agrega el lote y debe acotar/quitar equipos.
+
+También puede desplegar **Agregar mediante código, cámara o imagen QR**. Escriba el código
+de etiqueta o contenido del QR; use Escanear con cámara o seleccione una imagen local.
+El equipo identificado se agrega directamente, sin salir del formulario. No hay duplicados.
+Pulse Listo para volver: **+** permanece primero y los agregados más recientes aparecen
+a su derecha. Quitar solo retira de la selección provisional. Todo se guarda al confirmar
+el mantenimiento; en edición, la ejecución existente conserva sus equipos originales.
+Sin JavaScript, agregue por código con el campo alternativo y quite con los botones de
+cada tarjeta. Agregar equipos o tareas no guarda ni pierde los otros campos rellenados.
+
 Configure tareas verificables. «Por dispositivo» crea una copia independiente para cada
 equipo, opcionalmente limitada a su categoría. «General de la ejecución» se incluye una
 vez y no admite categoría. Cada equipo necesita al menos una tarea individual aplicable.

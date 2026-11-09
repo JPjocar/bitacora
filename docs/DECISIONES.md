@@ -16,6 +16,15 @@ permisos, transiciones ni dependencias. Detalle en [INTERFAZ.md](INTERFAZ.md).
 
 ## Decisiones de los incrementos anteriores
 
+Antes del piloto se utilizaba un `CheckboxSelectMultiple` con inventario completo para
+inscripciones preventivas. Por solicitud posterior se reemplaza por widget de tarjetas,
+modal paginado y selección provisional en DOM con inputs del formulario. La elegibilidad
+se extrae a `eligible_devices`; endpoints devuelven HTML acotado, sin API REST ni
+almacenamiento de borradores. El QR reutiliza validación y controlador existentes; el
+adaptador del escáner se comparte, manteniendo su pantalla anterior. Se rechazan lotes
+que exceden 200 en vez de truncarlos, y se descartan respuestas de modales cerrados.
+Detalles en [INTERFAZ.md](INTERFAZ.md). Sin modelos, migraciones ni dependencias nuevas.
+
 1. Mantener el monolito Django y PostgreSQL exigidos; proyecto nuevo, sin funcionalidades
    preexistentes que reutilizar o reescribir en la primera entrega. La segunda reutiliza
    accounts, locations y core y agrega assets para dispositivos y movimientos.

@@ -1,0 +1,9 @@
+{% load ui %}
+<article class="card device-card" data-device-card data-device-id="{{ device.pk }}" data-device-label="{{ device.code }} · {{ device.name }}">
+  <input type="hidden" name="{{ field_name|default:'devices' }}" value="{{ device.pk }}">
+  <p class="font-monospace fw-semibold small mb-2">{{ device.code }}</p>
+  <h3 class="h6">{{ device.name }}</h3>
+  <p class="small text-secondary mb-2">{{ device.category.name }}<br>{{ device.location.name }}</p>
+  <div class="d-flex flex-wrap gap-1 mb-3">{% status_badge device.status %}{% if not device.is_active %}{% status_badge device.is_active 'active' %}{% endif %}</div>
+  <button class="btn btn-outline-danger btn-sm mt-auto align-self-start" type="submit" name="remove_device" value="{{ device.pk }}" formnovalidate data-remove-device aria-label="Quitar {{ device.code }} de la selección">Quitar</button>
+</article>

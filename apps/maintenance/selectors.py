@@ -6,6 +6,7 @@ from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
 from apps.assets.models import Device
+from apps.assets.selectors import visible_devices
 
 from .dates import add_interval
 from .models import MaintenanceRun, MaintenanceRunDevice, MaintenanceTarget
@@ -22,6 +23,17 @@ TIMING_LABELS = {
     "soon": "Próximo (7 días)",
     "later": "Posterior",
 }
+
+
+def eligible_devices(maintenance=None, *, actor=None):
+    eligible = Q(is_active=True) & ~Q(status=Device.Status.WITHDRAWN)
+    if maintenance is not None:
+        current = maintenance.targets.filter(is_active=True).values("device_id")
+        eligible |= Q(pk__in=current)
+    devices = Device.objects.filter(eligible).select_related("category", "location")
+    if actor is not None:
+        devices = devices.filter(pk__in=visible_devices(actor).values("pk"))
+    return devices
 
 
 def targets_with_last_completion(maintenance=None, *, active_only=True):

@@ -1,3 +1,67 @@
+# Selector de equipos preventivos · 8 de noviembre de 2026 (Lima)
+
+Maestro releído completo. Se revisaron modelos, migraciones, servicios, permisos, lector
+QR, formularios y pruebas antes de sustituir el selector; el repositorio estaba limpio.
+Sin dependencias, modelos, migraciones ni modificaciones del maestro.
+
+| Comprobación | Resultado observado |
+| --- | --- |
+| Regresión Django final | **472 OK en 146,985 s**, PostgreSQL real: 456 anteriores + 16 nuevas |
+| Primera regresión completa | 472 OK en 149,018 s, antes de la guarda de longitud del widget |
+| Focalizadas del selector | 16 OK en 2,053 s, incluida entrada numérica de 10 000 dígitos tras la guarda |
+| Regresión focalizada de módulos | 123 OK en 18,534 s: selector, configuración, vistas, QR, UI y HTML |
+| JavaScript final | **32 OK**: 21 existentes + 9 del selector + 2 del adaptador compartido |
+| Ruff / formato | Correctos; 185 archivos Python con formato correcto |
+| Django y dependencias | `check` y `pip check` correctos |
+| Migraciones | `makemigrations --check --dry-run`: sin cambios |
+| Estáticos | Tres archivos actualizados, 180 sin cambios |
+| Piloto | `check_pilot --allow-demo` correcto con el entorno de PG restringido |
+| HTTP real en instancia temporal | Tres roles, QR decodificado, selector, selección filtrada, código, permisos y estáticos correctos |
+| Navegador visual | No disponible: selección fallida y listado vacío; cámara física y revisión visual pendientes |
+
+Las pruebas nuevas verifican que el alta con 100 equipos **no consulta ni renderiza el
+inventario**: la grilla inicial solo contiene +; el modal devuelve 20 resultados por página.
+Se verifican búsqueda por nombre/código/ubicación, todas las páginas del filtro, rechazo
+sin truncamiento por encima de 200, códigos/URLs propios y QR externos/inexistentes,
+filtros inválidos, entradas manipuladas, elegibilidad y conservación de inscripciones
+inactivas anteriores. POST guarda mediante el servicio existente, deduplica, rechaza
+equipos ya no elegibles y conserva el snapshot de la ejecución al editar.
+
+También se comprueban conservación del orden tras errores/agregar tareas y alternativa
+sin JavaScript por código/quitar, sin guardar de forma anticipada; permisos en ambas
+rutas HTML, GET sin escrituras y escape de textos. En la revisión final se añadió una
+guarda de longitud al renderizar IDs para que un número excesivo no provoque un error
+al reconstruir las tarjetas tras una validación fallida.
+
+JavaScript comprueba + primero, nuevas tarjetas a su derecha, campos ocultos sincronizados,
+retirar/reagregar, páginas/filtros, duplicados, unión de lotes y límite atómico, descartes
+de respuestas de aperturas anteriores y detención del lector. El adaptador anterior
+mantiene sus casos y prueba arranque explícito y contenedores/formato QR correctos.
+Los dobles DOM no son una prueba visual ni ejecutan Bootstrap/HTMX en un navegador.
+
+Comandos ejecutados desde la raíz:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/manage_local.py test --noinput --keepdb
+.\.venv\Scripts\python.exe scripts/manage_local.py test tests.test_device_picker --noinput --keepdb
+.\.venv\Scripts\python.exe scripts/manage_local.py test tests.test_device_picker tests.test_maintenance_views tests.test_maintenance tests.test_qr tests.test_ui tests.test_pilot_html --noinput --keepdb
+node --test tests/js/*.test.cjs
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe -m ruff format --check .
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe scripts/manage_local.py check
+.\.venv\Scripts\python.exe scripts/manage_local.py makemigrations --check --dry-run
+.\.venv\Scripts\python.exe scripts/manage_local.py collectstatic --noinput
+.\.venv\Scripts\python.exe scripts/manage_local.py --env-file .local/pilot.env check_pilot --allow-demo
+.\.venv\Scripts\python.exe scripts/smoke_http.py --base-url http://127.0.0.1:8012 --assets --qr --maintenance
+```
+
+Node se ejecutó desde la caché del entorno; el comando abreviado requiere Node en PATH.
+La instancia temporal HTTP se cerró al terminar. El smoke solo modifica sesiones demo
+(login/logout), no crea mantenimientos ni altera dispositivos. No se afirma nuevo
+despliegue HTTPS, cámara real, impresión física o ejecución remota de CI.
+Casos manuales y archivos en [INTERFAZ.md](INTERFAZ.md).
+
 # Verificación del ajuste de interfaz · 8 de noviembre de 2026 (Lima)
 
 Maestro releído completo; revisión previa de modelos, formularios, servicios, permisos,

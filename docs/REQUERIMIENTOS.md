@@ -1,5 +1,13 @@
 # Requisitos y trazabilidad
 
+**Selector de inscripciones preventivas (08/11/2026):** RF-008 permite seleccionar desde
+grid/modal paginado de 20 en 20, buscar/filtrar y agregar todas las coincidencias hasta
+200 equipos, sin perder selecciones. RF-004/007 integran código, cámara e imagen con
+validación de identidad existente. RF-001 protege ambos endpoints HTML; el GET no escribe.
+POST conserva controles transaccionales y snapshots de RF-011. Evidencia en
+`tests/test_device_picker.py`, `tests/js/device-picker.test.cjs`, `tests/js/scanner.test.cjs`
+y `scripts/smoke_http.py --maintenance`. Sin modificar esquema o dependencias.
+
 **Ajuste de interfaz solicitado el 08/11/2026:** `tests/test_ui.py` verifica estados con
 etiquetas consistentes (RF-002/003/011/024), navegación según permisos (RF-001), campo
 de puesta en servicio retirado sin pérdida histórica (RF-003), contexto y extractos

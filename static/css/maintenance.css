@@ -1,3 +1,11 @@
-#id_devices, #id_targets { max-height: 22rem; overflow-y: auto; border: 1px solid var(--bs-border-color); border-radius: .375rem; padding: .75rem; }
-#id_devices label, #id_targets label { display: block; padding: .5rem .25rem; }
-#id_devices input, #id_targets input { margin-right: .5rem; }
+#id_targets { max-height: 22rem; overflow-y: auto; border: 1px solid var(--bs-border-color); border-radius: .375rem; padding: .75rem; }
+#id_targets label { display: block; padding: .5rem .25rem; }
+#id_targets input { margin-right: .5rem; }
+.device-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: 1rem; align-items: stretch; }
+.device-card, .device-add { min-height: 13rem; padding: 1rem; overflow-wrap: anywhere; }
+.device-card { display: flex; flex-direction: column; }
+.device-add { aspect-ratio: 1; align-items: center; justify-content: center; gap: .5rem; border: 2px dashed #526c7c; color: var(--bs-primary); background: #f6f8fa; }
+.device-add:hover { background: #edf2f5; border-color: var(--bs-primary); }
+.device-add-symbol { font-size: 3rem; font-weight: 300; line-height: 1; }
+#device-picker-modal .list-group-item { cursor: pointer; }
+#device-picker-modal .btn, #device-picker-modal .page-link { min-height: 44px; }

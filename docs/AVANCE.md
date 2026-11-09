@@ -1,5 +1,15 @@
 # Avance al 8 de noviembre de 2026 (Lima)
 
+Selector de inscripciones preventivas: cuadrícula con + fijo y equipos nuevos primero;
+modal de búsqueda/filtro paginado de 20 en 20, selección de todos los filtrados, código,
+cámara e imagen QR reutilizando el lector existente. Borrador conservado entre filtros,
+páginas, agregar tareas y validaciones; máximo 200 y sin duplicados. Guardado y reglas
+de negocio existentes; sin modelos, migraciones ni dependencias nuevas. Detalles en
+[INTERFAZ.md](INTERFAZ.md) y resultados en [PRUEBAS.md](PRUEBAS.md).
+Última regresión: **472 Django + 32 JavaScript OK**. Incluye 16 casos nuevos de servidor
+y 11 JavaScript del selector/adaptador, con HTTP real y preflight piloto correctos.
+Quedan por verificar la presentación en navegador y el uso de cámara física.
+
 Incremento de interfaz posterior al piloto: puesta en servicio retirada de las pantallas
 (datos previos conservados); estados con etiquetas compartidas; navegación agrupada por
 permisos; avisos con contexto y extractos; columna responsable y resumen de vencimientos

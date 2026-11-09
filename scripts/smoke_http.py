@@ -139,6 +139,25 @@ def main():
             status, listing, _ = request("/mantenimientos/")
             assert status == (403 if username == "demo_docente" else 200)
             assert request("/mantenimientos/nuevo/")[0] == expected_users
+            status, picker, _ = request(
+                "/mantenimientos/equipos/selector/", headers={"HX-Request": "true"}
+            )
+            assert status == expected_users
+            if username == "demo_admin":
+                assert 1 <= picker.count("data-picker-device") <= 20
+                code = re.search(r"EQ-[A-Z2-9]{8}", picker)[0]
+                for selection in ({"mode": "scan", "query": code}, {"mode": "all", "q": code}):
+                    status, cards, _ = request(
+                        "/mantenimientos/equipos/selector/?" + urlencode(selection)
+                    )
+                    assert status == 200 and "data-picker-selection" in cards
+                    assert cards.count("<template data-picker-card=") == 1 and code in cards
+                status, rejected, _ = request(
+                    "/mantenimientos/equipos/selector/?"
+                    + urlencode({"mode": "scan", "query": "https://external.example/"})
+                )
+                assert status == 200 and "Código no reconocido" in rejected
+                assert "data-picker-card=" not in rejected
             if username != "demo_docente":
                 maintenance_path = re.search(r'href="(/mantenimientos/[0-9]+/)"', listing)[1]
                 status, detail, _ = request(maintenance_path)
@@ -154,6 +173,8 @@ def main():
                 for mode, field in (("unique", "planned_date"), ("recurring", "base_date")):
                     status, form_html, _ = request("/mantenimientos/nuevo/?kind=" + mode)
                     assert status == 200 and f'name="{field}"' in form_html
+                    assert 'id="device-grid"' in form_html and 'id="device-add"' in form_html
+                    assert "data-device-card" not in form_html
             print(f"HTTP correcto: {username}; preventivos, configuración, permisos e historial.")
         token = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', home)[1]
         assert (
@@ -163,6 +184,10 @@ def main():
     for filename in ["bootstrap.min.css", "bootstrap.bundle.min.js", "htmx.min.js"]:
         assert request(f"/static/vendor/{filename}")[0] == 200
     print("HTTP correcto: recursos Bootstrap y HTMX locales.")
+    if options.maintenance:
+        for path in ["js/device-picker.js", "css/maintenance.css"]:
+            assert request(f"/static/{path}")[0] == 200
+        print("HTTP correcto: selector paginado, selección filtrada, código y recursos locales.")
     if options.qr:
         for path in [
             "vendor/html5-qrcode.min.js",

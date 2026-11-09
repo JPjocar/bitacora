@@ -85,16 +85,71 @@ por página y reutiliza los selectores y el cálculo de recurrencia existentes:
 4. Una configuración con fechas fuera de rango se señala para revisión; no se presenta
    silenciosamente como completa ni se recalculan datos históricos.
 
+## Selector de equipos en mantenimientos
+
+La lista completa de checkboxes de creación/edición se sustituye por una cuadrícula.
+La primera tarjeta es **+ Agregar equipos**; cada equipo nuevo aparece inmediatamente
+a su derecha y desplaza los anteriores. Se muestra código, nombre, categoría, ubicación
+y estado, con acción **Quitar**. Duplicados no crean otra tarjeta ni alteran el orden.
+Los cambios son una selección provisional hasta guardar el mantenimiento.
+
+El único modal contiene búsqueda por nombre, código o ubicación, filtro de ubicación
+y páginas de **20 equipos**. La selección permanece entre páginas, filtros y aperturas.
+**Agregar todos los filtrados** incluye todas las coincidencias, no solo la página visible.
+El servidor entrega como máximo 200 tarjetas; si el filtro excede ese límite, pide
+acotarlo. Si la unión con la selección actual supera 200, el cliente rechaza el lote
+completo. El campo y el servicio vuelven a validar el límite al guardar.
+
+La sección QR del mismo modal acepta código o URL de etiqueta, cámara explícita e imagen
+PNG/JPEG/WebP de hasta 10 MB. Se reutilizan `resolve_scan`, `qr-controller.js` y el adaptador
+compartido `BitacoraScanner.bind`, extraído del escáner existente. No se anidan modales.
+La imagen se decodifica localmente; únicamente se consulta su texto, sin subir el archivo.
+El texto leído siempre se valida en Django: no se navega al contenido del QR.
+El resultado agrega directamente el equipo y anuncia su identidad; la cámara se puede
+reiniciar para el siguiente. Cerrar modal/sección QR, ocultar o abandonar la página y
+enviar el formulario detienen el lector. Respuestas de una apertura anterior se descartan.
+
+`eligible_devices` concentra la elegibilidad del campo y del selector: activos no
+retirados, más inscripciones vigentes ya existentes en edición, con la visibilidad del
+actor. Buscar/agregar al borrador requiere permiso de crear/editar mantenimiento; el
+GET no modifica datos. El guardado sigue en el servicio transaccional anterior.
+Cambiar inscripciones no altera las participaciones de una ejecución ya creada.
+
+El widget solo consulta las tarjetas seleccionadas, conservando su orden del POST.
+No enumera el inventario para construir opciones. Agregar tareas o corregir validaciones
+conserva esa selección. Sin JavaScript se puede agregar por código y quitar tarjetas
+mediante POST con CSRF, conservando campos/tareas y sin guardar el mantenimiento.
+No se persiste el orden en la base de datos ni se crea un borrador o sesión adicional.
+
+Archivos principales de este selector:
+
+| Capa | Archivos |
+| --- | --- |
+| Campo y widget | `apps/maintenance/forms.py`, `widgets.py` |
+| Consulta y endpoints HTML | `selectors.py`, `picker_views.py`, `views.py`, `urls.py` en maintenance |
+| Plantillas | `maintenance/form.html`, `device_picker_modal.html`, `device_card.html`, `picker_results.html`, `picker_selection.html`, `widgets/device_grid.html` |
+| Renderizado compartido | `templates/components/form_fields.html` permite excluir el campo de la sección genérica |
+| Interacciones | `static/js/device-picker.js`, adaptador compartido `scanner.js` y `static/css/maintenance.css` |
+| Pruebas | `tests/test_device_picker.py`, `tests/js/device-picker.test.cjs`, `tests/js/scanner.test.cjs`, `scripts/smoke_http.py` |
+
 ## Verificación y límites
 
-Casos automatizados en `tests/test_ui.py`; regresión y comandos observados en
+Casos automatizados en `tests/test_ui.py`, `tests/test_device_picker.py` y JavaScript;
+regresión y comandos observados en
 [PRUEBAS.md](PRUEBAS.md). No hay dependencias ni migraciones nuevas.
 El navegador de la sesión no está disponible (selección fallida y lista vacía).
 La estructura HTML se comprueba automáticamente; quedan por comprobar visualmente
 los dropdowns, foco/teclado, contraste efectivo y anchos 1366/390 px con navegador real.
+Para el selector: abrir/cerrar modal, cambiar filtros/página con equipos elegidos,
+agregar todos, retirar/reagregar, verificar el orden y recorrerlo con teclado. Probar
+escaneo sucesivo y permisos de cámara en un teléfono con HTTPS. Los dobles DOM de las
+pruebas JavaScript no sustituyen esa validación visual ni una cámara física.
 No se afirma validación visual, impresión física ni prueba de cámara.
 
 Referencias: [Bootstrap dropdowns](https://getbootstrap.com/docs/5.3/components/dropdowns/),
 [navbar responsive](https://getbootstrap.com/docs/5.3/components/navbar/),
 [badges](https://getbootstrap.com/docs/5.3/components/badge/) y
 [W3C: uso del color](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html).
+Selector: [Bootstrap modal](https://getbootstrap.com/docs/5.3/components/modal/),
+[eventos HTMX](https://htmx.org/events/), [sincronización](https://htmx.org/attributes/hx-sync/)
+y [filtros incluidos](https://htmx.org/attributes/hx-include/).

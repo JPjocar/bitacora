@@ -37,6 +37,13 @@ añade contexto a avisos y muestra responsable/vencimiento en mantenimientos. Re
 puesta en servicio de las pantallas conservando valores antiguos. **456 pruebas Django
 y 21 JavaScript OK**, sin migraciones nuevas; [detalle de interfaz](docs/INTERFAZ.md).
 
+El selector de equipos preventivos ahora usa cuadrícula con **+**, modal de búsqueda
+paginado de 20 en 20, selección de todos los filtrados e identificación por código,
+cámara o imagen QR. Conserva el borrador entre filtros/páginas y valida el límite de
+200 al guardar; no añade dependencias, modelos ni migraciones.
+Verificado con **472 pruebas Django + 32 JavaScript**, además de HTTP con tres roles.
+La revisión visual del modal y la cámara física siguen pendientes por falta de navegador.
+
 ## Entorno verificado
 
 Python 3.12.13; Django 5.2.19; PostgreSQL 18; psycopg 3.3.8; django-htmx 1.29.0;

@@ -1,7 +1,6 @@
 import uuid
 
 from django import forms
-from django.db.models import Q
 from django.forms import formset_factory
 from django.utils import timezone
 
@@ -9,12 +8,16 @@ from apps.assets.models import Category, Device
 from apps.core.forms import BootstrapFormMixin
 
 from .models import Maintenance, MaintenanceTaskTemplate
+from .selectors import eligible_devices
 from .services import MAX_TARGETS, MAX_TASKS
+from .widgets import DeviceGridWidget
 
 
 class DeviceSelection(forms.ModelMultipleChoiceField):
-    def label_from_instance(self, device):
-        return f"{device.code} · {device.name} · {device.category.name} · {device.location.name}"
+    def clean(self, value):
+        if value and len(value) > MAX_TARGETS:
+            raise forms.ValidationError(f"Seleccione como máximo {MAX_TARGETS} equipos.")
+        return super().clean(value)
 
 
 class MaintenanceForm(BootstrapFormMixin, forms.Form):
@@ -46,8 +49,8 @@ class MaintenanceForm(BootstrapFormMixin, forms.Form):
     devices = DeviceSelection(
         label="Equipos inscritos",
         queryset=Device.objects.none(),
-        widget=forms.CheckboxSelectMultiple,
-        help_text="Seleccione uno o varios equipos. Se conservan los inactivos ya inscritos.",
+        widget=DeviceGridWidget,
+        help_text="Agrega equipos con el botón +. Se guardan al confirmar el mantenimiento.",
     )
     is_active = forms.BooleanField(
         label="Mantenimiento activo",
@@ -59,7 +62,7 @@ class MaintenanceForm(BootstrapFormMixin, forms.Form):
     version = forms.IntegerField(min_value=1, widget=forms.HiddenInput)
     reason = forms.CharField(label="Motivo del cambio", max_length=300)
 
-    def __init__(self, *args, maintenance=None, kind="unique", **kwargs):
+    def __init__(self, *args, maintenance=None, kind="unique", actor=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.maintenance = maintenance
         mode = (
@@ -73,12 +76,10 @@ class MaintenanceForm(BootstrapFormMixin, forms.Form):
         else:
             for field in ("base_date", "interval_value", "interval_unit"):
                 self.fields.pop(field)
-        eligible = Q(is_active=True) & ~Q(status=Device.Status.WITHDRAWN)
         if maintenance:
             current_ids = list(
                 maintenance.targets.filter(is_active=True).values_list("device_id", flat=True)
             )
-            eligible |= Q(pk__in=current_ids)
             for field in self.fields:
                 if hasattr(maintenance, field):
                     self.initial[field] = getattr(maintenance, field)
@@ -89,16 +90,8 @@ class MaintenanceForm(BootstrapFormMixin, forms.Form):
         else:
             for field in ("version", "reason", "is_active"):
                 self.fields.pop(field)
-        self.fields["devices"].queryset = Device.objects.filter(eligible).select_related(
-            "category", "location"
-        )
+        self.fields["devices"].queryset = eligible_devices(maintenance, actor=actor)
         self.fields["devices"].widget.attrs.pop("class", None)
-
-    def clean_devices(self):
-        selected = self.cleaned_data["devices"]
-        if selected.count() > MAX_TARGETS:
-            raise forms.ValidationError(f"Seleccione como máximo {MAX_TARGETS} equipos.")
-        return selected
 
     def clean_kind(self):
         value = self.cleaned_data["kind"]

@@ -1,0 +1,20 @@
+{% load ui %}
+{% if picker_error %}<p class="alert alert-warning" role="alert">{{ picker_error }}</p>{% endif %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <p class="small text-secondary mb-0">{{ page_obj.paginator.count }} equipo{{ page_obj.paginator.count|pluralize:'s' }} disponible{{ page_obj.paginator.count|pluralize:'s' }} con estos filtros</p>
+  {% if page_obj.paginator.count %}<button type="button" class="btn btn-outline-primary btn-sm" hx-get="{{ request.path }}?mode=all" hx-include="#device-picker-search" hx-target="#device-picker-bulk-result" hx-sync="#device-picker-search:replace">Agregar todos los filtrados ({{ page_obj.paginator.count }})</button>{% endif %}
+</div>
+<div class="list-group mb-3">
+{% for device in page_obj %}
+<label class="list-group-item d-flex align-items-start gap-3" for="picker-device-{{ device.pk }}">
+  <input id="picker-device-{{ device.pk }}" type="checkbox" class="form-check-input flex-shrink-0" value="{{ device.pk }}" data-picker-device>
+  <span class="flex-grow-1"><strong class="d-block">{{ device.name }}</strong><span class="font-monospace small">{{ device.code }}</span><span class="d-block small text-secondary">{{ device.category.name }} · {{ device.location.name }}</span>{% status_badge device.status %}{% if not device.is_active %} {% status_badge device.is_active 'active' %}{% endif %}</span>
+</label>
+<template data-picker-card="{{ device.pk }}">{% include 'maintenance/device_card.html' %}</template>
+{% empty %}<p class="text-secondary">No hay equipos para estos filtros. Cambia la búsqueda o agrega mediante QR.</p>{% endfor %}
+</div>
+{% if page_obj.has_other_pages %}<nav aria-label="Páginas de equipos"><ul class="pagination flex-wrap mb-0">
+{% if page_obj.has_previous %}<li class="page-item"><button class="page-link" type="button" hx-get="{{ request.path }}?page={{ page_obj.previous_page_number }}" hx-include="#device-picker-search" hx-target="#device-picker-results" hx-sync="#device-picker-search:replace">Anterior</button></li>{% endif %}
+<li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+{% if page_obj.has_next %}<li class="page-item"><button class="page-link" type="button" hx-get="{{ request.path }}?page={{ page_obj.next_page_number }}" hx-include="#device-picker-search" hx-target="#device-picker-results" hx-sync="#device-picker-search:replace">Siguiente</button></li>{% endif %}
+</ul></nav>{% endif %}

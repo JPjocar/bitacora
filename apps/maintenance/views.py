@@ -5,16 +5,19 @@ from django.core.paginator import Paginator
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_safe
 from django.views.decorators.vary import vary_on_headers
 
+from apps.assets.qr import resolve_scan
 from apps.core.forms import add_validation_errors
+from apps.locations.models import Location
 
 from .execution import can_control
 from .forms import MaintenanceForm, TaskFormSet
 from .models import Maintenance, MaintenanceRun, MaintenanceRunDevice
-from .selectors import OPEN_STATES, list_schedules
-from .services import MAX_TASKS, save_maintenance, template_data
+from .selectors import OPEN_STATES, eligible_devices, list_schedules
+from .services import MAX_TARGETS, MAX_TASKS, save_maintenance, template_data
 
 
 @login_required
@@ -184,6 +187,27 @@ def maintenance_edit(request, pk=None):
     )
     data = request.POST.copy() if request.method == "POST" else None
     adding = data is not None and data.get("action") == "add_task"
+    picking = data is not None and (data.get("action") == "add_device" or "remove_device" in data)
+    picker_error = None
+    if picking:
+        selected = data.getlist("devices")
+        if "remove_device" in data:
+            data.setlist("devices", [value for value in selected if value != data["remove_device"]])
+        else:
+            try:
+                device = resolve_scan(actor=request.user, value=data.get("device_query", "")[:2049])
+                if (
+                    not eligible_devices(maintenance, actor=request.user)
+                    .filter(pk=device.pk)
+                    .exists()
+                ):
+                    raise ValidationError("Equipo no disponible para este mantenimiento.")
+                if str(device.pk) not in selected:
+                    if len(selected) >= MAX_TARGETS:
+                        raise ValidationError(f"Seleccione como máximo {MAX_TARGETS} equipos.")
+                    data.setlist("devices", [str(device.pk), *selected])
+            except ValidationError as error:
+                picker_error = error
     if adding:
         try:
             count = int(data.get("tasks-TOTAL_FORMS", "0"))
@@ -193,9 +217,11 @@ def maintenance_edit(request, pk=None):
             data["tasks-TOTAL_FORMS"] = str(count + 1)
             data[f"tasks-{count}-scope"] = "DISPOSITIVO"
             data[f"tasks-{count}-required"] = "on"
-    form = MaintenanceForm(data, maintenance=maintenance, kind=kind)
+    form = MaintenanceForm(data, maintenance=maintenance, kind=kind, actor=request.user)
+    if picker_error:
+        form.add_error("devices", picker_error)
     formset = TaskFormSet(data, initial=initial, prefix="tasks")
-    if request.method == "POST" and not adding:
+    if request.method == "POST" and not adding and not picking:
         form_valid, tasks_valid = form.is_valid(), formset.is_valid()
         if form_valid and tasks_valid:
             tasks = [
@@ -238,5 +264,9 @@ def maintenance_edit(request, pk=None):
             "formset": formset,
             "maintenance": maintenance,
             "kind": form.initial["kind"],
+            "picker_url": reverse("maintenance:device_picker_edit", args=[pk])
+            if pk
+            else reverse("maintenance:device_picker"),
+            "picker_locations": Location.objects.order_by("name", "pk"),
         },
     )

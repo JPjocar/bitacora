@@ -1,0 +1,1 @@
+{% if picker_error %}<p class="alert alert-warning mb-0" role="alert">{{ picker_error }}</p>{% else %}<div data-picker-selection>{% for device in devices %}<template data-picker-card="{{ device.pk }}">{% include 'maintenance/device_card.html' %}</template>{% empty %}<p class="text-secondary mb-0">No hay equipos que agregar con estos filtros.</p>{% endfor %}</div>{% endif %}
